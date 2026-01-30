@@ -5,26 +5,25 @@
 	"license": "MIT",
 	"authors": [
 		{
-			"name": "ebene fünf GmbH",
-			"email": "info@ebenefuenf.de"
+			"name": "Thomas Ernst",
+			"email": "duon@ebenefuenf.de"
 		}
 	],
-	"minimum-stability": "dev",
-	"prefer-stable": true,
+	"homepage": "https://duon.run/cms",
 	"require": {
-		"php": ">=8.3",
+		"php": "^8.5",
 		"ext-pgsql": "*",
 		"ext-gd": "*",
 		"ext-intl": "*",
 		"ext-curl": "*",
 		"ext-dom": "*",
 		"ext-xml": "*",
-		"duon/core": "dev-main",
-		"duon/error": "dev-main",
-		"duon/quma": "dev-main",
-		"duon/registry": "dev-main",
-		"duon/session": "dev-main",
-		"duon/sire": "dev-main",
+		"duon/core": "^0.1",
+		"duon/error": "^0.1",
+		"duon/quma": "^0.1",
+		"duon/registry": "^0.1",
+		"duon/session": "^0.1",
+		"duon/sire": "^0.1",
 		"gumlet/php-image-resize": "2.0.*",
 		"hidehalo/nanoid-php": "^2",
 		"laminas/laminas-httphandlerrunner": "^2.4",
@@ -32,10 +31,9 @@
 		"symfony/html-sanitizer": "^7.1"
 	},
 	"require-dev": {
-		"duon/cms-boiler": "dev-main",
-		"duon/dev": "^1.1",
-		"laminas/laminas-diactoros": "^3",
-		"phpunit/phpunit": "^12"
+		"duon/cms-boiler": "^0.1",
+		"duon/dev": "^2.5",
+		"laminas/laminas-diactoros": "^3"
 	},
 	"autoload": {
 		"psr-4": {
@@ -49,11 +47,6 @@
 	"autoload-dev": {
 		"psr-4": {
 			"Duon\\Cms\\Tests\\": "tests"
-		}
-	},
-	"config": {
-		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	}
 }
