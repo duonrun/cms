@@ -16,7 +16,7 @@
       <directory suffix="Test.php">tests/End2End</directory>
     </testsuite>
   </testsuites>
-  <coverage pathCoverage="true">
+  <coverage>
     <report>
       <html outputDirectory="coverage" lowUpperBound="20" highLowerBound="50"/>
     </report>
