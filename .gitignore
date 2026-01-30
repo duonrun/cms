@@ -16,3 +16,7 @@ vite.config.ts.timestamp-*
 /ui/package
 /ui/src/locale/
 /vendor/
+
+# Local config overrides (not committed)
+/phpunit.xml
+/psalm.xml
