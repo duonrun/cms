@@ -41,3 +41,7 @@ macOS/homebrew:
 ```bash
 brew install php php-intl
 ```
+
+## License
+
+This project is licensed under the [MIT license](LICENSE.md).
