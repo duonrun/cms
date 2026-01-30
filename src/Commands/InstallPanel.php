@@ -135,7 +135,7 @@ class InstallPanel extends Command
 			return '';
 		}
 
-		$url = 'https://github.com/duoncode/cms/releases/download/nightly/panel-nightly.tar.gz';
+		$url = 'https://github.com/duonrun/cms/releases/download/nightly/panel-nightly.tar.gz';
 		$tempFile = tempnam(sys_get_temp_dir(), 'cms_panel_');
 
 		$this->info("Downloading panel from {$url}...");
