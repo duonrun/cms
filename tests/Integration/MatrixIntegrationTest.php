@@ -36,7 +36,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixIntegration(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new TestNodeWithMatrix($context, $finder, ['content' => [
 			'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
@@ -83,7 +83,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$matrix = new TestMatrix('test_matrix', new TestNodeWithMatrix($context, $finder, ['content' => []]), new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		
@@ -104,7 +104,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMatrixSubfieldTranslateStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		// Create matrix with one empty item
 		$matrix = new TestMatrix(

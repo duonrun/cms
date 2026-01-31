@@ -40,7 +40,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createTextField(string $name = 'test'): Text
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -55,7 +55,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createImageField(string $name = 'image'): Image
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -70,7 +70,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createGridField(string $name = 'grid'): Grid
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -85,7 +85,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createOptionField(string $name = 'option'): Option
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string

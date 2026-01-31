@@ -37,7 +37,7 @@ class MatrixTest extends TestCase
 	public function testMatrixFieldCreation(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -58,7 +58,7 @@ class MatrixTest extends TestCase
 	public function testMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -77,7 +77,7 @@ class MatrixTest extends TestCase
 	public function testMatrixSchema(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -95,7 +95,7 @@ class MatrixTest extends TestCase
 	public function testMatrixSubfieldsHaveTranslateCapability(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
@@ -125,7 +125,7 @@ class MatrixTest extends TestCase
 	public function testMatrixStructureFromValueContext(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createMock(\Duon\Cms\Finder\Finder::class);
+		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
