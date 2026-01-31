@@ -21,7 +21,6 @@
 		"duon/core": "^0.1",
 		"duon/error": "^0.1",
 		"duon/quma": "^0.1",
-		"duon/registry": "^0.1",
 		"duon/session": "^0.1",
 		"duon/sire": "^0.1",
 		"gumlet/php-image-resize": "2.0.*",
@@ -48,5 +47,19 @@
 		"psr-4": {
 			"Duon\\Cms\\Tests\\": "tests"
 		}
+	},
+	"scripts": {
+		"test": "./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"types": "./vendor/bin/psalm --no-cache",
+		"mdlint": "markdownlint-cli2 README.md CHANGELOG.md LICENSE.md",
+		"coverage": [
+			"./vendor/bin/phpunit --testdox --path-coverage --coverage-text --coverage-php=coverage/cover.php --colors=always",
+			"./vendor/bin/coverlyzer coverage/cover.php"
+		],
+		"ci": [
+			"composer coverage",
+			"composer types",
+			"composer mdlint"
+		]
 	}
 }
