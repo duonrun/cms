@@ -368,9 +368,16 @@ abstract class Node
 			throw new HttpBadRequest($this->request);
 		}
 
+		try {
+			$session = $this->request->get('session');
+			$editor = $session?->authenticatedUserId() ?: 1;
+		} catch (Throwable) {
+			$editor = 1; // The System user
+		}
+
 		$this->db->nodes->delete([
 			'uid' => $this->uid(),
-			'editor' => $this->request->get('session')->authenticatedUserId(),
+			'editor' => $editor,
 		])->run();
 
 		return [
