@@ -36,6 +36,9 @@ jobs:
           sudo -u postgres psql -c "CREATE USER ${{ env.DUONCMS_DB_USER }} WITH PASSWORD '${{ env.DUONCMS_DB_PASSWORD }}' CREATEDB;"
           sudo -u postgres createdb --owner ${{ env.DUONCMS_DB_USER }} ${{ env.DUONCMS_DB_NAME }}
 
+      - name: Initialize database schema
+        run: ./run migrate --apply
+
       - name: Run tests, static type checker and linter
         run: |
           php -d pcov.enabled=1 ./vendor/bin/phpunit --testdox --coverage-clover=clover.xml --coverage-text --coverage-php=coverage/cover.php --colors=always
