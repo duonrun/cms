@@ -124,7 +124,7 @@ class Auth
 
 	protected function userFromToken(): ?User
 	{
-		$authToken = self::getAuthToken($this->request);
+		$authToken = $this->getAuthToken();
 
 		if ($authToken) {
 			return $this->users->byAuthToken($authToken);
