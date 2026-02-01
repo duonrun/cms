@@ -43,4 +43,14 @@ final class SessionTest extends TestCase
 		$this->assertIsInt($session->lastActivity());
 		$this->assertGreaterThan(0, $session->lastActivity());
 	}
+
+	public function testAuthTokenCookieUsesDefaultName(): void
+	{
+		$session = new Session();
+		$session->start();
+
+		$_COOKIE['duon_auth'] = 'token-value';
+
+		$this->assertSame('token-value', $session->getAuthToken());
+	}
 }
