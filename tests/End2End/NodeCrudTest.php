@@ -172,6 +172,11 @@ final class NodeCrudTest extends End2EndTestCase
 			'headers' => ['Accept' => 'application/json'],
 		]);
 
-		$this->assertResponseStatus(500, $response);
+		$this->assertResponseStatus(200, $response);
+		$payload = $this->assertJsonResponse($response);
+		$this->assertTrue($payload['success'] ?? false);
+
+		$reloaded = $this->makeRequest('GET', "/panel/api/node/{$uid}");
+		$this->assertResponseStatus(404, $reloaded);
 	}
 }
