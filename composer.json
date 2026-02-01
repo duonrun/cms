@@ -22,12 +22,11 @@
 		"duon/error": "^0.1",
 		"duon/quma": "^0.1",
 		"duon/session": "^0.1",
-		"duon/sire": "^0.1",
+		"duon/sire": "^0.2",
 		"gumlet/php-image-resize": "2.0.*",
 		"hidehalo/nanoid-php": "^2",
 		"laminas/laminas-httphandlerrunner": "^2.4",
-		"psr/http-message-implementation": "^1.0",
-		"symfony/html-sanitizer": "^7.1"
+		"psr/http-message-implementation": "^1.0"
 	},
 	"require-dev": {
 		"duon/cms-boiler": "^0.1",
