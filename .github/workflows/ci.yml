@@ -33,7 +33,7 @@ jobs:
       - name: Start postgresql server and create test db
         run: |
           sudo systemctl start postgresql.service
-          echo "${{ env.DUONCMS_DB_PASSWORD }}" | sudo -u postgres createuser --pwprompt --createdb ${{ env.DUONCMS_DB_USER }}
+          sudo -u postgres psql -c "CREATE USER ${{ env.DUONCMS_DB_USER }} WITH PASSWORD '${{ env.DUONCMS_DB_PASSWORD }}' CREATEDB;"
           sudo -u postgres createdb --owner ${{ env.DUONCMS_DB_USER }} ${{ env.DUONCMS_DB_NAME }}
 
       - name: Run tests, static type checker and linter
