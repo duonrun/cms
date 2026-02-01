@@ -8,6 +8,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DUONCMS_DB_HOST: localhost
+      DUONCMS_DB_NAME: duoncms
+      DUONCMS_DB_USER: duoncms
+      DUONCMS_DB_PASSWORD: duoncms
     steps:
       - name: Setup PHP extensions
         uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
@@ -24,6 +29,12 @@ jobs:
 
       - name: Install packages with composer
         run: composer install
+
+      - name: Start postgresql server and create test db
+        run: |
+          sudo systemctl start postgresql.service
+          echo "${{ env.DUONCMS_DB_PASSWORD }}" | sudo -u postgres createuser --pwprompt --createdb ${{ env.DUONCMS_DB_USER }}
+          sudo -u postgres createdb --owner ${{ env.DUONCMS_DB_USER }} ${{ env.DUONCMS_DB_NAME }}
 
       - name: Run tests, static type checker and linter
         run: |
