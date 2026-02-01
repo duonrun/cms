@@ -214,4 +214,56 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('13:45', (string) $value);
 		$this->assertTrue($value->isset());
 	}
+
+	public function testIframeValueFallsBackToDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Iframe('embed', $node, new ValueContext('embed', []));
+		$field->translate();
+
+		$context->request->set('locale', $context->locales()->get('de'));
+		$value = new \Duon\Cms\Value\Iframe($node, $field, new ValueContext('embed', [
+			'value' => ['en' => '<iframe></iframe>', 'de' => null],
+		]));
+
+		$this->assertSame('<iframe></iframe>', $value->unwrap());
+		$this->assertSame('&lt;iframe&gt;&lt;/iframe&gt;', (string) $value);
+		$this->assertTrue($value->isset());
+	}
+
+	public function testIframeValueIsEmptyWhenMissing(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Iframe('embed', $node, new ValueContext('embed', []));
+		$field->translate();
+
+		$context->request->set('locale', $context->locales()->get('de'));
+		$value = new \Duon\Cms\Value\Iframe($node, $field, new ValueContext('embed', [
+			'value' => ['en' => null, 'de' => null],
+		]));
+
+		$this->assertSame('', $value->unwrap());
+		$this->assertSame('', (string) $value);
+		$this->assertFalse($value->isset());
+	}
+
+	public function testYoutubeValueUsesAspectRatio(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Youtube('video', $node, new ValueContext('video', [
+			'value' => 'abc123',
+			'id' => 'abc123',
+			'aspectRatioX' => 16,
+			'aspectRatioY' => 9,
+		]));
+
+		$value = $field->value();
+		$this->assertSame('abc123', $value->unwrap());
+		$this->assertSame('abc123', $value->json());
+		$this->assertTrue($value->isset());
+		$this->assertStringContainsString('padding-top: 56.25%', (string) $value);
+	}
 }
