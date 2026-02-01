@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms\Commands;
 
 use Composer\InstalledVersions;
+use Duon\Cli\Command;
 use Duon\Cms\Config;
-use Duon\Quma\Commands\Command;
 use PharData;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -22,6 +22,10 @@ class InstallPanel extends Command
 	protected string $panelPath;
 	protected string $publicPath;
 	protected string $indexPath;
+	private string $cmsVersion = 'unknown';
+	private string $panelReleaseTag = 'nightly';
+	private string $panelFileName = 'panel-nightly.tar.gz';
+	private string $panelUrl = 'https://github.com/duonrun/cms/releases/download/nightly/panel-nightly.tar.gz';
 
 	protected const string defaultPath = '/cms';
 
@@ -35,21 +39,44 @@ class InstallPanel extends Command
 
 	public function run(): int
 	{
-		$cmsVersion = InstalledVersions::getVersion('duon/cms');
+		try {
+			$cmsVersion = InstalledVersions::getPrettyVersion('duon/cms') ?? '';
+			$this->cmsVersion = $cmsVersion !== '' ? $cmsVersion : 'unknown';
+		} catch (Throwable $e) {
+			$this->error("Failed to determine installed version: {$e->getMessage()}");
+
+			return 1;
+		}
+
+		$this->preparePanelDownload($cmsVersion);
+
+		$this->info('Installing admin panel version: ' . $this->versionLabel());
 
 		$panelArchive = $this->downloadRelease($cmsVersion);
 
-		if ($panelArchive !== '') {
-			$this->removeDirectory($this->publicPath);
-			$this->extractArchive($panelArchive, $this->publicPath);
+		if ($panelArchive === '') {
+			return 1;
+		}
 
-			if ($this->panelPath !== self::defaultPath) {
-				$this->echoln("Changing panel path from `" .
-					self::defaultPath . "` to `{$this->prefix}{$this->panelPath}`:");
+		$this->removeDirectory($this->publicPath);
 
-				return $this->updatePanelPath();
+		if (!$this->extractArchive($panelArchive, $this->publicPath)) {
+			return 1;
+		}
+
+		if ($this->panelPath !== self::defaultPath) {
+			$this->echoln(
+				"Changing panel path from `" . self::defaultPath . "` to `{$this->prefix}{$this->panelPath}`:",
+			);
+
+			if ($this->updatePanelPath() !== 0) {
+				$this->error('Panel installed, but path update failed');
+
+				return 1;
 			}
 		}
+
+		$this->success("Panel installed from {$this->panelFileName}");
 
 		return 0;
 	}
@@ -89,12 +116,12 @@ class InstallPanel extends Command
 			return;
 		}
 
-		$this->success("Removed existing panel directory");
+		$this->success('Removed existing panel directory');
 	}
 
-	private function extractArchive(string $archivePath, string $destination): void
+	private function extractArchive(string $archivePath, string $destination): bool
 	{
-		$this->info("Extracting panel archive to {$destination}...");
+		$this->info("Extracting {$this->panelFileName} to {$destination}...");
 
 		$tarGzPath = null;
 
@@ -117,9 +144,11 @@ class InstallPanel extends Command
 			// Extract all files to destination
 			$phar->extractTo($destination, null, true);
 
-			$this->success("Panel extracted successfully");
+			return true;
 		} catch (Throwable $e) {
 			$this->error("Failed to extract archive: {$e->getMessage()}");
+
+			return false;
 
 			// Clean up on error if archive was renamed
 		} finally {
@@ -131,14 +160,15 @@ class InstallPanel extends Command
 
 	private function downloadRelease(string $version): string
 	{
-		if ($version !== 'dev-main') {
+		$tempFile = tempnam(sys_get_temp_dir(), 'cms_panel_');
+
+		if ($tempFile === false) {
+			$this->error('Failed to create temp file for panel archive');
+
 			return '';
 		}
 
-		$url = 'https://github.com/duonrun/cms/releases/download/nightly/panel-nightly.tar.gz';
-		$tempFile = tempnam(sys_get_temp_dir(), 'cms_panel_');
-
-		$this->info("Downloading panel from {$url}...");
+		$this->info("Downloading {$this->panelFileName} from {$this->panelUrl}...");
 
 		$context = stream_context_create([
 			'http' => [
@@ -148,10 +178,10 @@ class InstallPanel extends Command
 			],
 		]);
 
-		$content = file_get_contents($url, false, $context);
+		$content = file_get_contents($this->panelUrl, false, $context);
 
 		if ($content === false) {
-			$this->error('Failed to download panel archive');
+			$this->error("Failed to download {$this->panelFileName} from {$this->panelUrl}");
 
 			return '';
 		}
@@ -162,9 +192,35 @@ class InstallPanel extends Command
 			return '';
 		}
 
-		$this->success("Downloaded panel to {$tempFile}");
+		$this->success("Downloaded {$this->panelFileName} to {$tempFile}");
 
 		return $tempFile;
+	}
+
+	private function preparePanelDownload(string $version): void
+	{
+		$tag = $this->resolvePanelReleaseTag($version);
+		$file = $tag === 'nightly' ? 'panel-nightly.tar.gz' : "panel-{$tag}.tar.gz";
+		$url = "https://github.com/duonrun/cms/releases/download/{$tag}/{$file}";
+
+		$this->panelReleaseTag = $tag;
+		$this->panelFileName = $file;
+		$this->panelUrl = $url;
+	}
+
+	private function resolvePanelReleaseTag(string $version): string
+	{
+		if ($version === '' || $version === 'dev-main' || str_starts_with($version, 'dev-')) {
+			return 'nightly';
+		}
+
+		if (preg_match('/^\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/', $version) === 1) {
+			return $version;
+		}
+
+		$this->warn("Unknown version format `{$version}`, falling back to nightly panel release");
+
+		return 'nightly';
 	}
 
 	private function updatePanelPath(): int
@@ -203,8 +259,7 @@ class InstallPanel extends Command
 	private function replace(string $file): int
 	{
 		if (!file_exists($file)) {
-			$this->echo('File does not exist: ', 'red');
-			$this->echoln($this->removeCwdFromPath($file));
+			$this->error('File does not exist: ' . $this->removeCwdFromPath($file));
 
 			return 1;
 		}
@@ -213,17 +268,20 @@ class InstallPanel extends Command
 		$updatedContent = str_replace(self::defaultPath, $this->prefix . $this->panelPath, $content);
 
 		if ($content === $updatedContent) {
-			$this->echo('No changes were made to the panel path: ', 'yellow');
-			$this->echoln($this->removeCwdFromPath($file));
+			$this->warn('No changes were made to the panel path: ' . $this->removeCwdFromPath($file));
 
 			return 0;
 		}
 
 		file_put_contents($file, $updatedContent);
-		$this->echo('Panel path updated successfully: ', 'green');
-		$this->echoln($this->removeCwdFromPath($file));
+		$this->success('Panel path updated successfully: ' . $this->removeCwdFromPath($file));
 
 		return 0;
+	}
+
+	private function versionLabel(): string
+	{
+		return "duon/cms@{$this->cmsVersion} (panel {$this->panelReleaseTag})";
 	}
 
 	private function removeCwdFromPath($path)
