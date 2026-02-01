@@ -179,13 +179,18 @@ class End2EndTestCase extends IntegrationTestCase
 				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, :creator, :editor)
 				RETURNING usr";
 
+		$systemUser = $db->execute(
+			"SELECT usr FROM cms.users WHERE userrole = 'system' LIMIT 1",
+		)->one();
+		$systemUserId = (int) $systemUser['usr'];
+
 		$userId = $db->execute($sql, [
 			'uid' => $uid,
 			'email' => $uid . '@example.com',
 			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
 			'userrole' => $role,
-			'creator' => 1,
-			'editor' => 1,
+			'creator' => $systemUserId,
+			'editor' => $systemUserId,
 		])->one()['usr'];
 
 		$this->createdUserIds[] = $userId;
