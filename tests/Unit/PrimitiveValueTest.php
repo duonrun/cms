@@ -130,6 +130,20 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('', (string) $value);
 	}
 
+	public function testDecimalValueFormatsAndLocalizes(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$valueContext = new ValueContext('price', ['value' => '12.5']);
+		$field = new TestNumber('price', $node, $valueContext);
+		$value = new \Duon\Cms\Value\Decimal($node, $field, $valueContext);
+		$this->assertSame(12.5, $value->unwrap());
+		$this->assertTrue($value->isset());
+		$this->assertSame('12.5', (string) $value->unwrap());
+		$this->assertSame('12.50', $value->localize(2, 'en'));
+		$this->assertStringContainsString('12.50', $value->currency('USD', 2, 'en'));
+	}
+
 	public function testCheckboxValueDefaultsFalse(): void
 	{
 		$context = $this->createContext();
