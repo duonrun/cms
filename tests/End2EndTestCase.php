@@ -182,6 +182,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$systemUser = $db->execute(
 			"SELECT usr FROM cms.users WHERE userrole = 'system' LIMIT 1",
 		)->one();
+		$this->assertNotEmpty($systemUser);
 		$systemUserId = (int) $systemUser['usr'];
 
 		$userId = $db->execute($sql, [
