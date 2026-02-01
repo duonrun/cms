@@ -254,22 +254,30 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestUser(array $data): int
 	{
+		$uid = $data['uid'] ?? uniqid('user-');
 		$defaults = [
-			'uid' => uniqid('user-'),
-			'email' => 'test@example.com',
-			'full_name' => 'Test User',
-			'display_name' => 'Test',
+			'uid' => $uid,
+			'username' => $data['username'] ?? $uid,
+			'email' => $data['email'] ?? ($uid . '@example.com'),
 			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
-			'role' => 4, // Editor role
+			'userrole' => 'editor',
+			'active' => true,
+			'data' => ['name' => 'Test User'],
+			'creator' => 1,
+			'editor' => 1,
 		];
 
 		$data = array_merge($defaults, $data);
 
-		$sql = "INSERT INTO cms.users (uid, email, full_name, display_name, pwhash, role)
-				VALUES (:uid, :email, :full_name, :display_name, :pwhash, :role)
-				RETURNING \"user\"";
+		if (isset($data['data']) && is_array($data['data'])) {
+			$data['data'] = json_encode($data['data']);
+		}
 
-		return $this->db()->execute($sql, $data)->one()['user'];
+		$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data::jsonb, :creator, :editor)
+				RETURNING usr";
+
+		return $this->db()->execute($sql, $data)->one()['usr'];
 	}
 
 	/**

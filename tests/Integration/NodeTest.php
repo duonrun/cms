@@ -199,4 +199,29 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertEquals('jsonb-node-2', $nodes[0]['uid']);
 		$this->assertEquals('Second Title', $nodes[0]['title']);
 	}
+
+	public function testCreateTestUserMatchesSchema(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'integration-test-user',
+			'username' => 'integration-user',
+			'email' => 'integration-user@example.com',
+			'userrole' => 'admin',
+			'data' => ['name' => 'Integration User'],
+		]);
+
+		$user = $this->db()->execute(
+			'SELECT uid, username, email, userrole, active, data FROM cms.users WHERE usr = :usr',
+			['usr' => $userId],
+		)->one();
+
+		$this->assertNotNull($user);
+		$this->assertSame('integration-test-user', $user['uid']);
+		$this->assertSame('integration-user', $user['username']);
+		$this->assertSame('integration-user@example.com', $user['email']);
+		$this->assertSame('admin', $user['userrole']);
+		$this->assertTrue($user['active']);
+		$data = json_decode($user['data'], true);
+		$this->assertSame('Integration User', ($data['name'] ?? null));
+	}
 }
