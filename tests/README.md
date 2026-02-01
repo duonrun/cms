@@ -64,23 +64,23 @@ The `recreate-db` command:
 ### Run All Tests
 
 ```bash
-vendor/bin/phpunit
+composer test
 ```
 
 ### Run Specific Test Suite
 
 ```bash
 # Run a specific test file
-vendor/bin/phpunit tests/NodeIntegrationTest.php
+vendor/bin/phpunit tests/Integration/NodeTest.php
 
 # Run a specific test method
-vendor/bin/phpunit --filter testCreateAndRetrieveNode tests/NodeIntegrationTest.php
+vendor/bin/phpunit --filter testCreateAndRetrieveNode tests/Integration/NodeTest.php
 ```
 
 ### Run Only Unit Tests
 
 ```bash
-vendor/bin/phpunit --exclude-group integration
+vendor/bin/phpunit --testsuite unit
 ```
 
 ### Run Only End-to-End Tests
@@ -96,12 +96,12 @@ vendor/bin/phpunit --testsuite end2end
 vendor/bin/phpunit --group integration
 ```
 
-*Note: E2E tests are in the `end2end` test suite by configuration in phpunit.xml*
+*Note: E2E tests are in the `end2end` test suite by configuration in phpunit.dist.xml*
 
 ### Generate Coverage Report
 
 ```bash
-vendor/bin/phpunit --coverage-html coverage
+composer coverage
 ```
 
 Open `coverage/index.html` in your browser to view the report.
@@ -138,19 +138,19 @@ tests/
 #### `TestCase`
 
 Base class for all tests, provides:
-- **Database helpers**: `conn()`, `db()`, `config()`, `registry()`
+- **Database helpers**: `db()`, `config()`, `registry()`, `factory()`
 - **HTTP helpers**: `request()`, `psrRequest()`, `setMethod()`, `setRequestUri()`
-- **Fixture loading**: `loadFixtures(...$fixtures)`
-- **Test data creation**: `createTestType()`, `createTestNode()`, `createTestUser()`
-- **Database initialization**: Checks schema exists on first test class run
-- **Transaction support**: Optionally wraps tests in transactions (controlled by `$useTransactions`)
+- **Utility helpers**: `fullTrim()`
 
 #### `IntegrationTestCase`
 
 Extends `TestCase` for integration tests, provides:
 - **Automatic transaction isolation**: Sets `$useTransactions = true` (each test runs in a transaction that rolls back)
-- **Context creation**: `createContext($localeId = 'en')`
-- **Finder creation**: `createFinder($localeId = 'en')`
+- **Database initialization**: Checks schema exists on first test class run
+- **Fixture loading**: `loadFixtures(...$fixtures)`
+- **Test data creation**: `createTestType()`, `createTestNode()`, `createTestUser()`, `createTestPath()`
+- **Context creation**: `createContext()`
+- **Finder creation**: `createFinder()`
 
 #### `End2EndTestCase`
 
@@ -176,7 +176,7 @@ Extends `IntegrationTestCase` for end-to-end HTTP tests, provides:
 
 namespace Duon\Cms\Tests;
 
-use Duon\Cms\Tests\Setup\TestCase;
+use Duon\Cms\Tests\TestCase;
 
 final class PasswordTest extends TestCase
 {
@@ -197,7 +197,7 @@ final class PasswordTest extends TestCase
 
 namespace Duon\Cms\Tests;
 
-use Duon\Cms\Tests\Setup\IntegrationTestCase;
+use Duon\Cms\Tests\IntegrationTestCase;
 
 final class MyIntegrationTest extends IntegrationTestCase
 {
@@ -391,7 +391,7 @@ sudo -u postgres psql -c "ALTER USER duoncms CREATEDB;"
 
 ### Database Connection Configuration
 
-Test database credentials are configured in `tests/Setup/TestCase.php`:
+Test database credentials are configured in `tests/TestCase.php`:
 
 ```php
 // Database: duoncms
