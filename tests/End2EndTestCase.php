@@ -108,6 +108,25 @@ class End2EndTestCase extends IntegrationTestCase
 	}
 
 	/**
+	 * Track a node created via HTTP API by uid.
+	 */
+	protected function trackNodeByUid(string $uid): int
+	{
+		$node = $this->db()->execute(
+			'SELECT node FROM cms.nodes WHERE uid = :uid',
+			['uid' => $uid],
+		)->one();
+		$this->assertNotEmpty($node);
+		$nodeId = (int) $node['node'];
+
+		if (!in_array($nodeId, $this->createdNodeIds, true)) {
+			$this->createdNodeIds[] = $nodeId;
+		}
+
+		return $nodeId;
+	}
+
+	/**
 	 * @override Track created types for cleanup
 	 */
 	protected function createTestType(string $handle, string $kind = 'page'): int

@@ -104,12 +104,7 @@ final class NodeCrudTest extends End2EndTestCase
 		$payload = $this->assertJsonResponse($response, 201);
 		$this->assertTrue($payload['success'] ?? false);
 
-		$storedNode = $this->db()->execute(
-			'SELECT node FROM cms.nodes WHERE uid = :uid',
-			['uid' => $uid],
-		)->one();
-		$this->assertNotEmpty($storedNode);
-		$this->createdNodeIds[] = (int) $storedNode['node'];
+		$this->trackNodeByUid($uid);
 
 		$created = $this->makeRequest('GET', "/panel/api/node/{$uid}");
 		$createdPayload = $this->assertJsonResponse($created);
