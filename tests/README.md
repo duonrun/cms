@@ -436,7 +436,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.5'
           extensions: pdo, pdo_pgsql, pgsql
 
       - name: Install dependencies
@@ -448,7 +448,7 @@ jobs:
           ./run migrate --apply
 
       - name: Run tests
-        run: vendor/bin/phpunit
+        run: composer test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
