@@ -69,4 +69,31 @@ final class AuthTest extends End2EndTestCase
 		$payload = $this->assertJsonResponse($response);
 		$this->assertNotEmpty($payload['uid'] ?? null);
 	}
+
+	public function testPermissionEnforcementReturnsUnauthorizedWithoutToken(): void
+	{
+		$response = $this->makeRequest('GET', '/panel/api/nodes', [
+			'query' => ['type' => 'test-article'],
+		]);
+
+		$this->assertResponseStatus(401, $response);
+	}
+
+	public function testPermissionEnforcementAllowsAuthenticatedRoles(): void
+	{
+		$superuserToken = $this->createAuthenticatedUser('superuser');
+		$editorToken = $this->createAuthenticatedUser('editor');
+		$this->createdAuthTokens[] = hash('sha256', $superuserToken);
+		$this->createdAuthTokens[] = hash('sha256', $editorToken);
+
+		$response = $this->makeRequest('GET', '/panel/api/users', [
+			'authToken' => $editorToken,
+		]);
+		$this->assertResponseOk($response);
+
+		$response = $this->makeRequest('GET', '/panel/api/users', [
+			'authToken' => $superuserToken,
+		]);
+		$this->assertResponseOk($response);
+	}
 }

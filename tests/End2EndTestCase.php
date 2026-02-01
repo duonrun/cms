@@ -176,7 +176,7 @@ class End2EndTestCase extends IntegrationTestCase
 
 		// Create user with correct schema (userrole instead of role)
 		$sql = "INSERT INTO cms.users (uid, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, 1, 1)
+				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, :creator, :editor)
 				RETURNING usr";
 
 		$userId = $db->execute($sql, [
@@ -184,6 +184,8 @@ class End2EndTestCase extends IntegrationTestCase
 			'email' => $uid . '@example.com',
 			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
 			'userrole' => $role,
+			'creator' => 1,
+			'editor' => 1,
 		])->one()['usr'];
 
 		$this->createdUserIds[] = $userId;
