@@ -143,4 +143,75 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('', (string) $value);
 		$this->assertTrue($value->isset());
 	}
+
+	public function testOptionValueUsesProvidedValue(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Option('status', $node, new ValueContext('status', [
+			'value' => 'draft',
+		]));
+
+		$value = $field->value();
+		$this->assertSame('draft', $value->unwrap());
+		$this->assertSame(['value' => 'draft'], $value->json());
+		$this->assertTrue($value->isset());
+	}
+
+	public function testRadioValueUsesStringValue(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+			'value' => 'yes',
+		]));
+
+		$value = $field->value();
+		$this->assertSame('yes', $value->unwrap());
+		$this->assertSame('yes', $value->json());
+		$this->assertTrue($value->isset());
+	}
+
+	public function testDateTimeValueFormatsToExpectedString(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\DateTime('timestamp', $node, new ValueContext('timestamp', [
+			'value' => '2025-01-31 13:45:10',
+			'timezone' => 'UTC',
+		]));
+
+		$value = $field->value();
+		$this->assertSame('2025-01-31 13:45:10', $value->format(\Duon\Cms\Value\DateTime::FORMAT));
+		$this->assertSame('2025-01-31 13:45:10', (string) $value);
+		$this->assertTrue($value->isset());
+	}
+
+	public function testDateValueFormatsToExpectedString(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Date('date', $node, new ValueContext('date', [
+			'value' => '2025-01-31',
+		]));
+
+		$value = $field->value();
+		$this->assertSame('2025-01-31', $value->format(\Duon\Cms\Value\Date::FORMAT));
+		$this->assertSame('2025-01-31', (string) $value);
+		$this->assertTrue($value->isset());
+	}
+
+	public function testTimeValueFormatsToExpectedString(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Time('time', $node, new ValueContext('time', [
+			'value' => '13:45',
+		]));
+
+		$value = $field->value();
+		$this->assertSame('13:45', $value->format(\Duon\Cms\Value\Time::FORMAT));
+		$this->assertSame('13:45', (string) $value);
+		$this->assertTrue($value->isset());
+	}
 }
