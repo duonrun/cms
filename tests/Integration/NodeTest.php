@@ -224,4 +224,34 @@ final class NodeTest extends IntegrationTestCase
 		$data = json_decode($user['data'], true);
 		$this->assertSame('Integration User', ($data['name'] ?? null));
 	}
+
+	public function testPagePathRequiresDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$finder = $this->createFinder();
+
+		$page = new \Duon\Cms\Tests\Fixtures\Node\TestPage(
+			$context,
+			$finder,
+			['content' => []],
+		);
+
+		$this->throws(
+			\Duon\Core\Exception\HttpBadRequest::class,
+			'Bad Request',
+		);
+
+		$page->create([
+			'uid' => 'path-missing-default',
+			'published' => true,
+			'locked' => false,
+			'hidden' => false,
+			'paths' => [
+				'de' => '/nur-de',
+			],
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Title']],
+			],
+		]);
+	}
 }
