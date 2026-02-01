@@ -36,18 +36,47 @@ final class NodeCrudTest extends End2EndTestCase
 
 	public function testGetSingleNode(): void
 	{
+		$this->authenticateAs('editor');
+
 		$typeId = $this->createTestType('crud-test-page', 'page');
-		$nodeId = $this->createTestNode([
+		$nodePath = '/test/crud-test-node';
+		$this->createTestNode([
 			'uid' => 'crud-test-node',
 			'type' => $typeId,
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
 			],
 		]);
+		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], $nodePath);
 
-		$response = $this->makeRequest('GET', "/api/nodes/{$nodeId}");
+		$response = $this->makeRequest('GET', '/panel/api/node/crud-test-node');
 
-		$this->assertResponseStatus(404, $response); // TODO: Expecting 404 until routes exist
+		$this->assertResponseOk($response);
+
+		$payload = $this->getJsonResponse($response);
+		$this->assertSame('crud-test-node', $payload['uid'] ?? null);
+		$this->assertSame('Test Node', $payload['title'] ?? null);
+		$this->assertArrayHasKey('fields', $payload);
+		$this->assertArrayHasKey('paths', $payload);
+		$this->assertSame($nodePath, $payload['paths']['en'] ?? null);
+	}
+
+	public function testGetSingleNodeRequiresAuthentication(): void
+	{
+		$typeId = $this->createTestType('crud-test-page', 'page');
+		$nodePath = '/test/unauth-node';
+		$this->createTestNode([
+			'uid' => 'crud-test-unauth-node',
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Unauth Node']],
+			],
+		]);
+		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], $nodePath);
+
+		$response = $this->makeRequest('GET', '/panel/api/node/crud-test-unauth-node');
+
+		$this->assertResponseStatus(401, $response);
 	}
 
 	public function testCreateNode(): void
