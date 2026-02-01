@@ -3,7 +3,13 @@ name: Build & Release Panel
 on:
   push:
     branches: [ "main" ]
-    tags:     [ "[0-9]+.[0-9]+.[0-9]+" ]
+    # Tag filters are glob patterns (not regex). Support stable + prerelease tags.
+    # Examples: 0.1.0, 0.1.0-alpha.1, 0.1.0-beta.1, 0.1.0-rc.1
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+      - "[0-9]*.[0-9]*.[0-9]*-alpha.*"
+      - "[0-9]*.[0-9]*.[0-9]*-beta.*"
+      - "[0-9]*.[0-9]*.[0-9]*-rc.*"
 
 permissions:
   contents: write  # required to create releases & upload assets
@@ -70,7 +76,7 @@ jobs:
           prerelease: true
           overwrite: true
 
-      # Versioned release for tags like v1.2.3
+      # Versioned release for tags like 1.2.3 / 1.2.3-beta.1
       - name: Upload to versioned release
         if: startsWith(github.ref, 'refs/tags/')
         uses: svenstaro/upload-release-action@v2
@@ -78,7 +84,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/${{ env.FILE_NAME }}
           asset_name: ${{ env.FILE_NAME }}
-          tag: ${{ github.ref_name }}        # uses the pushed tag (e.g. v1.2.3)
+          tag: ${{ github.ref_name }}        # uses the pushed tag (e.g. 1.2.3)
           release_name: ${{ github.ref_name }}
           body: "SvelteKit panel build for ${{ github.ref_name }}."
           prerelease: false
