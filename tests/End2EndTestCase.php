@@ -46,6 +46,7 @@ class End2EndTestCase extends IntegrationTestCase
 	protected array $createdTypeHandles = [];
 	protected array $createdUserIds = [];
 	protected array $createdAuthTokens = [];
+	protected array $createdOneTimeTokens = [];
 	protected ?string $defaultAuthToken = null;
 
 	protected function setUp(): void
@@ -58,6 +59,12 @@ class End2EndTestCase extends IntegrationTestCase
 	{
 		// Clean up test data created during the test
 		$this->cleanupTestData();
+
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			$_SESSION = [];
+			session_unset();
+			session_destroy();
+		}
 
 		// Restore error handlers to prevent PHPUnit warnings
 		if ($this->errorHandler) {
@@ -73,6 +80,11 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function cleanupTestData(): void
 	{
 		$db = $this->db();
+
+		// Delete created one-time tokens
+		foreach ($this->createdOneTimeTokens as $tokenHash) {
+			$db->execute('DELETE FROM cms.onetimetokens WHERE token = :token', ['token' => $tokenHash])->run();
+		}
 
 		// Delete created auth tokens
 		foreach ($this->createdAuthTokens as $tokenHash) {
@@ -104,6 +116,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->createdTypeHandles = [];
 		$this->createdUserIds = [];
 		$this->createdAuthTokens = [];
+		$this->createdOneTimeTokens = [];
 		$this->defaultAuthToken = null;
 	}
 
