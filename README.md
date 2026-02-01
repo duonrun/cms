@@ -11,29 +11,21 @@ Settings
 
 Test database:
 
-```sql
-CREATE DATABASE duon_cms_test_db WITH TEMPLATE = template0 ENCODING = 'UTF8';
-CREATE USER duon_cms_test_user PASSWORD 'duon_cms_test_password';
-GRANT ALL PRIVILEGES ON DATABASE duon_cms_test_db TO duon_cms_test_user;
-ALTER DATABASE duon_cms_test_db OWNER TO duon_cms_test_user;
-```
-
-to allow recreation via command RecreateDb:
-
-```sql
-ALTER USER duon_cms_test_user SUPERUSER;
+```bash
+echo "duoncms" | createuser --pwprompt --createdb duoncms
+createdb --owner duoncms duoncms
 ```
 
 System Requirements:
 
 ```bash
-apt install php8.3 php8.3-pgsql php8.3-gd php8.3-xml php8.3-intl php8.3-curl
+apt install php8.5 php8.5-pgsql php8.5-gd php8.5-xml php8.5-intl php8.5-curl
 ```
 
 For development
 
 ```bash
-apt install php8.3 php8.3-xdebug
+apt install php8.5 php8.5-xdebug
 ```
 
 macOS/homebrew:
