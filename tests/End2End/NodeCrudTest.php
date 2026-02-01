@@ -162,6 +162,9 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->createTestNode([
 			'uid' => $uid,
 			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Delete Node']],
+			],
 		]);
 		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], '/test/' . $uid);
 
