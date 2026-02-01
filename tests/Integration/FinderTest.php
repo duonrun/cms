@@ -18,9 +18,9 @@ final class FinderTest extends IntegrationTestCase
 	public function testFinderReturnsNodesOfSpecificType(): void
 	{
 		$finder = $this->createFinder();
-		$nodes = $finder->nodes->types('test-article');
+		$nodes = iterator_to_array($finder->nodes->types('test-article'));
 
-		$this->assertNotEmpty($nodes);
+		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
 			$this->assertEquals('test-article', $node::handle());
@@ -44,9 +44,9 @@ final class FinderTest extends IntegrationTestCase
 	public function testFinderFiltersUnpublishedNodes(): void
 	{
 		$finder = $this->createFinder();
-		$unpublishedNodes = $finder->nodes()
+		$unpublishedNodes = iterator_to_array($finder->nodes()
 			->types('test-article')
-			->published(false);
+			->published(false));
 
 		$this->assertNotEmpty($unpublishedNodes);
 
@@ -58,8 +58,8 @@ final class FinderTest extends IntegrationTestCase
 	public function testFinderSupportsMultipleTypes(): void
 	{
 		$finder = $this->createFinder();
-		$nodes = $finder->nodes()
-			->types('test-home', 'test-article');
+		$nodes = iterator_to_array($finder->nodes()
+			->types('test-home', 'test-article'));
 
 		$this->assertNotEmpty($nodes);
 
@@ -163,7 +163,7 @@ final class FinderTest extends IntegrationTestCase
 	public function testFinderWithFixtureData(): void
 	{
 		$finder = $this->createFinder();
-		$homepage = $finder->nodes()->types('test-home');
+		$homepage = iterator_to_array($finder->nodes()->types('test-home'));
 
 		$this->assertNotEmpty($homepage);
 
