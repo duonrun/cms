@@ -383,6 +383,18 @@ class End2EndTestCase extends IntegrationTestCase
 	}
 
 	/**
+	 * Assert JSON response and return decoded payload.
+	 */
+	protected function assertJsonResponse(ResponseInterface $response, ?int $status = null): array
+	{
+		if ($status !== null) {
+			$this->assertResponseStatus($status, $response);
+		}
+
+		return $this->getJsonResponse($response);
+	}
+
+	/**
 	 * Get the response body as HTML string.
 	 */
 	protected function getHtmlResponse(ResponseInterface $response): string

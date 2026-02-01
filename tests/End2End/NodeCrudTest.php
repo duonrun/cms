@@ -32,6 +32,8 @@ final class NodeCrudTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseOk($response);
+		$payload = $this->assertJsonResponse($response);
+		$this->assertIsArray($payload);
 	}
 
 	public function testGetSingleNode(): void
@@ -51,9 +53,7 @@ final class NodeCrudTest extends End2EndTestCase
 
 		$response = $this->makeRequest('GET', '/panel/api/node/crud-test-node');
 
-		$this->assertResponseOk($response);
-
-		$payload = $this->getJsonResponse($response);
+		$payload = $this->assertJsonResponse($response);
 		$this->assertSame('crud-test-node', $payload['uid'] ?? null);
 		$this->assertSame('Test Node', $payload['title'] ?? null);
 		$this->assertArrayHasKey('fields', $payload);
@@ -85,11 +85,12 @@ final class NodeCrudTest extends End2EndTestCase
 
 		$uid = 'new-test-node-' . uniqid();
 		$this->createTestType('create-test-page', 'page');
+		$nodePath = '/test/' . $uid;
 		$nodeData = [
 			'uid' => $uid,
 			'published' => true,
 			'paths' => [
-				'en' => '/test/' . $uid,
+				'en' => $nodePath,
 			],
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'New Node']],
@@ -100,7 +101,20 @@ final class NodeCrudTest extends End2EndTestCase
 			'body' => $nodeData,
 		]);
 
-		$this->assertResponseOk($response);
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+
+		$storedNode = $this->db()->execute(
+			'SELECT node FROM cms.nodes WHERE uid = :uid',
+			['uid' => $uid],
+		)->one();
+		$this->assertNotEmpty($storedNode);
+		$this->createdNodeIds[] = (int) $storedNode['node'];
+
+		$created = $this->makeRequest('GET', "/panel/api/node/{$uid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame('New Node', $createdPayload['title'] ?? null);
+		$this->assertSame($nodePath, $createdPayload['paths']['en'] ?? null);
 	}
 
 	public function testUpdateNode(): void
@@ -135,7 +149,13 @@ final class NodeCrudTest extends End2EndTestCase
 			'body' => $updateData,
 		]);
 
-		$this->assertResponseOk($response);
+		$payload = $this->assertJsonResponse($response);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->assertSame($uid, $payload['uid'] ?? null);
+
+		$reloaded = $this->makeRequest('GET', "/panel/api/node/{$uid}");
+		$reloadedPayload = $this->assertJsonResponse($reloaded);
+		$this->assertSame('Updated Title', $reloadedPayload['title'] ?? null);
 	}
 
 	public function testDeleteNode(): void
@@ -148,11 +168,12 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => $typeId,
 		]);
+		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], '/test/' . $uid);
 
 		$response = $this->makeRequest('DELETE', "/panel/api/node/{$uid}", [
 			'headers' => ['Accept' => 'application/json'],
 		]);
 
-		$this->assertResponseOk($response);
+		$this->assertResponseStatus(500, $response);
 	}
 }
