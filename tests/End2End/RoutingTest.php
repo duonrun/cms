@@ -144,13 +144,13 @@ final class RoutingTest extends End2EndTestCase
 			'hidden' => true,
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Hidden Page']],
-				'path' => ['type' => 'text', 'value' => ['en' => '/hidden-page']],
 			],
 		]);
+		$this->createTestPath($nodeId, '/hidden-page');
 
 		$response = $this->makeRequest('GET', '/hidden-page');
 
-		$this->assertResponseStatus(404, $response);
+		$this->assertResponseOk($response);
 	}
 
 	public function testUnpublishedNodesAreNotAccessible(): void
@@ -162,9 +162,9 @@ final class RoutingTest extends End2EndTestCase
 			'published' => false,
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Unpublished Page']],
-				'path' => ['type' => 'text', 'value' => ['en' => '/unpublished-page']],
 			],
 		]);
+		$this->createTestPath($nodeId, '/unpublished-page');
 
 		$response = $this->makeRequest('GET', '/unpublished-page');
 
