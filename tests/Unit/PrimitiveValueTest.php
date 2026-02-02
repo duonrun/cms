@@ -351,6 +351,50 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero Image', $value->title());
 	}
 
+	public function testTranslatedImagesReturnsTranslatedImageItems(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('gallery', $node, new ValueContext('gallery', [
+			'files' => [
+				'en' => [
+					['file' => 'hero.jpg', 'alt' => 'Hero'],
+				],
+				'de' => [
+					['file' => null, 'alt' => null],
+				],
+			],
+		]));
+		$field->multiple();
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedImages::class, $value);
+		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedImage::class, $value->current());
+		$this->assertSame('Hero', $value->current()->alt());
+	}
+
+	public function testImageValueResizeAddsQueryString(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+			'files' => [
+				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
+			],
+		]));
+
+		/** @var \Duon\Cms\Value\Image $value */
+		$value = $field->value()->width(320, true)->quality(80);
+
+		$this->assertStringContainsString('resize=width', $value->publicPath());
+		$this->assertStringContainsString('w=320', $value->publicPath());
+		$this->assertStringContainsString('enlarge=true', $value->publicPath());
+		$this->assertStringContainsString('quality=80', $value->publicPath());
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
