@@ -299,6 +299,58 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertStringContainsString('/cms/media/image/node/test-node/hero.jpg', $value->publicPath());
 	}
 
+	public function testFileValueTitleFallsBackToDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\File('document', $node, new ValueContext('document', [
+			'files' => [
+				[
+					'file' => 'manual.pdf',
+					'title' => [
+						'en' => 'Manual',
+						'de' => null,
+					],
+				],
+			],
+		]));
+		$field->translate();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertSame('manual.pdf', $value->filename());
+		$this->assertSame('Manual', $value->title());
+	}
+
+	public function testPictureValueUsesTranslatedAltAndTitle(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Picture('hero', $node, new ValueContext('hero', [
+			'files' => [
+				[
+					'file' => 'hero.jpg',
+					'alt' => [
+						'en' => 'Hero',
+						'de' => null,
+					],
+					'title' => [
+						'en' => 'Hero Image',
+						'de' => null,
+					],
+				],
+			],
+		]));
+		$field->translate();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertSame('Hero', $value->alt());
+		$this->assertSame('Hero Image', $value->title());
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
