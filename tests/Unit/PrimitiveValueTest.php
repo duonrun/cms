@@ -158,6 +158,33 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 	}
 
+	public function testFilesValueIteratesAndCounts(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$valueContext = new ValueContext('attachments', [
+			'files' => [
+				['file' => 'one.pdf'],
+				['file' => 'two.pdf'],
+			],
+		]);
+		$field = new \Duon\Cms\Field\File('attachments', $node, $valueContext);
+		$field->multiple();
+		$value = $field->value();
+
+		$this->assertSame(2, $value->count());
+		$this->assertTrue($value->isset());
+		$this->assertSame('Files: count(0)', (string) $value);
+		$this->assertInstanceOf(\Duon\Cms\Value\File::class, $value->first());
+
+		$files = [];
+		foreach ($value as $file) {
+			$files[] = $file;
+		}
+
+		$this->assertCount(2, $files);
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
