@@ -395,6 +395,29 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertStringContainsString('quality=80', $value->publicPath());
 	}
 
+	public function testImagesValueIteratesOverImages(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('gallery', $node, new ValueContext('gallery', [
+			'files' => [
+				['file' => 'one.jpg', 'alt' => ['en' => 'One']],
+				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
+			],
+		]));
+		$field->multiple();
+
+		/** @var \Duon\Cms\Value\Images $value */
+		$value = $field->value();
+
+		$this->assertSame(2, $value->count());
+		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->first());
+		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->current());
+		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->get(1));
+		$this->assertSame('One', $value->first()->alt());
+		$this->assertSame('Two', $value->get(1)->alt());
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
