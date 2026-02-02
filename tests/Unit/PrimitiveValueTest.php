@@ -298,6 +298,36 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero', $value->alt());
 	}
 
+	public function testImageTagUsesMediaUrlAndAlt(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+			'files' => [
+				[
+					'file' => 'hero.jpg',
+					'alt' => ['en' => 'Hero'],
+					'title' => ['en' => 'Hero Title'],
+				],
+			],
+		]));
+
+		/** @var \Duon\Cms\Value\Image $value */
+		$value = $field->value();
+		$tag = $value->tag(true, 'hero-image');
+
+		$this->assertStringContainsString('class="hero-image"', $tag);
+		$this->assertStringContainsString(
+			'src="http://www.example.com/cms/media/image/node/test-node/hero.jpg"',
+			$tag,
+		);
+		$this->assertStringContainsString('alt="Hero"', $tag);
+		$this->assertStringContainsString(
+			'data-path-original="/cms/media/image/node/test-node/hero.jpg"',
+			$tag,
+		);
+	}
+
 	public function testTranslatedImageFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
@@ -373,6 +403,45 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertSame('Hero', $value->alt());
 		$this->assertSame('Hero Image', $value->title());
+	}
+
+	public function testPictureTagRendersSourcesAndFallback(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$valueContext = new ValueContext('hero', [
+			'files' => [
+				[
+					'file' => 'hero.webp',
+					'media' => '(min-width: 600px)',
+					'alt' => ['en' => 'Hero Alt'],
+					'title' => ['en' => 'Hero Title'],
+				],
+				[
+					'file' => 'hero.jpg',
+					'alt' => ['en' => 'Hero Alt'],
+					'title' => ['en' => 'Hero Title'],
+				],
+			],
+		]);
+		$field = new \Duon\Cms\Field\Picture('hero', $node, $valueContext);
+		$field->translate();
+
+		$value = new class ($node, $field, $valueContext) extends \Duon\Cms\Value\Picture {
+			public function url(bool $bust = true, int $index = 0): string
+			{
+				return "https://cdn.example.com/hero-{$index}.jpg";
+			}
+		};
+
+		$tag = $value->tag(false, 'hero-picture');
+
+		$this->assertStringContainsString('<picture', $tag);
+		$this->assertStringContainsString('class="hero-picture"', $tag);
+		$this->assertStringContainsString('media="(min-width: 600px)"', $tag);
+		$this->assertStringContainsString('type="image/jpeg"', $tag);
+		$this->assertStringContainsString('alt="Hero Alt"', $tag);
+		$this->assertStringContainsString('src="https://cdn.example.com/hero-1.jpg"', $tag);
 	}
 
 	public function testTranslatedPictureFallsBackToDefaultLocale(): void
