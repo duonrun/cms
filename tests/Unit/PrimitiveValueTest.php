@@ -88,6 +88,30 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertFalse($value->isset());
 	}
 
+	public function testValueBaseExposesCustomAttributes(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new TestText('title', $node, new ValueContext('title', [
+			'value' => ['en' => 'Hello'],
+			'class' => 'hero',
+			'id' => 'section',
+			'custom' => 'custom-value',
+		]));
+
+		$value = $field->value();
+
+		$this->assertSame('hero', $value->styleClass());
+		$this->assertSame('section', $value->elementId());
+		$this->assertSame('custom-value', $value->custom);
+
+		$this->throws(
+			\Duon\Cms\Exception\NoSuchProperty::class,
+			"The field 'title' doesn't have the property 'missing'",
+		);
+		$value->missing;
+	}
+
 	public function testHtmlValueUsesExcerptAndSanitizedOutput(): void
 	{
 		$context = $this->createContext();
@@ -351,6 +375,38 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero Image', $value->title());
 	}
 
+	public function testTranslatedPictureFallsBackToDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Picture('hero', $node, new ValueContext('hero', [
+			'files' => [
+				[
+					'en' => [
+						'file' => 'hero.jpg',
+						'alt' => 'Hero',
+						'title' => 'Hero Image',
+						'link' => '/hero',
+					],
+					'de' => [
+						'file' => null,
+						'alt' => null,
+						'title' => null,
+						'link' => null,
+					],
+				],
+			],
+		]));
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertSame('Hero', $value->alt());
+		$this->assertSame('Hero Image', $value->title());
+		$this->assertSame('/hero', $value->link());
+	}
+
 	public function testTranslatedImagesReturnsTranslatedImageItems(): void
 	{
 		$context = $this->createContext();
@@ -444,6 +500,38 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('yes', $value->unwrap());
 		$this->assertSame('yes', $value->json());
 		$this->assertTrue($value->isset());
+	}
+
+	public function testStrValueEscapesHtml(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+			'value' => '<strong>Yes</strong>',
+		]));
+
+		$value = $field->value();
+
+		$this->assertSame('<strong>Yes</strong>', $value->unwrap());
+		$this->assertSame('<strong>Yes</strong>', $value->json());
+		$this->assertSame('&lt;strong&gt;Yes&lt;/strong&gt;', (string) $value);
+		$this->assertTrue($value->isset());
+	}
+
+	public function testStrValueIsEmptyWhenMissing(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+			'value' => '',
+		]));
+
+		$value = $field->value();
+
+		$this->assertSame('', $value->unwrap());
+		$this->assertSame('', $value->json());
+		$this->assertSame('', (string) $value);
+		$this->assertFalse($value->isset());
 	}
 
 	public function testDateTimeValueFormatsToExpectedString(): void
