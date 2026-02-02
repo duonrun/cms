@@ -11,7 +11,7 @@ class TranslatedFiles extends Files
 		return $this->get($this->pointer);
 	}
 
-	protected function get(int $index): TranslatedFile
+	public function get(int $index): TranslatedFile
 	{
 		return new TranslatedFile($this->node, $this->field, $this->context, $index);
 	}

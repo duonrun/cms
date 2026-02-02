@@ -174,7 +174,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertSame(2, $value->count());
 		$this->assertTrue($value->isset());
-		$this->assertSame('Files: count(0)', (string) $value);
+		$this->assertSame('Files: count(0)', (string) $value, 'Value unwrap uses locale data, not files.');
 		$this->assertInstanceOf(\Duon\Cms\Value\File::class, $value->first());
 
 		$files = [];
@@ -183,6 +183,77 @@ final class PrimitiveValueTest extends TestCase
 		}
 
 		$this->assertCount(2, $files);
+	}
+
+	public function testTranslatedFileFallsBackToDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\File('attachment', $node, new ValueContext('attachment', [
+			'files' => [
+				'en' => [
+					['file' => 'manual.pdf', 'title' => 'Manual'],
+				],
+				'de' => [
+					['file' => null, 'title' => null],
+				],
+			],
+		]));
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertTrue($value->isset());
+		$this->assertSame('Manual', $value->title());
+	}
+
+	public function testTranslatedFileIsEmptyWhenMissing(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\File('attachment', $node, new ValueContext('attachment', [
+			'files' => [
+				'en' => [
+					['file' => null, 'title' => null],
+				],
+				'de' => [
+					['file' => null, 'title' => null],
+				],
+			],
+		]));
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertFalse($value->isset());
+		$this->assertSame('', $value->title());
+	}
+
+	public function testTranslatedFilesReturnsTranslatedFileInstances(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\File('attachments', $node, new ValueContext('attachments', [
+			'files' => [
+				'en' => [
+					['file' => 'spec.pdf', 'title' => 'Spec'],
+				],
+				'de' => [
+					['file' => null, 'title' => null],
+				],
+			],
+		]));
+		$field->multiple();
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		$value = $field->value();
+
+		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFiles::class, $value);
+		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFile::class, $value->current());
+		$this->assertSame('Spec', $value->current()->title());
 	}
 
 	public function testOptionValueUsesProvidedValue(): void
