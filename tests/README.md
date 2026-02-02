@@ -67,6 +67,12 @@ The `recreate-db` command:
 composer test
 ```
 
+## How to Resume
+
+- Run `composer test` to verify the suite.
+- If the database is out of date, run `./run recreate-db && ./run migrate --apply`.
+- Use `composer coverage` when you need updated coverage numbers.
+
 ### Run Specific Test Suite
 
 ```bash
