@@ -407,6 +407,35 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('/hero', $value->link());
 	}
 
+	public function testVideoValueRendersSourceTag(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$valueContext = new ValueContext('clip', [
+			'files' => [
+				['file' => 'clip.mp4', 'title' => 'Clip'],
+			],
+		]);
+		$field = new \Duon\Cms\Field\Video('clip', $node, $valueContext);
+
+		$value = new class ($node, $field, $valueContext) extends \Duon\Cms\Value\Video {
+			public function url(bool $bust = false): string
+			{
+				return 'http://www.example.com/assets/clip.mp4';
+			}
+
+			public function mimeType(): string
+			{
+				return 'video/mp4';
+			}
+		};
+
+		$this->assertSame(
+			'<video controls><source src="http://www.example.com/assets/clip.mp4" type="video/mp4"/></video>',
+			(string) $value,
+		);
+	}
+
 	public function testTranslatedImagesReturnsTranslatedImageItems(): void
 	{
 		$context = $this->createContext();
