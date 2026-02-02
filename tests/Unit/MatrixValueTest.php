@@ -37,7 +37,7 @@ final class MatrixValueTest extends TestCase
 		return new Context(
 			$this->db(),
 			$request,
-			$this->config(),
+			$this->config(['path.prefix' => '/cms']),
 			$this->registry(),
 			$this->factory(),
 		);
@@ -47,7 +47,7 @@ final class MatrixValueTest extends TestCase
 	{
 		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
-		return new class ($context, $finder, ['content' => []]) extends Document {
+		return new class ($context, $finder, ['uid' => 'test-node', 'content' => []]) extends Document {
 			public function title(): string
 			{
 				return 'Test';

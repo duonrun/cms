@@ -36,7 +36,7 @@ final class PrimitiveValueTest extends TestCase
 		return new Context(
 			$this->db(),
 			$request,
-			$this->config(),
+			$this->config(['path.prefix' => '/cms']),
 			$this->registry(),
 			$this->factory(),
 		);
@@ -46,7 +46,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
-		return new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
+		return new class ($context, $finder, ['uid' => 'test-node', 'content' => []]) extends \Duon\Cms\Node\Document {
 			public function title(): string
 			{
 				return 'Test';
@@ -254,6 +254,49 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFiles::class, $value);
 		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFile::class, $value->current());
 		$this->assertSame('Spec', $value->current()->title());
+	}
+
+	public function testImageValueBuildsMediaPaths(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+			'files' => [
+				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
+			],
+		]));
+
+		/** @var \Duon\Cms\Value\Image $value */
+		$value = $field->value();
+
+		$this->assertStringContainsString('/cms/media/image/node/test-node/hero.jpg', $value->publicPath());
+		$this->assertStringContainsString('http://www.example.com', $value->url());
+		$this->assertSame('Hero', $value->alt());
+	}
+
+	public function testTranslatedImageFallsBackToDefaultLocale(): void
+	{
+		$context = $this->createContext();
+		$node = $this->createNode($context);
+		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+			'files' => [
+				'en' => [
+					['file' => 'hero.jpg', 'alt' => 'Hero'],
+				],
+				'de' => [
+					['file' => null, 'alt' => null],
+				],
+			],
+		]));
+		$field->translateFile();
+		$context->request->set('locale', $context->locales()->get('de'));
+
+		/** @var \Duon\Cms\Value\TranslatedImage $value */
+		$value = $field->value();
+
+		$this->assertTrue($value->isset());
+		$this->assertSame('Hero', $value->alt());
+		$this->assertStringContainsString('/cms/media/image/node/test-node/hero.jpg', $value->publicPath());
 	}
 
 	public function testOptionValueUsesProvidedValue(): void
