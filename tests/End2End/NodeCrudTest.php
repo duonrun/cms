@@ -157,7 +157,7 @@ final class NodeCrudTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$typeId = $this->createTestType('delete-test-page', 'page');
+		$typeId = $this->createTestType('delete-test-page-' . uniqid(), 'page');
 		$uid = 'delete-test-node-' . uniqid();
 		$this->createTestNode([
 			'uid' => $uid,
