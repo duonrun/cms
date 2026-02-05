@@ -1,6 +1,9 @@
-CREATE EXTENSION btree_gist;
-CREATE EXTENSION btree_gin;
-CREATE EXTENSION unaccent;
+-- Extensions for CMS functionality
+-- btree_gist: Reserved for future exclusion constraints (e.g., date range overlaps)
+-- unaccent: For accent-insensitive fulltext search (optional but recommended)
+-- Note: tsvector GIN indexes work without extensions
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 CREATE SCHEMA cms;
 CREATE SCHEMA audit;
