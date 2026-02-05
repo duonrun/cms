@@ -143,8 +143,20 @@ class TestCase extends BaseTestCase
 		return new \Duon\Quma\Database(
 			new \Duon\Quma\Connection(
 				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				self::root() . '/db/sql',
-				self::root() . '/db/migrations',
+				[
+					'pgsql' => self::root() . '/db/sql/pgsql',
+					'sqlite' => self::root() . '/db/sql/sqlite',
+				],
+				[
+					'install' => [[
+						'pgsql' => self::root() . '/db/migrations/install/pgsql',
+						'sqlite' => self::root() . '/db/migrations/install/sqlite',
+					]],
+					'default' => [[
+						'pgsql' => self::root() . '/db/migrations/update/pgsql',
+						'sqlite' => self::root() . '/db/migrations/update/sqlite',
+					]],
+				],
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,
 			),
