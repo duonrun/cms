@@ -44,7 +44,10 @@ class IntegrationTestCase extends TestCase
 		// Create shared connection for migration check
 		self::$sharedConnection = new Connection(
 			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
+			[
+				'pgsql' => self::root() . '/db/sql/pgsql',
+				'sqlite' => self::root() . '/db/sql/sqlite',
+			],
 			self::root() . '/db/migrations',
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
@@ -112,7 +115,10 @@ class IntegrationTestCase extends TestCase
 	{
 		return new Connection(
 			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
+			[
+				'pgsql' => self::root() . '/db/sql/pgsql',
+				'sqlite' => self::root() . '/db/sql/sqlite',
+			],
 			self::root() . '/db/migrations',
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,

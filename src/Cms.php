@@ -113,11 +113,18 @@ class Cms implements Plugin
 		$this->validateDriver($dsn);
 
 		$root = dirname(__DIR__);
+
+		// Driver-aware SQL directories: pgsql and sqlite scripts are separate
 		$sqlConfig = $this->config->get('db.sql', []);
+		$userSqlDirs = $sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [];
 		$sql = array_merge(
-			[$root . '/db/sql'],
-			$sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [],
+			$userSqlDirs,
+			[[
+				'pgsql' => $root . '/db/sql/pgsql',
+				'sqlite' => $root . '/db/sql/sqlite',
+			]],
 		);
+
 		$migrations = $this->config->get('db.migrations', []);
 		$namespacedMigrations = [];
 		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
