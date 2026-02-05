@@ -227,6 +227,39 @@ final class SqliteMigrationTest extends TestCase
 		$this->assertSame(0, (int) $node['locked']);
 	}
 
+	public function testUpdateMigrationsCanBeApplied(): void
+	{
+		$this->db = $this->createDatabase();
+		$pdo = $this->db->getConn();
+
+		$pdo->exec('PRAGMA foreign_keys = ON');
+
+		// Apply install migrations
+		$ddlPath = self::root() . '/db/migrations/install/sqlite/000000-000000-init-ddl.sql';
+		$pdo->exec(file_get_contents($ddlPath));
+
+		$pdo->exec('CREATE TABLE migrations (migration TEXT PRIMARY KEY, applied TEXT NOT NULL)');
+		$dataPath = self::root() . '/db/migrations/install/sqlite/000000-000001-init-data.sql';
+		$pdo->exec(file_get_contents($dataPath));
+
+		// Apply update migrations (these are placeholders for SQLite but should run without error)
+		$updateDir = self::root() . '/db/migrations/update/sqlite';
+		$files = glob($updateDir . '/*.sql');
+		$this->assertNotEmpty($files, 'Update migrations should exist for SQLite');
+
+		foreach ($files as $file) {
+			$sql = file_get_contents($file);
+			$this->assertNotFalse($sql);
+			// Execute the migration - should not throw
+			$pdo->exec($sql);
+		}
+
+		// Verify database is still functional after update migrations
+		$stmt = $pdo->query('SELECT COUNT(*) as cnt FROM cms_userroles');
+		$result = $stmt->fetch();
+		$this->assertGreaterThan(0, (int) $result['cnt']);
+	}
+
 	/**
 	 * @return string[]
 	 */
