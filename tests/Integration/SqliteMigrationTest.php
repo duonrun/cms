@@ -108,6 +108,58 @@ final class SqliteMigrationTest extends TestCase
 		}
 	}
 
+	public function testSqliteUpdateMigrationsApplyWithoutError(): void
+	{
+		if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+			$this->markTestSkipped('pdo_sqlite is not available');
+		}
+
+		$path = tempnam(sys_get_temp_dir(), 'duon-cms-sqlite-');
+
+		if ($path === false) {
+			$this->markTestSkipped('Unable to create temporary sqlite file');
+		}
+
+		try {
+			$pdo = new PDO('sqlite:' . $path, null, null, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			]);
+			$pdo->exec('PRAGMA foreign_keys = ON');
+
+			// Apply install migrations first
+			$installMigrations = [
+				self::root() . '/db/migrations/install/sqlite/000000-000000-init-ddl.sql',
+				self::root() . '/db/migrations/install/sqlite/000000-000001-init-audit.sql',
+				self::root() . '/db/migrations/install/sqlite/000000-000002-init-data.sql',
+			];
+
+			foreach ($installMigrations as $migrationPath) {
+				$sql = file_get_contents($migrationPath);
+				$this->assertNotFalse($sql);
+				$pdo->exec((string) $sql);
+			}
+
+			// Apply update migrations
+			$updateMigrations = [
+				self::root() . '/db/migrations/update/sqlite/000000-000002-named-checks.sql',
+				self::root() . '/db/migrations/update/sqlite/000000-000003-fix-authtokens-trigger.sql',
+			];
+
+			foreach ($updateMigrations as $migrationPath) {
+				$sql = file_get_contents($migrationPath);
+				$this->assertNotFalse($sql);
+				$pdo->exec((string) $sql);
+			}
+
+			// Verify database is still functional after updates
+			$roles = $pdo->query('SELECT COUNT(*) FROM cms_userroles')
+				->fetchColumn();
+			$this->assertSame(4, (int) $roles);
+		} finally {
+			$this->cleanupSqlitePath($path);
+		}
+	}
+
 	private function cleanupSqlitePath(string $path): void
 	{
 		$walPath = $path . '-wal';
