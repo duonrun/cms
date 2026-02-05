@@ -74,9 +74,54 @@ class IntegrationTestCase extends TestCase
 		)->one();
 
 		if ($result === null) {
-			// Apply migrations automatically for SQLite
-			$db->migrate('install');
-			$db->migrate('default');
+			// Apply migrations directly by executing SQL files
+			self::applySqliteMigrations($db);
+		}
+	}
+
+	/**
+	 * Apply SQLite migrations by executing SQL files directly.
+	 *
+	 * Note: This is a simplified migration runner for tests. It doesn't
+	 * use Quma's migration tracking (migrations table). This is fine for
+	 * tests because we create a fresh database for each test run.
+	 *
+	 * Uses PDO::exec() instead of prepared statements because SQLite
+	 * with prepared statements only executes the first statement in
+	 * multi-statement SQL files.
+	 */
+	protected static function applySqliteMigrations(Database $db): void
+	{
+		$root = self::root();
+		$installDir = $root . '/db/migrations/install/sqlite';
+		$updateDir = $root . '/db/migrations/update/sqlite';
+
+		// Get the PDO connection for direct exec()
+		$pdo = $db->getConn();
+
+		// Apply install migrations in order
+		$installFiles = glob($installDir . '/*.sql') ?: [];
+		sort($installFiles);
+
+		foreach ($installFiles as $file) {
+			$sql = file_get_contents($file);
+
+			if ($sql !== false && trim($sql) !== '') {
+				// Use exec() for multi-statement DDL files
+				$pdo->exec($sql);
+			}
+		}
+
+		// Apply update migrations in order
+		$updateFiles = glob($updateDir . '/*.sql') ?: [];
+		sort($updateFiles);
+
+		foreach ($updateFiles as $file) {
+			$sql = file_get_contents($file);
+
+			if ($sql !== false && trim($sql) !== '') {
+				$pdo->exec($sql);
+			}
 		}
 	}
 

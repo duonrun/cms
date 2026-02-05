@@ -26,7 +26,3 @@ INSERT INTO cms_users (
 	1
 );
 
--- Mark update migrations as already applied (they are PostgreSQL-specific fixes)
-INSERT INTO migrations (migration, applied) VALUES
-	('000000-000002-named-checks.sql', strftime('%Y-%m-%d %H:%M:%S', 'now')),
-	('000000-000003-fix-authtokens-trigger.sql', strftime('%Y-%m-%d %H:%M:%S', 'now'));
