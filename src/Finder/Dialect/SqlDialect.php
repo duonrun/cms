@@ -61,6 +61,15 @@ interface SqlDialect
 	public function like(string $column, string $paramName): string;
 
 	/**
+	 * Generate SQL for case-sensitive NOT LIKE comparison.
+	 *
+	 * @param string $column The column or expression to match
+	 * @param string $paramName The parameter placeholder (e.g., ':p0')
+	 * @return string SQL expression for NOT LIKE
+	 */
+	public function unlike(string $column, string $paramName): string;
+
+	/**
 	 * Generate SQL for case-insensitive LIKE comparison.
 	 *
 	 * @param string $column The column or expression to match
@@ -68,6 +77,15 @@ interface SqlDialect
 	 * @return string SQL expression for case-insensitive LIKE
 	 */
 	public function ilike(string $column, string $paramName): string;
+
+	/**
+	 * Generate SQL for case-insensitive NOT LIKE comparison.
+	 *
+	 * @param string $column The column or expression to match
+	 * @param string $paramName The parameter placeholder (e.g., ':p0')
+	 * @return string SQL expression for case-insensitive NOT LIKE
+	 */
+	public function iunlike(string $column, string $paramName): string;
 
 	/**
 	 * Generate SQL for case-sensitive regex match.

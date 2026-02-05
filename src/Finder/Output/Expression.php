@@ -7,12 +7,19 @@ namespace Duon\Cms\Finder\Output;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Finder\CompiledQuery;
 use Duon\Cms\Finder\CompilesField;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 
 abstract readonly class Expression
 {
 	use CompilesField;
+
+	/**
+	 * Get the SQL dialect for this expression.
+	 * Must be implemented by subclasses that use dialect-specific features.
+	 */
+	abstract protected function getDialect(): ?SqlDialect;
 
 	protected function getOperator(TokenType $type): string
 	{
@@ -24,15 +31,16 @@ abstract readonly class Expression
 			TokenType::GreaterEqual => '>=',
 			TokenType::Less => '<',
 			TokenType::LessEqual => '<=',
-			TokenType::Like => 'LIKE',
-			TokenType::ILike => 'ILIKE',
 			TokenType::Unequal => '!=',
-			TokenType::Unlike => 'NOT LIKE',
-			TokenType::IUnlike => 'NOT ILIKE',
 			TokenType::And => 'AND',
 			TokenType::Or => 'OR',
 			TokenType::In => 'IN',
 			TokenType::NotIn => 'NOT IN',
+			// LIKE operators are handled by dialect in getSqlExpression
+			TokenType::Like => 'LIKE',
+			TokenType::Unlike => 'NOT LIKE',
+			TokenType::ILike => 'ILIKE',
+			TokenType::IUnlike => 'NOT ILIKE',
 			default => throw new ParserException('Invalid expression operator: ' . $type->name),
 		};
 	}
@@ -50,16 +58,45 @@ abstract readonly class Expression
 		array &$params,
 		int &$paramIndex,
 	): string {
+		$dialect = $this->getDialect();
+
 		return match ($token->type) {
-			TokenType::Boolean => strtolower($token->lexeme),
-			TokenType::Field => $this->compileField($token->lexeme, 'n.content'),
+			TokenType::Boolean => $this->formatBoolean($token->lexeme, $dialect),
+			TokenType::Field => $this->compileFieldWithDialect($token->lexeme, $dialect),
 			TokenType::Builtin => $builtins[$token->lexeme],
-			TokenType::Keyword => $this->translateKeyword($token->lexeme),
+			TokenType::Keyword => $this->translateKeyword($token->lexeme, $dialect),
 			TokenType::Null => 'NULL',
 			TokenType::Number => $token->lexeme,
 			TokenType::String => $this->addParam($token->lexeme, $params, $paramIndex),
 			TokenType::List => $this->compileList($token, $params, $paramIndex),
 		};
+	}
+
+	/**
+	 * Compile a field using dialect-specific JSON access.
+	 */
+	protected function compileFieldWithDialect(string $fieldName, ?SqlDialect $dialect): string
+	{
+		if ($dialect === null) {
+			throw new ParserException('Dialect is required for field compilation');
+		}
+
+		return $this->compileField($fieldName, 'n.content', $dialect);
+	}
+
+	/**
+	 * Format a boolean value for the current dialect.
+	 */
+	protected function formatBoolean(string $value, ?SqlDialect $dialect): string
+	{
+		$lowered = strtolower($value);
+
+		// SQLite uses 1/0 for booleans
+		if ($dialect !== null && $dialect->driver() === 'sqlite') {
+			return $lowered === 'true' ? '1' : '0';
+		}
+
+		return $lowered;
 	}
 
 	/**
@@ -93,10 +130,10 @@ abstract readonly class Expression
 		return '(' . implode(', ', $placeholders) . ')';
 	}
 
-	protected function translateKeyword(string $keyword): string
+	protected function translateKeyword(string $keyword, ?SqlDialect $dialect): string
 	{
 		return match ($keyword) {
-			'now' => 'NOW()',
+			'now' => $dialect?->now() ?? 'NOW()',
 		};
 	}
 }

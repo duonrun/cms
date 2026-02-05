@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder\Output;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
 use Duon\Cms\Finder\CompiledQuery;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\ParamCounter;
@@ -21,6 +22,11 @@ final readonly class Comparison extends Expression implements Output
 		private array $builtins,
 		private ?ParamCounter $paramCounter = null,
 	) {}
+
+	protected function getDialect(): ?SqlDialect
+	{
+		return $this->context->dialect();
+	}
 
 	public function get(): CompiledQuery
 	{
@@ -42,7 +48,7 @@ final readonly class Comparison extends Expression implements Output
 				return $this->getSqlExpression();
 			}
 
-			return $this->getJsonPathExpression();
+			return $this->getJsonFieldExpression();
 		}
 
 		if ($this->left->type === TokenType::Builtin) {
@@ -55,7 +61,94 @@ final readonly class Comparison extends Expression implements Output
 		);
 	}
 
-	private function getJsonPathExpression(): CompiledQuery
+	/**
+	 * Generate a dialect-specific JSON field comparison expression.
+	 *
+	 * PostgreSQL uses jsonpath operators (@@ / @?).
+	 * SQLite uses json_extract() with standard SQL operators.
+	 */
+	private function getJsonFieldExpression(): CompiledQuery
+	{
+		$dialect = $this->context->dialect();
+
+		// For SQLite, we always use SQL-style expressions with json_extract()
+		if ($dialect->driver() === 'sqlite') {
+			return $this->getSqliteJsonExpression();
+		}
+
+		// PostgreSQL uses jsonpath expressions
+		return $this->getPostgresJsonPathExpression();
+	}
+
+	/**
+	 * Generate SQLite JSON expression using json_extract().
+	 */
+	private function getSqliteJsonExpression(): CompiledQuery
+	{
+		$dialect = $this->context->dialect();
+		$params = [];
+		$paramIndex = $this->paramCounter?->current() ?? 0;
+
+		$left = $this->getFieldPath();
+		$column = $dialect->jsonExtractText('n.content', $left);
+
+		// Handle regex operators specially
+		if (in_array($this->operator->type, [
+			TokenType::Regex,
+			TokenType::IRegex,
+			TokenType::NotRegex,
+			TokenType::INotRegex,
+		], true)) {
+			$paramName = $this->addParam($this->right->lexeme, $params, $paramIndex);
+			$negate = in_array($this->operator->type, [TokenType::NotRegex, TokenType::INotRegex], true);
+
+			$regexExpr = match ($this->operator->type) {
+				TokenType::Regex, TokenType::NotRegex => $dialect->regex($column, $paramName),
+				TokenType::IRegex, TokenType::INotRegex => $dialect->iregex($column, $paramName),
+			};
+
+			$sql = $negate ? "NOT ({$regexExpr})" : $regexExpr;
+
+			if ($this->paramCounter !== null) {
+				while ($this->paramCounter->current() < $paramIndex) {
+					$this->paramCounter->next();
+				}
+			}
+
+			return new CompiledQuery($sql, $params);
+		}
+
+		// Standard comparison operators
+		$operator = $this->getOperator($this->operator->type);
+
+		// Get the right-hand side value as a parameter
+		$right = match ($this->right->type) {
+			TokenType::String => $this->addParam($this->right->lexeme, $params, $paramIndex),
+			TokenType::Number => $this->right->lexeme,
+			TokenType::Boolean => $this->formatBoolean($this->right->lexeme, $dialect),
+			TokenType::Null => 'NULL',
+			TokenType::List => $this->compileList($this->right, $params, $paramIndex),
+			default => throw new ParserOutputException(
+				$this->right,
+				'The right hand side in a field expression must be a literal',
+			),
+		};
+
+		$sql = "{$column} {$operator} {$right}";
+
+		if ($this->paramCounter !== null) {
+			while ($this->paramCounter->current() < $paramIndex) {
+				$this->paramCounter->next();
+			}
+		}
+
+		return new CompiledQuery($sql, $params);
+	}
+
+	/**
+	 * Generate PostgreSQL jsonpath expression (original behavior).
+	 */
+	private function getPostgresJsonPathExpression(): CompiledQuery
 	{
 		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
 			TokenType::Equal => ['@@', '==', $this->getRight(), false],
@@ -68,7 +161,7 @@ final readonly class Comparison extends Expression implements Output
 			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
 		};
 
-		$left = $this->getField();
+		$left = $this->getFieldPath();
 
 		$sql = sprintf(
 			"%sn.content %s '$.%s %s %s'",
@@ -100,7 +193,10 @@ final readonly class Comparison extends Expression implements Output
 		return sprintf('(@ like_regex %s%s)', $pattern, $case);
 	}
 
-	private function getField(): string
+	/**
+	 * Get the field path, handling locale placeholders.
+	 */
+	private function getFieldPath(): string
 	{
 		$parts = explode('.', $this->left->lexeme);
 
@@ -156,15 +252,26 @@ final readonly class Comparison extends Expression implements Output
 
 	private function getSqlExpression(): CompiledQuery
 	{
+		$dialect = $this->context->dialect();
 		$params = [];
 		$paramIndex = $this->paramCounter?->current() ?? 0;
 
-		$sql = sprintf(
-			'%s %s %s',
-			$this->getOperand($this->left, $this->builtins, $params, $paramIndex),
-			$this->getOperator($this->operator->type),
-			$this->getOperand($this->right, $this->builtins, $params, $paramIndex),
-		);
+		$leftOperand = $this->getOperand($this->left, $this->builtins, $params, $paramIndex);
+		$rightOperand = $this->getOperand($this->right, $this->builtins, $params, $paramIndex);
+
+		// Handle LIKE/ILIKE with dialect
+		$sql = match ($this->operator->type) {
+			TokenType::Like => $dialect->like($leftOperand, $rightOperand),
+			TokenType::Unlike => $dialect->unlike($leftOperand, $rightOperand),
+			TokenType::ILike => $dialect->ilike($leftOperand, $rightOperand),
+			TokenType::IUnlike => $dialect->iunlike($leftOperand, $rightOperand),
+			default => sprintf(
+				'%s %s %s',
+				$leftOperand,
+				$this->getOperator($this->operator->type),
+				$rightOperand,
+			),
+		};
 
 		// Update the shared counter if we have one
 		if ($this->paramCounter !== null) {

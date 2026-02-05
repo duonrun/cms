@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder\Output;
 
+use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
 use Duon\Cms\Finder\CompiledQuery;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\ParamCounter;
@@ -16,9 +18,15 @@ final readonly class NullComparison extends Expression implements Output
 		private Token $left,
 		private Token $operator,
 		private Token $right,
+		private Context $context,
 		private array $builtins,
 		private ?ParamCounter $paramCounter = null,
 	) {}
+
+	protected function getDialect(): ?SqlDialect
+	{
+		return $this->context->dialect();
+	}
 
 	public function get(): CompiledQuery
 	{

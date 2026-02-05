@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Finder\Dialect\PostgresDialect;
 use Duon\Cms\Finder\OrderCompiler;
 use Duon\Cms\Tests\TestCase;
 
@@ -12,30 +13,38 @@ const OB = "\n    ";
 
 final class OrderCompilerTest extends TestCase
 {
+	private PostgresDialect $dialect;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->dialect = new PostgresDialect();
+	}
+
 	public function testFailOnEmptyStatement(): void
 	{
 		$this->throws(ParserException::class, 'Empty order by clause');
 
-		(new OrderCompiler([]))->compile('');
+		(new OrderCompiler($this->dialect, []))->compile('');
 	}
 
 	public function testCompileSimpleStatement(): void
 	{
-		$oc = new OrderCompiler([]);
+		$oc = new OrderCompiler($this->dialect, []);
 
 		$this->assertSame(OB . "n.content->'test'->'value' ASC", $oc->compile('test'));
 	}
 
 	public function testCompileStatementWithBuiltin(): void
 	{
-		$oc = new OrderCompiler(['field' => 'n.field']);
+		$oc = new OrderCompiler($this->dialect, ['field' => 'n.field']);
 
 		$this->assertSame(OB . 'n.field ASC', $oc->compile('field'));
 	}
 
 	public function testCompileStatementWithDottedField(): void
 	{
-		$oc = new OrderCompiler([]);
+		$oc = new OrderCompiler($this->dialect, []);
 
 		$this->assertSame(OB . "n.content->'test'->'lang' ASC", $oc->compile('test.lang'));
 		$this->assertSame(OB . "n.content->'test'->'lang'->'de' ASC", $oc->compile('test.lang.de'));
@@ -43,7 +52,7 @@ final class OrderCompilerTest extends TestCase
 
 	public function testCompileMixedStatement(): void
 	{
-		$oc = new OrderCompiler(['field' => 'n.field']);
+		$oc = new OrderCompiler($this->dialect, ['field' => 'n.field']);
 		$s = OB . "n.field ASC,\n    n.content->'test'->'value' ASC";
 
 		$this->assertSame($s, $oc->compile('field, test'));
@@ -51,21 +60,21 @@ final class OrderCompilerTest extends TestCase
 
 	public function testChangeDirection(): void
 	{
-		$oc = new OrderCompiler([]);
+		$oc = new OrderCompiler($this->dialect, []);
 
 		$this->assertSame(OB . "n.content->'test'->'value' DESC", $oc->compile('test desc'));
 	}
 
 	public function testChangeDirectionWithBuiltin(): void
 	{
-		$oc = new OrderCompiler(['field' => 'n.field']);
+		$oc = new OrderCompiler($this->dialect, ['field' => 'n.field']);
 
 		$this->assertSame(OB . 'n.field DESC', $oc->compile('field DeSc'));
 	}
 
 	public function testCompileLargerMixedStatement(): void
 	{
-		$oc = new OrderCompiler(['field' => 'n.field', 'column' => 'uc.column']);
+		$oc = new OrderCompiler($this->dialect, ['field' => 'n.field', 'column' => 'uc.column']);
 		$s = ",\n    ";
 		$result = OB . "n.field DESC{$s}n.content->'test'->'value' ASC{$s}"
 			. "uc.column ASC{$s}n.content->'another'->'lang'->'en' DESC";
@@ -77,7 +86,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('; DROP TABLE students;');
 	}
@@ -86,7 +95,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('--');
 	}
@@ -95,7 +104,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('/*');
 	}
@@ -104,7 +113,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid field name');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('field.to.');
 	}
@@ -113,7 +122,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('.field.to');
 	}
@@ -122,7 +131,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('field. .to');
 	}
@@ -131,7 +140,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid field name');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('field..to');
 	}
@@ -140,7 +149,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid field name');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('field.to. DESC');
 	}
@@ -149,7 +158,7 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->throws(ParserException::class, 'Invalid order by clause');
 
-		$oc = new OrderCompiler();
+		$oc = new OrderCompiler($this->dialect);
 
 		$oc->compile('field1,,field2');
 	}

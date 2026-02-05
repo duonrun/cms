@@ -204,6 +204,7 @@ final class QueryParser
 				$left,
 				$operator,
 				$right,
+				$this->context,
 				$this->builtins,
 				$this->paramCounter,
 			);

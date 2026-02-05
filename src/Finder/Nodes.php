@@ -66,7 +66,7 @@ final class Nodes implements Iterator
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins);
+		$compiler = new OrderCompiler($this->context->dialect(), $this->builtins);
 		$this->order = $compiler->compile(implode(',', $order));
 
 		return $this;

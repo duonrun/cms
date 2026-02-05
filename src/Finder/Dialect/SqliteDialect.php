@@ -42,11 +42,21 @@ final readonly class SqliteDialect implements SqlDialect
 		return "{$column} LIKE {$paramName}";
 	}
 
+	public function unlike(string $column, string $paramName): string
+	{
+		return "{$column} NOT LIKE {$paramName}";
+	}
+
 	public function ilike(string $column, string $paramName): string
 	{
 		// SQLite LIKE is case-insensitive for ASCII by default
 		// For Unicode, we need COLLATE NOCASE
 		return "{$column} LIKE {$paramName} COLLATE NOCASE";
+	}
+
+	public function iunlike(string $column, string $paramName): string
+	{
+		return "{$column} NOT LIKE {$paramName} COLLATE NOCASE";
 	}
 
 	public function regex(string $column, string $paramName): string

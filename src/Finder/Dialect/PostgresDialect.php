@@ -66,9 +66,19 @@ final readonly class PostgresDialect implements SqlDialect
 		return "{$column} LIKE {$paramName}";
 	}
 
+	public function unlike(string $column, string $paramName): string
+	{
+		return "{$column} NOT LIKE {$paramName}";
+	}
+
 	public function ilike(string $column, string $paramName): string
 	{
 		return "{$column} ILIKE {$paramName}";
+	}
+
+	public function iunlike(string $column, string $paramName): string
+	{
+		return "{$column} NOT ILIKE {$paramName}";
 	}
 
 	public function regex(string $column, string $paramName): string
