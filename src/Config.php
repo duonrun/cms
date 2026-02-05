@@ -31,6 +31,12 @@ class Config implements ConfigInterface
 			'db.migrations' => [],
 			'db.print' => false,
 			'db.options' => [],
+			'db.sqlite.pragmas.foreign_keys' => true,
+			'db.sqlite.pragmas.journal_mode' => 'WAL',
+			'db.sqlite.pragmas.synchronous' => 'NORMAL',
+			'db.sqlite.pragmas.busy_timeout_ms' => 5000,
+			'db.sqlite.pragmas.secure_delete' => false,
+			'db.sqlite.pragmas.trusted_schema' => false,
 			'session.options' => [
 				'cookie_httponly' => true,
 				'cookie_lifetime' => 0,

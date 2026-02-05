@@ -140,7 +140,7 @@ class Cms implements Plugin
 
 			throw $e;
 		}
-		$this->db = new Database($this->connection);
+		$this->db = new CmsDatabase($this->connection, $this->config);
 	}
 
 	private function missingDriverMessage(\RuntimeException $exception): ?string
