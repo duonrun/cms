@@ -41,10 +41,15 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
+		$sql = [
+			'pgsql' => self::root() . '/db/sql/pgsql',
+			'sqlite' => self::root() . '/db/sql/sqlite',
+		];
+
 		// Create shared connection for migration check
 		self::$sharedConnection = new Connection(
 			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
+			$sql,
 			self::root() . '/db/migrations',
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
@@ -110,9 +115,14 @@ class IntegrationTestCase extends TestCase
 
 	public function conn(): Connection
 	{
+		$sql = [
+			'pgsql' => self::root() . '/db/sql/pgsql',
+			'sqlite' => self::root() . '/db/sql/sqlite',
+		];
+
 		return new Connection(
 			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
+			$sql,
 			self::root() . '/db/migrations',
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,

@@ -140,10 +140,15 @@ class TestCase extends BaseTestCase
 	 */
 	public function db(): \Duon\Quma\Database
 	{
+		$sql = [
+			'pgsql' => self::root() . '/db/sql/pgsql',
+			'sqlite' => self::root() . '/db/sql/sqlite',
+		];
+
 		return new \Duon\Quma\Database(
 			new \Duon\Quma\Connection(
 				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				self::root() . '/db/sql',
+				$sql,
 				self::root() . '/db/migrations',
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,

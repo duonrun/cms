@@ -110,10 +110,37 @@ class Cms implements Plugin
 
 		$root = dirname(__DIR__);
 		$sqlConfig = $this->config->get('db.sql', []);
-		$sql = array_merge(
-			[$root . '/db/sql'],
-			$sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [],
-		);
+		$additionalSql = [
+			'pgsql' => [],
+			'sqlite' => [],
+			'all' => [],
+		];
+
+		if (is_string($sqlConfig) && $sqlConfig !== '') {
+			$additionalSql['all'][] = $sqlConfig;
+		} elseif (is_array($sqlConfig)) {
+			if (array_is_list($sqlConfig)) {
+				$additionalSql['all'] = array_merge($additionalSql['all'], $sqlConfig);
+			} else {
+				foreach (['pgsql', 'sqlite', 'all'] as $key) {
+					if (!array_key_exists($key, $sqlConfig)) {
+						continue;
+					}
+
+					$value = $sqlConfig[$key];
+					$additionalSql[$key] = array_merge(
+						$additionalSql[$key],
+						is_array($value) ? $value : [$value],
+					);
+				}
+			}
+		}
+
+		$sql = [
+			'pgsql' => array_merge([$root . '/db/sql/pgsql'], $additionalSql['pgsql']),
+			'sqlite' => array_merge([$root . '/db/sql/sqlite'], $additionalSql['sqlite']),
+			'all' => $additionalSql['all'],
+		];
 		$migrations = $this->config->get('db.migrations', []);
 		$namespacedMigrations = [];
 		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];

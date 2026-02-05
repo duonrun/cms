@@ -33,9 +33,13 @@ final class SqlitePragmaTest extends TestCase
 				'db.sqlite.pragmas.trusted_schema' => false,
 			]);
 			$dsn = 'sqlite:' . $path;
+			$sql = [
+				'pgsql' => self::root() . '/db/sql/pgsql',
+				'sqlite' => self::root() . '/db/sql/sqlite',
+			];
 			$conn = new Connection(
 				$dsn,
-				self::root() . '/db/sql',
+				$sql,
 				self::root() . '/db/migrations',
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,
