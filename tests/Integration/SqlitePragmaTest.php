@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Integration;
 
 use Duon\Cms\CmsDatabase;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Cms\Tests\TestCase;
 use Duon\Quma\Connection;
 use PDO;
@@ -33,20 +34,8 @@ final class SqlitePragmaTest extends TestCase
 				'db.sqlite.pragmas.trusted_schema' => false,
 			]);
 			$dsn = 'sqlite:' . $path;
-			$sql = [
-				'pgsql' => self::root() . '/db/sql/pgsql',
-				'sqlite' => self::root() . '/db/sql/sqlite',
-			];
-			$migrations = [
-				'install' => [
-					'pgsql' => self::root() . '/db/migrations/install/pgsql',
-					'sqlite' => self::root() . '/db/migrations/install/sqlite',
-				],
-				'default' => [
-					'pgsql' => self::root() . '/db/migrations/update/pgsql',
-					'sqlite' => self::root() . '/db/migrations/update/sqlite',
-				],
-			];
+			$sql = TestDbConfig::sqlDirs();
+			$migrations = TestDbConfig::migrationDirs();
 			$conn = new Connection(
 				$dsn,
 				$sql,

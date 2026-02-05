@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests;
 
+use Duon\Cms\CmsDatabase;
 use Duon\Cms\Config;
 use Duon\Cms\Locales;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Core\Factory;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Request;
@@ -140,29 +142,9 @@ class TestCase extends BaseTestCase
 	 */
 	public function db(): \Duon\Quma\Database
 	{
-		$sql = [
-			'pgsql' => self::root() . '/db/sql/pgsql',
-			'sqlite' => self::root() . '/db/sql/sqlite',
-		];
-		$migrations = [
-			'install' => [
-				'pgsql' => self::root() . '/db/migrations/install/pgsql',
-				'sqlite' => self::root() . '/db/migrations/install/sqlite',
-			],
-			'default' => [
-				'pgsql' => self::root() . '/db/migrations/update/pgsql',
-				'sqlite' => self::root() . '/db/migrations/update/sqlite',
-			],
-		];
-
-		return new \Duon\Quma\Database(
-			new \Duon\Quma\Connection(
-				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				$sql,
-				$migrations,
-				fetchMode: PDO::FETCH_ASSOC,
-				print: false,
-			),
+		return new CmsDatabase(
+			TestDbConfig::connection(),
+			$this->config(),
 		);
 	}
 

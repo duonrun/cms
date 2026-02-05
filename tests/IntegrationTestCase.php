@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests;
 
+use Duon\Cms\CmsDatabase;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
@@ -41,31 +43,12 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
-		$sql = [
-			'pgsql' => self::root() . '/db/sql/pgsql',
-			'sqlite' => self::root() . '/db/sql/sqlite',
-		];
-		$migrations = [
-			'install' => [
-				'pgsql' => self::root() . '/db/migrations/install/pgsql',
-				'sqlite' => self::root() . '/db/migrations/install/sqlite',
-			],
-			'default' => [
-				'pgsql' => self::root() . '/db/migrations/update/pgsql',
-				'sqlite' => self::root() . '/db/migrations/update/sqlite',
-			],
-		];
-
-		// Create shared connection for migration check
-		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			$sql,
-			$migrations,
-			fetchMode: PDO::FETCH_ASSOC,
-			print: false,
-		);
-
+		self::$sharedConnection = TestDbConfig::connection();
 		$db = new Database(self::$sharedConnection);
+
+		if (TestDbConfig::driver() !== 'pgsql') {
+			return;
+		}
 
 		// Check if migrations table exists
 		$tableExists = $db->execute(
@@ -125,28 +108,7 @@ class IntegrationTestCase extends TestCase
 
 	public function conn(): Connection
 	{
-		$sql = [
-			'pgsql' => self::root() . '/db/sql/pgsql',
-			'sqlite' => self::root() . '/db/sql/sqlite',
-		];
-		$migrations = [
-			'install' => [
-				'pgsql' => self::root() . '/db/migrations/install/pgsql',
-				'sqlite' => self::root() . '/db/migrations/install/sqlite',
-			],
-			'default' => [
-				'pgsql' => self::root() . '/db/migrations/update/pgsql',
-				'sqlite' => self::root() . '/db/migrations/update/sqlite',
-			],
-		];
-
-		return new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			$sql,
-			$migrations,
-			fetchMode: PDO::FETCH_ASSOC,
-			print: false,
-		);
+		return TestDbConfig::connection();
 	}
 
 	public function db(): Database
@@ -156,7 +118,7 @@ class IntegrationTestCase extends TestCase
 			return $this->testDb;
 		}
 
-		return new Database($this->conn());
+		return new CmsDatabase($this->conn(), $this->config());
 	}
 
 	public function registry(): Registry

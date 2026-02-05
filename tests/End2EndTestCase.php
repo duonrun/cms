@@ -11,6 +11,7 @@ use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Core\App;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Plugin;
@@ -223,16 +224,18 @@ class End2EndTestCase extends IntegrationTestCase
 		$factory = new Laminas();
 		$router = new Router();
 		$registry = $this->registry();
-		$config = $this->config([
-			'db.dsn' => 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			'path.root' => self::root(),
-			'path.public' => self::root() . '/public',
-			'path.uploads' => self::root() . '/public/uploads',
-			'path.api' => '/api',
-			'path.panel' => '/panel',
-			'upload.maxSize' => 10 * 1024 * 1024, // 10MB
-			'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
-		]);
+		$config = $this->config(array_merge(
+			TestDbConfig::cmsConfigOverrides(),
+			[
+				'path.root' => self::root(),
+				'path.public' => self::root() . '/public',
+				'path.uploads' => self::root() . '/public/uploads',
+				'path.api' => '/api',
+				'path.panel' => '/panel',
+				'upload.maxSize' => 10 * 1024 * 1024, // 10MB
+				'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
+			],
+		));
 
 		$app = new App($factory, $router, $registry, $config);
 
