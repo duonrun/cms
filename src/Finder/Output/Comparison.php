@@ -30,14 +30,28 @@ final readonly class Comparison extends Expression implements Output
 
 	public function get(): CompiledQuery
 	{
-		switch ($this->operator->type) {
-			case TokenType::Like:
-			case TokenType::Unlike:
-			case TokenType::ILike:
-			case TokenType::IUnlike:
-			case TokenType::In:
-			case TokenType::NotIn:
-				return $this->getSqlExpression();
+		// Check for LIKE/IN operators first
+		$isLikeOp = in_array($this->operator->type, [
+			TokenType::Like,
+			TokenType::Unlike,
+			TokenType::ILike,
+			TokenType::IUnlike,
+		], true);
+		$isInOp = in_array($this->operator->type, [
+			TokenType::In,
+			TokenType::NotIn,
+		], true);
+
+		// For LIKE with wildcard locale fields (title.*), use JSON expression
+		if ($isLikeOp && $this->left->type === TokenType::Field) {
+			if (str_ends_with($this->left->lexeme, '.*')) {
+				return $this->getJsonFieldExpression();
+			}
+		}
+
+		// Other LIKE/IN operators use SQL expression
+		if ($isLikeOp || $isInOp) {
+			return $this->getSqlExpression();
 		}
 
 		if ($this->left->type === TokenType::Field) {
@@ -190,26 +204,42 @@ final readonly class Comparison extends Expression implements Output
 
 	/**
 	 * Generate PostgreSQL jsonpath expression (original behavior).
+	 *
+	 * Note: Uses jsonb_path_match() and jsonb_path_exists() functions instead
+	 * of @@ and @? operators to avoid PDO interpreting ? as a positional parameter.
 	 */
 	private function getPostgresJsonPathExpression(): CompiledQuery
 	{
-		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
-			TokenType::Equal => ['@@', '==', $this->getRight(), false],
-			TokenType::Regex => ['@?', '?', $this->getRegex(false), false],
-			TokenType::IRegex => ['@?', '?', $this->getRegex(true), false],
-			TokenType::NotRegex => ['@?', '?', $this->getRegex(false), true],
-			TokenType::INotRegex => ['@?', '?', $this->getRegex(true), true],
-			TokenType::In => ['@@', 'in', $this->getRight(), false],
-			TokenType::NotIn => ['@@', 'nin', $this->getRight(), false],
-			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
-		};
-
 		$left = $this->getFieldPath();
 
+		// Handle wildcard locale with LIKE operators
+		if (str_ends_with($left, '.*')) {
+			$isLikeOp = in_array($this->operator->type, [
+				TokenType::Like,
+				TokenType::Unlike,
+				TokenType::ILike,
+				TokenType::IUnlike,
+			], true);
+			if ($isLikeOp) {
+				return $this->getPostgresWildcardLikeExpression($left);
+			}
+		}
+
+		[$func, $jsonOperator, $right, $negate] = match ($this->operator->type) {
+			TokenType::Equal => ['jsonb_path_match', '==', $this->getRight(), false],
+			TokenType::Regex => ['jsonb_path_exists', '?', $this->getRegex(false), false],
+			TokenType::IRegex => ['jsonb_path_exists', '?', $this->getRegex(true), false],
+			TokenType::NotRegex => ['jsonb_path_exists', '?', $this->getRegex(false), true],
+			TokenType::INotRegex => ['jsonb_path_exists', '?', $this->getRegex(true), true],
+			TokenType::In => ['jsonb_path_match', 'in', $this->getRight(), false],
+			TokenType::NotIn => ['jsonb_path_match', 'nin', $this->getRight(), false],
+			default => ['jsonb_path_match', $this->operator->lexeme, $this->getRight(), false],
+		};
+
 		$sql = sprintf(
-			"%sn.content %s '$.%s %s %s'",
+			"%s%s(n.content, '$.%s %s %s')",
 			$negate ? 'NOT ' : '',
-			$operator,
+			$func,
 			$left,
 			$jsonOperator,
 			$right,
@@ -219,6 +249,43 @@ final readonly class Comparison extends Expression implements Output
 		// are embedded in the jsonpath string. Escaping is handled by
 		// quoteJsonPathString() for strings and getRegex() for patterns.
 		return CompiledQuery::sql($sql);
+	}
+
+	/**
+	 * Generate PostgreSQL wildcard locale LIKE expression using jsonb_each_text.
+	 */
+	private function getPostgresWildcardLikeExpression(string $fieldPath): CompiledQuery
+	{
+		$params = [];
+		$paramIndex = $this->paramCounter?->current() ?? 0;
+
+		// Remove the trailing .* to get the base path (e.g., title.value)
+		$basePath = substr($fieldPath, 0, -2);
+
+		// Get the LIKE operator string
+		$operator = $this->getOperator($this->operator->type);
+
+		// Add parameter for the pattern
+		$paramName = $this->addParam($this->right->lexeme, $params, $paramIndex);
+
+		// Convert dot path to PostgreSQL arrow notation
+		// title.value → 'title'->'value'
+		$parts = explode('.', $basePath);
+		$jsonAccess = 'n.content';
+		foreach ($parts as $part) {
+			$jsonAccess .= "->'{$part}'";
+		}
+
+		// Use jsonb_each_text to iterate over locale values
+		$sql = "EXISTS (SELECT 1 FROM jsonb_each_text({$jsonAccess}) WHERE value {$operator} {$paramName})";
+
+		if ($this->paramCounter !== null) {
+			while ($this->paramCounter->current() < $paramIndex) {
+				$this->paramCounter->next();
+			}
+		}
+
+		return new CompiledQuery($sql, $params);
 	}
 
 	private function getRegex(bool $ignoreCase): string
@@ -255,7 +322,8 @@ final readonly class Comparison extends Expression implements Output
 		return match ($segments[1]) {
 			'*' => $segments[0] . '.value.*',
 			'?' => $segments[0] . '.value.' . $this->getCurrentLocale(),
-			default => implode('.', $segments),
+			// For explicit locale codes like 'en', 'de', etc., insert .value
+			default => $segments[0] . '.value.' . $segments[1],
 		};
 	}
 

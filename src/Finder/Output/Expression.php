@@ -74,11 +74,21 @@ abstract readonly class Expression
 
 	/**
 	 * Compile a field using dialect-specific JSON access.
+	 *
+	 * Transforms 2-part field names like 'title.en' to 'title.value.en'
+	 * to account for the field structure {type: ..., value: ...}.
 	 */
 	protected function compileFieldWithDialect(string $fieldName, ?SqlDialect $dialect): string
 	{
 		if ($dialect === null) {
 			throw new ParserException('Dialect is required for field compilation');
+		}
+
+		// Transform 2-part field names to insert .value for locale access
+		// e.g., 'title.en' → 'title.value.en'
+		$parts = explode('.', $fieldName);
+		if (count($parts) === 2) {
+			$fieldName = $parts[0] . '.value.' . $parts[1];
 		}
 
 		return $this->compileField($fieldName, 'n.content', $dialect);

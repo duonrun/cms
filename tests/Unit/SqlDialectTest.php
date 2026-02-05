@@ -174,7 +174,8 @@ final class SqlDialectTest extends TestCase
 	{
 		$dialect = new PostgresDialect();
 
-		$this->assertEquals("n.content ? 'title'", $dialect->jsonExists('n.content', 'title'));
+		// Uses jsonb_exists() function instead of ? operator to avoid PDO parameter conflict
+		$this->assertEquals("jsonb_exists(n.content, 'title')", $dialect->jsonExists('n.content', 'title'));
 		$this->assertEquals(
 			"n.content->'field'->'value' IS NOT NULL",
 			$dialect->jsonExists('n.content', 'field.value'),

@@ -93,10 +93,10 @@ final readonly class PostgresDialect implements SqlDialect
 
 	public function jsonExists(string $column, string $path): string
 	{
-		// PostgreSQL uses ? operator for top-level key existence
-		// For nested paths, use jsonb_path_exists or check if extract is not null
+		// PostgreSQL: use jsonb_exists() function instead of ? operator
+		// The ? operator conflicts with PDO's positional parameter placeholder
 		if (!str_contains($path, '.')) {
-			return "{$column} ? '{$path}'";
+			return "jsonb_exists({$column}, '{$path}')";
 		}
 
 		// For nested paths, check if extraction is not null
@@ -109,8 +109,14 @@ final readonly class PostgresDialect implements SqlDialect
 		string $operator,
 		string $paramOrValue,
 	): string {
-		// PostgreSQL uses jsonpath with wildcard and @@ operator
-		// Maps SQL operators to jsonpath operators
+		// Check if this is a LIKE/ILIKE operator
+		$upperOp = strtoupper($operator);
+		if (in_array($upperOp, ['LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE'], true)) {
+			// Use jsonb_each_text for LIKE patterns since jsonpath doesn't support them
+			return "EXISTS (SELECT 1 FROM jsonb_each_text({$column}->'{$basePath}'->>'value'::jsonb) WHERE value {$operator} {$paramOrValue})";
+		}
+
+		// For comparison operators, use jsonpath with @@ operator
 		$jsonOperator = match ($operator) {
 			'=' => '==',
 			'!=' => '!=',

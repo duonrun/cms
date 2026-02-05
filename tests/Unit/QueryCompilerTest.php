@@ -30,7 +30,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
 		$result = $compiler->compile('field=1 & builtin=2');
-		$this->assertSame("n.content @@ '$.field.value == 1' AND builtin = 2", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '$.field.value == 1') AND builtin = 2", $result->sql);
 		$this->assertSame([], $result->params);
 	}
 
@@ -110,7 +110,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
 		$result = $compiler->compile('field=1 | builtin=2');
-		$this->assertSame("n.content @@ '$.field.value == 1' OR builtin = 2", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '$.field.value == 1') OR builtin = 2", $result->sql);
 		$this->assertSame([], $result->params);
 	}
 
@@ -120,7 +120,7 @@ final class QueryCompilerTest extends TestCase
 
 		$result = $compiler->compile('field=1 & (builtin=2|builtin=3)');
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (n.builtin = 2 OR n.builtin = 3)",
+			"jsonb_path_match(n.content, '$.field.value == 1') AND (n.builtin = 2 OR n.builtin = 3)",
 			$result->sql,
 		);
 		$this->assertSame([], $result->params);
@@ -132,7 +132,7 @@ final class QueryCompilerTest extends TestCase
 
 		$result = $compiler->compile("field=1 & (another='test'|(builtin>2 & builtin<5))");
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (t.another = :p0 OR (n.builtin > 2 AND n.builtin < 5))",
+			"jsonb_path_match(n.content, '$.field.value == 1') AND (t.another = :p0 OR (n.builtin > 2 AND n.builtin < 5))",
 			$result->sql,
 		);
 		$this->assertSame(['p0' => 'test'], $result->params);
@@ -144,7 +144,7 @@ final class QueryCompilerTest extends TestCase
 
 		$result = $compiler->compile("(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))");
 		$this->assertSame(
-			"(n.builtin = 1 OR n.content @@ '$.field.value == 1')"
+			"(n.builtin = 1 OR jsonb_path_match(n.content, '$.field.value == 1'))"
 				. ' AND '
 				. "(t.another = :p0 OR (n.builtin > 2 AND n.builtin < 5))",
 			$result->sql,
@@ -214,24 +214,24 @@ final class QueryCompilerTest extends TestCase
 	{
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
-		// Case-sensitive regex
+		// Case-sensitive regex - uses jsonb_path_exists to avoid PDO ? conflict
 		$result = $compiler->compile("field ~ 'pattern'");
-		$this->assertSame("n.content @? '\$.field.value ? (@ like_regex \"pattern\")'", $result->sql);
+		$this->assertSame("jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"pattern\")')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Case-insensitive regex
 		$result = $compiler->compile("field ~* 'pattern'");
-		$this->assertSame("n.content @? '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")'", $result->sql);
+		$this->assertSame("jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Negated regex
 		$result = $compiler->compile("field !~ 'pattern'");
-		$this->assertSame("NOT n.content @? '\$.field.value ? (@ like_regex \"pattern\")'", $result->sql);
+		$this->assertSame("NOT jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"pattern\")')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Negated case-insensitive regex
 		$result = $compiler->compile("field !~* 'pattern'");
-		$this->assertSame("NOT n.content @? '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")'", $result->sql);
+		$this->assertSame("NOT jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")')", $result->sql);
 		$this->assertSame([], $result->params);
 	}
 
@@ -283,14 +283,14 @@ final class QueryCompilerTest extends TestCase
 	{
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
-		// Simple field existence check
+		// Simple field existence check - uses jsonb_exists() to avoid PDO ? conflict
 		$result = $compiler->compile('title');
-		$this->assertSame("n.content ? 'title'", $result->sql);
+		$this->assertSame("jsonb_exists(n.content, 'title')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Combined with other conditions
 		$result = $compiler->compile('title & builtin = 1');
-		$this->assertSame("n.content ? 'title' AND builtin = 1", $result->sql);
+		$this->assertSame("jsonb_exists(n.content, 'title') AND builtin = 1", $result->sql);
 	}
 
 	public function testExistsQuerySqlite(): void

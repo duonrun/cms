@@ -34,8 +34,9 @@ final readonly class Exists extends Expression implements Output
 		$dialect = $this->getDialect();
 
 		// Default to PostgreSQL-style if no dialect (for backwards compatibility)
+		// Use jsonb_exists() instead of ? operator to avoid PDO parameter conflict
 		if ($dialect === null) {
-			return CompiledQuery::sql("n.content ? '{$this->token->lexeme}'");
+			return CompiledQuery::sql("jsonb_exists(n.content, '{$this->token->lexeme}')");
 		}
 
 		// Get the field path - typically just the field name for existence check

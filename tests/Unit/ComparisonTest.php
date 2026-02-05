@@ -31,17 +31,17 @@ final class ComparisonTest extends TestCase
 		// JSON path expressions don't use PDO params; values are escaped in the path string
 		// Input: " \"\" ' " -> space, two escaped quotes, space, apostrophe, space
 		$result = $compiler->compile('field = " \"\" \' "');
-		$this->assertSame("n.content @@ '\$.field.value == \" \\\"\\\" ' \"'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value == \" \\\"\\\" ' \"')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Input: '"""' -> Three double quotes
 		$result = $compiler->compile("field = '\"\"\"'");
-		$this->assertSame('n.content @@ \'$.field.value == "\\"\\"\\""\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "\\"\\"\\""\')', $result->sql);
 		$this->assertSame([], $result->params);
 
 		// Input: 'test\' " \" ' -> test, apostrophe, space, quote, space, backslash-quote, space
 		$result = $compiler->compile("field = 'test\\' \" \\\" '");
-		$this->assertSame('n.content @@ \'$.field.value == "test\' \\" \\\\\\" "\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "test\' \\" \\\\\\" "\')', $result->sql);
 		$this->assertSame([], $result->params);
 	}
 
@@ -50,17 +50,17 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$result = $compiler->compile('field = 13');
-		$this->assertSame("n.content @@ '$.field.value == 13'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value == 13')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		$result = $compiler->compile('field.value.de = 13');
-		$this->assertSame("n.content @@ '$.field.value.de == 13'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value.de == 13')", $result->sql);
 
 		$result = $compiler->compile('field = 13.73');
-		$this->assertSame("n.content @@ '$.field.value == 13.73'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value == 13.73')", $result->sql);
 
 		$result = $compiler->compile('field.value.de = 13.73');
-		$this->assertSame("n.content @@ '$.field.value.de == 13.73'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value.de == 13.73')", $result->sql);
 	}
 
 	public function testStringOperand(): void
@@ -68,17 +68,17 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$result = $compiler->compile('field = "string"');
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "string"\')', $result->sql);
 		$this->assertSame([], $result->params);
 
 		$result = $compiler->compile("field = 'string'");
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "string"\')', $result->sql);
 
 		$result = $compiler->compile('field = /string/');
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "string"\')', $result->sql);
 
 		$result = $compiler->compile("field.value.de = 'string'");
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value.de == "string"\')', $result->sql);
 	}
 
 	public function testBooleanOperand(): void
@@ -86,14 +86,14 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$result = $compiler->compile('field = false');
-		$this->assertSame("n.content @@ '$.field.value == false'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value == false')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		$result = $compiler->compile('field = true');
-		$this->assertSame("n.content @@ '$.field.value == true'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value == true')", $result->sql);
 
 		$result = $compiler->compile('field.value.de = false');
-		$this->assertSame("n.content @@ '$.field.value.de == false'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value.de == false')", $result->sql);
 	}
 
 	public function testOperatorRegexOperandPattern(): void
@@ -101,17 +101,17 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$result = $compiler->compile('field ~ /^test$/');
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $result->sql);
+		$this->assertSame("jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"^test\$\")')", $result->sql);
 		$this->assertSame([], $result->params);
 
 		$result = $compiler->compile('field ~* /^test$/');
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $result->sql);
+		$this->assertSame("jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"^test\$\" flag \"i\")')", $result->sql);
 
 		$result = $compiler->compile('field !~ /^test$/');
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $result->sql);
+		$this->assertSame("NOT jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"^test\$\")')", $result->sql);
 
 		$result = $compiler->compile('field !~* /^test$/');
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $result->sql);
+		$this->assertSame("NOT jsonb_path_exists(n.content, '\$.field.value ? (@ like_regex \"^test\$\" flag \"i\")')", $result->sql);
 	}
 
 	public function testOperatorLikeAndIlike(): void
@@ -178,11 +178,11 @@ final class ComparisonTest extends TestCase
 
 		// JSON path expressions (field comparisons) don't use params
 		$result = $compiler->compile('field="string"');
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value == "string"\')', $result->sql);
 		$this->assertSame([], $result->params);
 
 		$result = $compiler->compile('field>23');
-		$this->assertSame("n.content @@ '$.field.value > 23'", $result->sql);
+		$this->assertSame("jsonb_path_match(n.content, '\$.field.value > 23')", $result->sql);
 
 		// Field-to-field and field-to-builtin comparisons
 		$result = $compiler->compile('builtin>field');
@@ -201,7 +201,7 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$result = $compiler->compile('field.* = "test"');
-		$this->assertSame('n.content @@ \'$.field.value.* == "test"\'', $result->sql);
+		$this->assertSame('jsonb_path_match(n.content, \'$.field.value.* == "test"\')', $result->sql);
 		$this->assertSame([], $result->params);
 	}
 
