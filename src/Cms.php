@@ -126,11 +126,20 @@ class Cms implements Plugin
 		);
 
 		$migrations = $this->config->get('db.migrations', []);
+		$userMigrations = $migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [];
+
+		// Driver-aware migrations: pgsql and sqlite migrations are separate
 		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
+		$namespacedMigrations['install'] = [[
+			'pgsql' => $root . '/db/migrations/install/pgsql',
+			'sqlite' => $root . '/db/migrations/install/sqlite',
+		]];
 		$namespacedMigrations['default'] = array_merge(
-			$migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [],
-			[$root . '/db/migrations/update'],
+			$userMigrations,
+			[[
+				'pgsql' => $root . '/db/migrations/update/pgsql',
+				'sqlite' => $root . '/db/migrations/update/sqlite',
+			]],
 		);
 
 		$this->connection = new Connection(

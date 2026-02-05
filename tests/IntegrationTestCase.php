@@ -48,7 +48,16 @@ class IntegrationTestCase extends TestCase
 				'pgsql' => self::root() . '/db/sql/pgsql',
 				'sqlite' => self::root() . '/db/sql/sqlite',
 			],
-			self::root() . '/db/migrations',
+			[
+				'install' => [[
+					'pgsql' => self::root() . '/db/migrations/install/pgsql',
+					'sqlite' => self::root() . '/db/migrations/install/sqlite',
+				]],
+				'default' => [[
+					'pgsql' => self::root() . '/db/migrations/update/pgsql',
+					'sqlite' => self::root() . '/db/migrations/update/sqlite',
+				]],
+			],
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
 		);
@@ -119,7 +128,16 @@ class IntegrationTestCase extends TestCase
 				'pgsql' => self::root() . '/db/sql/pgsql',
 				'sqlite' => self::root() . '/db/sql/sqlite',
 			],
-			self::root() . '/db/migrations',
+			[
+				'install' => [[
+					'pgsql' => self::root() . '/db/migrations/install/pgsql',
+					'sqlite' => self::root() . '/db/migrations/install/sqlite',
+				]],
+				'default' => [[
+					'pgsql' => self::root() . '/db/migrations/update/pgsql',
+					'sqlite' => self::root() . '/db/migrations/update/sqlite',
+				]],
+			],
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
 		);

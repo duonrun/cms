@@ -17,7 +17,16 @@ $connection = new Connection(
 		'pgsql' => __DIR__ . '/db/sql/pgsql',
 		'sqlite' => __DIR__ . '/db/sql/sqlite',
 	],
-	__DIR__ . '/db/migrations/install',
+	[
+		'install' => [[
+			'pgsql' => __DIR__ . '/db/migrations/install/pgsql',
+			'sqlite' => __DIR__ . '/db/migrations/install/sqlite',
+		]],
+		'default' => [[
+			'pgsql' => __DIR__ . '/db/migrations/update/pgsql',
+			'sqlite' => __DIR__ . '/db/migrations/update/sqlite',
+		]],
+	],
 	fetchMode: PDO::FETCH_ASSOC,
 	print: false,
 );
