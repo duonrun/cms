@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenGroup;
 use Duon\Cms\Finder\Input\TokenType;
@@ -35,6 +36,7 @@ final class QueryParser
 	 */
 	public function __construct(
 		private readonly Context $context,
+		private readonly SqlDialect $dialect,
 		private readonly array $builtins = [],
 	) {}
 
@@ -203,7 +205,7 @@ final class QueryParser
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
-			return new UrlPath($left, $operator, $right);
+			return new UrlPath($left, $operator, $right, $this->dialect);
 		}
 
 		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
@@ -222,7 +224,7 @@ final class QueryParser
 		$this->readyForCondition = false;
 		$this->pos++;
 
-		return new Exists($token);
+		return new Exists($token, $this->dialect);
 	}
 
 	/**
