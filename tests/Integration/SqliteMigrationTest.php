@@ -160,6 +160,68 @@ final class SqliteMigrationTest extends TestCase
 		}
 	}
 
+	public function testSqliteIsInitializedReturnsFalseBeforeMigrations(): void
+	{
+		if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+			$this->markTestSkipped('pdo_sqlite is not available');
+		}
+
+		$path = tempnam(sys_get_temp_dir(), 'duon-cms-sqlite-');
+
+		if ($path === false) {
+			$this->markTestSkipped('Unable to create temporary sqlite file');
+		}
+
+		try {
+			$pdo = new PDO('sqlite:' . $path, null, null, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			]);
+
+			// Run isInitialized query before migrations
+			$sql = file_get_contents(self::root() . '/db/sql/sqlite/sys/isInitialized.sql');
+			$this->assertNotFalse($sql);
+
+			$result = $pdo->query((string) $sql)->fetch(PDO::FETCH_ASSOC);
+			$this->assertSame(0, (int) $result['value']);
+		} finally {
+			$this->cleanupSqlitePath($path);
+		}
+	}
+
+	public function testSqliteIsInitializedReturnsTrueAfterMigrations(): void
+	{
+		if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+			$this->markTestSkipped('pdo_sqlite is not available');
+		}
+
+		$path = tempnam(sys_get_temp_dir(), 'duon-cms-sqlite-');
+
+		if ($path === false) {
+			$this->markTestSkipped('Unable to create temporary sqlite file');
+		}
+
+		try {
+			$pdo = new PDO('sqlite:' . $path, null, null, [
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			]);
+			$pdo->exec('PRAGMA foreign_keys = ON');
+
+			// Apply DDL migration
+			$ddlSql = file_get_contents(self::root() . '/db/migrations/install/sqlite/000000-000000-init-ddl.sql');
+			$this->assertNotFalse($ddlSql);
+			$pdo->exec((string) $ddlSql);
+
+			// Run isInitialized query after migrations
+			$sql = file_get_contents(self::root() . '/db/sql/sqlite/sys/isInitialized.sql');
+			$this->assertNotFalse($sql);
+
+			$result = $pdo->query((string) $sql)->fetch(PDO::FETCH_ASSOC);
+			$this->assertSame(1, (int) $result['value']);
+		} finally {
+			$this->cleanupSqlitePath($path);
+		}
+	}
+
 	private function cleanupSqlitePath(string $path): void
 	{
 		$walPath = $path . '-wal';
