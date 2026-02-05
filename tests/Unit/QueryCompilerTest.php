@@ -209,4 +209,73 @@ final class QueryCompilerTest extends TestCase
 		// The malicious value is safely in params, not in SQL
 		$this->assertStringNotContainsString('DROP TABLE', $result->sql);
 	}
+
+	public function testRegexQueryPostgres(): void
+	{
+		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+
+		// Case-sensitive regex
+		$result = $compiler->compile("field ~ 'pattern'");
+		$this->assertSame("n.content @? '\$.field.value ? (@ like_regex \"pattern\")'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		// Case-insensitive regex
+		$result = $compiler->compile("field ~* 'pattern'");
+		$this->assertSame("n.content @? '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		// Negated regex
+		$result = $compiler->compile("field !~ 'pattern'");
+		$this->assertSame("NOT n.content @? '\$.field.value ? (@ like_regex \"pattern\")'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		// Negated case-insensitive regex
+		$result = $compiler->compile("field !~* 'pattern'");
+		$this->assertSame("NOT n.content @? '\$.field.value ? (@ like_regex \"pattern\" flag \"i\")'", $result->sql);
+		$this->assertSame([], $result->params);
+	}
+
+	public function testRegexQuerySqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, ['builtin' => 'builtin']);
+
+		// Case-sensitive regex
+		$result = $compiler->compile("field ~ 'pattern'");
+		$this->assertSame(
+			"json_extract(n.content, '\$.field.value') REGEXP :p0",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'pattern'], $result->params);
+
+		// Case-insensitive regex
+		$result = $compiler->compile("field ~* 'pattern'");
+		$this->assertSame(
+			"regexp_i(json_extract(n.content, '\$.field.value'), :p0)",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'pattern'], $result->params);
+
+		// Negated regex
+		$result = $compiler->compile("field !~ 'pattern'");
+		$this->assertSame(
+			"NOT (json_extract(n.content, '\$.field.value') REGEXP :p0)",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'pattern'], $result->params);
+
+		// Negated case-insensitive regex
+		$result = $compiler->compile("field !~* 'pattern'");
+		$this->assertSame(
+			"NOT (regexp_i(json_extract(n.content, '\$.field.value'), :p0))",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'pattern'], $result->params);
+	}
 }

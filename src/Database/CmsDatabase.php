@@ -7,6 +7,7 @@ namespace Duon\Cms\Database;
 use Duon\Cms\Config;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
+use PDO;
 
 /**
  * CMS Database wrapper that applies driver-specific initialization.
@@ -83,6 +84,47 @@ class CmsDatabase extends Database
 			// Use exec for PRAGMAs as they don't need prepared statements
 			$pdo->exec("PRAGMA {$pragma} = {$value}");
 		}
+
+		$this->registerSqliteFunctions($pdo);
+	}
+
+	/**
+	 * Register custom SQLite functions for regex support.
+	 *
+	 * Uses PDO::sqliteCreateFunction() which is deprecated in PHP 8.5+
+	 * but still works. The Quma library creates PDO instances with `new PDO()`
+	 * which doesn't return the typed Pdo\Sqlite subclass, so we must use
+	 * the deprecated method. Suppressed via @ operator.
+	 */
+	private function registerSqliteFunctions(PDO $pdo): void
+	{
+		// Case-sensitive regex: column REGEXP pattern
+		// SQLite's REGEXP operator calls a user-defined function with (pattern, value) order
+		@$pdo->sqliteCreateFunction(
+			'REGEXP',
+			static function (string $pattern, ?string $value): int {
+				if ($value === null) {
+					return 0;
+				}
+
+				return preg_match('/' . $pattern . '/', $value) === 1 ? 1 : 0;
+			},
+			2,
+		);
+
+		// Case-insensitive regex: regexp_i(value, pattern)
+		// Custom function with (value, pattern) order for consistency with dialect output
+		@$pdo->sqliteCreateFunction(
+			'regexp_i',
+			static function (?string $value, string $pattern): int {
+				if ($value === null) {
+					return 0;
+				}
+
+				return preg_match('/' . $pattern . '/i', $value) === 1 ? 1 : 0;
+			},
+			2,
+		);
 	}
 
 	/**

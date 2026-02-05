@@ -136,4 +136,79 @@ final class CmsDatabaseTest extends TestCase
 		$pragmas = $db->getSqlitePragmas();
 		$this->assertNotEmpty($pragmas);
 	}
+
+	public function testSqliteRegexpFunctionRegistered(): void
+	{
+		$conn = new Connection(
+			'sqlite:' . $this->tempDbPath,
+			self::root() . '/db/sql',
+			fetchMode: PDO::FETCH_ASSOC,
+		);
+
+		$db = new CmsDatabase($conn);
+		$db->connect();
+
+		$pdo = $db->getConn();
+
+		// Test case-sensitive REGEXP
+		$result = $pdo->query("SELECT 'Hello World' REGEXP 'World' AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(1, $result['matches']);
+
+		$result = $pdo->query("SELECT 'Hello World' REGEXP 'world' AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(0, $result['matches']); // Case-sensitive, no match
+
+		$result = $pdo->query("SELECT 'Hello World' REGEXP '^Hello' AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(1, $result['matches']);
+
+		$result = $pdo->query("SELECT 'Hello World' REGEXP '^World' AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(0, $result['matches']); // World is not at start
+	}
+
+	public function testSqliteRegexpIFunctionRegistered(): void
+	{
+		$conn = new Connection(
+			'sqlite:' . $this->tempDbPath,
+			self::root() . '/db/sql',
+			fetchMode: PDO::FETCH_ASSOC,
+		);
+
+		$db = new CmsDatabase($conn);
+		$db->connect();
+
+		$pdo = $db->getConn();
+
+		// Test case-insensitive regexp_i
+		$result = $pdo->query("SELECT regexp_i('Hello World', 'world') AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(1, $result['matches']); // Case-insensitive, should match
+
+		$result = $pdo->query("SELECT regexp_i('Hello World', 'WORLD') AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(1, $result['matches']);
+
+		$result = $pdo->query("SELECT regexp_i('Hello World', '^hello') AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(1, $result['matches']);
+
+		$result = $pdo->query("SELECT regexp_i('Hello World', 'nomatch') AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(0, $result['matches']);
+	}
+
+	public function testSqliteRegexpWithNullValue(): void
+	{
+		$conn = new Connection(
+			'sqlite:' . $this->tempDbPath,
+			self::root() . '/db/sql',
+			fetchMode: PDO::FETCH_ASSOC,
+		);
+
+		$db = new CmsDatabase($conn);
+		$db->connect();
+
+		$pdo = $db->getConn();
+
+		// Null values should return 0 (no match)
+		$result = $pdo->query("SELECT NULL REGEXP 'test' AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(0, $result['matches']);
+
+		$result = $pdo->query("SELECT regexp_i(NULL, 'test') AS matches")->fetch(PDO::FETCH_ASSOC);
+		$this->assertEquals(0, $result['matches']);
+	}
 }
