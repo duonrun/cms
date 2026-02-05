@@ -1,0 +1,82 @@
+SELECT
+	-- n.node,
+	n.uid,
+	n.published,
+	n.hidden,
+	n.locked,
+	n.created,
+	n.changed,
+	n.deleted,
+	n.content,
+	t.handle,
+	t.kind,
+	uc.uid AS creator_uid,
+	uc.email AS creator_email,
+	uc.username AS creator_username,
+	uc.data AS creator_data,
+	ue.uid AS editor_uid,
+	ue.email AS editor_email,
+	ue.username AS editor_username,
+	ue.data AS editor_data,
+	coalesce(
+		(SELECT json_group_object(sup.locale, sup.path)
+		 FROM cms_urlpaths sup
+		 WHERE sup.node = n.node AND sup.inactive IS NULL),
+		'{}') AS paths
+FROM
+	cms_nodes n
+	INNER JOIN cms_types t ON n.type = t.type
+	INNER JOIN cms_users uc ON
+		uc.usr = n.creator
+	INNER JOIN cms_users ue ON
+		ue.usr = n.editor
+	LEFT JOIN cms_urlpaths up ON
+		up.node = n.node
+WHERE
+	1 = 1
+<?php if (isset($kind)) : ?>
+	AND t.kind = :kind
+<?php endif ?>
+<?php if (isset($uid)) : ?>
+	AND n.uid = :uid
+<?php endif ?>
+<?php if (isset($deleted)) : ?>
+<?php if ($deleted) : ?>
+	AND n.deleted IS NOT NULL
+<?php else: ?>
+	AND n.deleted IS NULL
+<?php endif ?>
+<?php endif ?>
+<?php if (isset($published)) : ?>
+	AND n.published = :published
+<?php endif ?>
+<?php if (isset($hidden)) : ?>
+	AND n.hidden = :hidden
+<?php endif ?>
+<?php if (isset($condition) && !empty(trim($condition))) : ?>
+	AND (<?= $condition ?>)
+<?php endif ?>
+<?php if (isset($path)) : ?>
+	AND up.path = :path
+	AND up.inactive IS NULL
+<?php endif ?>
+
+GROUP BY
+	n.node,
+	uc.uid,
+	uc.email,
+	uc.username,
+	uc.data,
+	ue.uid,
+	ue.email,
+	ue.username,
+	ue.data,
+	t.handle,
+	t.kind
+<?php if (isset($order)) : ?>
+ORDER BY <?= $order ?>
+<?php endif ?>
+<?php if (isset($limit)) : ?>
+
+LIMIT :limit
+<?php endif ?>;
