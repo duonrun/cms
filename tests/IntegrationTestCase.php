@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests;
 
 use Duon\Cms\Context;
+use Duon\Cms\Database\CmsDatabase;
 use Duon\Cms\Finder\Finder;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
-use PDO;
 use RuntimeException;
 
 /**
@@ -41,29 +42,49 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
+		$config = self::testDbConfig();
+
 		// Create shared connection for migration check
 		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			[
-				'pgsql' => self::root() . '/db/sql/pgsql',
-				'sqlite' => self::root() . '/db/sql/sqlite',
-			],
-			[
-				'install' => [[
-					'pgsql' => self::root() . '/db/migrations/install/pgsql',
-					'sqlite' => self::root() . '/db/migrations/install/sqlite',
-				]],
-				'default' => [[
-					'pgsql' => self::root() . '/db/migrations/update/pgsql',
-					'sqlite' => self::root() . '/db/migrations/update/sqlite',
-				]],
-			],
-			fetchMode: PDO::FETCH_ASSOC,
+			$config->dsn(),
+			$config->sqlDirs(self::root()),
+			$config->migrationDirs(self::root()),
+			fetchMode: $config->fetchMode(),
 			print: false,
 		);
 
-		$db = new Database(self::$sharedConnection);
+		$db = new CmsDatabase(self::$sharedConnection);
+		$db->connect();
 
+		if ($config->isSqlite()) {
+			self::initializeSqliteDatabase($db);
+		} else {
+			self::initializePostgresDatabase($db);
+		}
+	}
+
+	/**
+	 * Initialize SQLite test database by applying migrations if needed.
+	 */
+	protected static function initializeSqliteDatabase(Database $db): void
+	{
+		// Check if the cms_nodes table exists (indicates migrations have been run)
+		$result = $db->execute(
+			"SELECT name FROM sqlite_master WHERE type='table' AND name='cms_nodes'",
+		)->one();
+
+		if ($result === null) {
+			// Apply migrations automatically for SQLite
+			$db->migrate('install');
+			$db->migrate('default');
+		}
+	}
+
+	/**
+	 * Initialize PostgreSQL test database, checking for required schema.
+	 */
+	protected static function initializePostgresDatabase(Database $db): void
+	{
 		// Check if migrations table exists
 		$tableExists = $db->execute(
 			"SELECT EXISTS (
@@ -104,7 +125,8 @@ class IntegrationTestCase extends TestCase
 
 		// Begin transaction if this test uses them
 		if ($this->useTransactions) {
-			$this->testDb = new Database($this->conn());
+			$this->testDb = new CmsDatabase($this->conn());
+			$this->testDb->connect();
 			$this->testDb->begin();
 		}
 	}
@@ -122,23 +144,13 @@ class IntegrationTestCase extends TestCase
 
 	public function conn(): Connection
 	{
+		$config = self::testDbConfig();
+
 		return new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			[
-				'pgsql' => self::root() . '/db/sql/pgsql',
-				'sqlite' => self::root() . '/db/sql/sqlite',
-			],
-			[
-				'install' => [[
-					'pgsql' => self::root() . '/db/migrations/install/pgsql',
-					'sqlite' => self::root() . '/db/migrations/install/sqlite',
-				]],
-				'default' => [[
-					'pgsql' => self::root() . '/db/migrations/update/pgsql',
-					'sqlite' => self::root() . '/db/migrations/update/sqlite',
-				]],
-			],
-			fetchMode: PDO::FETCH_ASSOC,
+			$config->dsn(),
+			$config->sqlDirs(self::root()),
+			$config->migrationDirs(self::root()),
+			fetchMode: $config->fetchMode(),
 			print: false,
 		);
 	}
@@ -150,7 +162,10 @@ class IntegrationTestCase extends TestCase
 			return $this->testDb;
 		}
 
-		return new Database($this->conn());
+		$db = new CmsDatabase($this->conn());
+		$db->connect();
+
+		return $db;
 	}
 
 	public function registry(): Registry
@@ -205,10 +220,18 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function loadFixtures(string ...$fixtures): void
 	{
+		$config = self::testDbConfig();
 		$db = $this->db();
+		$suffix = $config->isSqlite() ? '.sqlite' : '';
 
 		foreach ($fixtures as $fixture) {
-			$path = self::root() . "/tests/Fixtures/data/{$fixture}.sql";
+			// Try driver-specific fixture first
+			$path = self::root() . "/tests/Fixtures/data/{$fixture}{$suffix}.sql";
+
+			if (!file_exists($path)) {
+				// Fall back to generic fixture
+				$path = self::root() . "/tests/Fixtures/data/{$fixture}.sql";
+			}
 
 			if (!file_exists($path)) {
 				throw new RuntimeException("Fixture file not found: {$path}");
@@ -226,7 +249,10 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestType(string $handle, string $kind = 'page'): int
 	{
-		$sql = "INSERT INTO cms.types (handle, kind)
+		$config = self::testDbConfig();
+		$table = $config->isSqlite() ? 'cms_types' : 'cms.types';
+
+		$sql = "INSERT INTO {$table} (handle, kind)
 				VALUES (:handle, :kind)
 				RETURNING type";
 
@@ -244,16 +270,21 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestNode(array $data): int
 	{
+		$config = self::testDbConfig();
+		$table = $config->isSqlite() ? 'cms_nodes' : 'cms.nodes';
+		$now = $config->isSqlite() ? "datetime('now')" : 'now()';
+		$jsonCast = $config->isSqlite() ? '' : '::jsonb';
+
 		$defaults = [
 			'uid' => uniqid('test-'),
 			'parent' => null,
-			'published' => true,
-			'hidden' => false,
-			'locked' => false,
+			'published' => $config->isSqlite() ? 1 : true,
+			'hidden' => $config->isSqlite() ? 0 : false,
+			'locked' => $config->isSqlite() ? 0 : false,
 			'creator' => 1, // System user
 			'editor' => 1,
-			'created' => 'now()',
-			'changed' => 'now()',
+			'created' => $now,
+			'changed' => $now,
 			'content' => '{}',
 		];
 
@@ -264,8 +295,8 @@ class IntegrationTestCase extends TestCase
 			$data['content'] = json_encode($data['content']);
 		}
 
-		$sql = "INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
+		$sql = "INSERT INTO {$table} (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
+				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content{$jsonCast})
 				RETURNING node";
 
 		return $this->db()->execute($sql, $data)->one()['node'];
@@ -278,6 +309,11 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestUser(array $data): int
 	{
+		$config = self::testDbConfig();
+		$table = $config->isSqlite() ? 'cms_users' : 'cms.users';
+		$jsonCast = $config->isSqlite() ? '' : '::jsonb';
+		$active = $config->isSqlite() ? 1 : true;
+
 		$uid = $data['uid'] ?? uniqid('user-');
 		$defaults = [
 			'uid' => $uid,
@@ -285,7 +321,7 @@ class IntegrationTestCase extends TestCase
 			'email' => $data['email'] ?? ($uid . '@example.com'),
 			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
 			'userrole' => 'editor',
-			'active' => true,
+			'active' => $active,
 			'data' => ['name' => 'Test User'],
 			'creator' => 1,
 			'editor' => 1,
@@ -297,8 +333,8 @@ class IntegrationTestCase extends TestCase
 			$data['data'] = json_encode($data['data']);
 		}
 
-		$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data::jsonb, :creator, :editor)
+		$sql = "INSERT INTO {$table} (uid, username, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data{$jsonCast}, :creator, :editor)
 				RETURNING usr";
 
 		return $this->db()->execute($sql, $data)->one()['usr'];
@@ -313,7 +349,10 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestPath(int $nodeId, string $path, string $locale = 'en'): void
 	{
-		$sql = "INSERT INTO cms.urlpaths (node, path, locale, creator, editor)
+		$config = self::testDbConfig();
+		$table = $config->isSqlite() ? 'cms_urlpaths' : 'cms.urlpaths';
+
+		$sql = "INSERT INTO {$table} (node, path, locale, creator, editor)
 				VALUES (:node, :path, :locale, 1, 1)";
 
 		$this->db()->execute($sql, [

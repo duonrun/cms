@@ -11,6 +11,7 @@ use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Core\App;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Plugin;
@@ -80,36 +81,45 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function cleanupTestData(): void
 	{
 		$db = $this->db();
+		$config = self::testDbConfig();
+
+		// Table name prefix depends on driver
+		$t = fn(string $table) => $config->isSqlite()
+			? "cms_{$table}"
+			: "cms.{$table}";
+
+		// Audit schema table (only for PostgreSQL)
+		$auditNodes = $config->isSqlite() ? 'audit_nodes' : 'audit.nodes';
 
 		// Delete created one-time tokens
 		foreach ($this->createdOneTimeTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.onetimetokens WHERE token = :token', ['token' => $tokenHash])->run();
+			$db->execute("DELETE FROM {$t('onetimetokens')} WHERE token = :token", ['token' => $tokenHash])->run();
 		}
 
 		// Delete created auth tokens
 		foreach ($this->createdAuthTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.authtokens WHERE token = :token', ['token' => $tokenHash])->run();
+			$db->execute("DELETE FROM {$t('authtokens')} WHERE token = :token", ['token' => $tokenHash])->run();
 		}
 
 		// Delete created users
 		foreach ($this->createdUserIds as $userId) {
-			$db->execute('DELETE FROM cms.users WHERE usr = :usr', ['usr' => $userId])->run();
+			$db->execute("DELETE FROM {$t('users')} WHERE usr = :usr", ['usr' => $userId])->run();
 		}
 
 		// Delete created paths and nodes in reverse order (children before parents)
 		// Also delete related records that reference the nodes via FKs
 		foreach (array_reverse($this->createdNodeIds) as $nodeId) {
-			$db->execute('DELETE FROM cms.urlpaths WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.fulltext WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodetags WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM audit.nodes WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodes WHERE node = :node', ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$t('urlpaths')} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$t('fulltext')} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$t('nodetags')} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$t('drafts')} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$auditNodes} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$t('nodes')} WHERE node = :node", ['node' => $nodeId])->run();
 		}
 
 		// Delete created types
 		foreach ($this->createdTypeHandles as $handle) {
-			$db->execute('DELETE FROM cms.types WHERE handle = :handle', ['handle' => $handle])->run();
+			$db->execute("DELETE FROM {$t('types')} WHERE handle = :handle", ['handle' => $handle])->run();
 		}
 
 		$this->createdNodeIds = [];
@@ -125,8 +135,11 @@ class End2EndTestCase extends IntegrationTestCase
 	 */
 	protected function trackNodeByUid(string $uid): int
 	{
+		$config = self::testDbConfig();
+		$table = $config->isSqlite() ? 'cms_nodes' : 'cms.nodes';
+
 		$node = $this->db()->execute(
-			'SELECT node FROM cms.nodes WHERE uid = :uid',
+			"SELECT node FROM {$table} WHERE uid = :uid",
 			['uid' => $uid],
 		)->one();
 		$this->assertNotEmpty($node);
@@ -170,20 +183,28 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function createAuthenticatedUser(string $role = 'editor'): string
 	{
 		$db = $this->db();
+		$config = self::testDbConfig();
+
+		$usersTable = $config->isSqlite() ? 'cms_users' : 'cms.users';
+		$tokensTable = $config->isSqlite() ? 'cms_authtokens' : 'cms.authtokens';
+		$active = $config->isSqlite() ? 1 : 'true';
+		$jsonCast = $config->isSqlite() ? '' : '::jsonb';
+
 		$uid = 'test-auth-' . uniqid();
 		$token = bin2hex(random_bytes(32));
 		$tokenHash = hash('sha256', $token);
 
-		// Create user with correct schema (userrole instead of role)
-		$sql = "INSERT INTO cms.users (uid, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, :creator, :editor)
-				RETURNING usr";
-
+		// Find system user
 		$systemUser = $db->execute(
-			"SELECT usr FROM cms.users WHERE userrole = 'system' LIMIT 1",
+			"SELECT usr FROM {$usersTable} WHERE userrole = 'system' LIMIT 1",
 		)->one();
 		$this->assertNotEmpty($systemUser);
 		$systemUserId = (int) $systemUser['usr'];
+
+		// Create user
+		$sql = "INSERT INTO {$usersTable} (uid, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :email, :pwhash, :userrole, {$active}, '{}'{$jsonCast}, :creator, :editor)
+				RETURNING usr";
 
 		$userId = $db->execute($sql, [
 			'uid' => $uid,
@@ -197,7 +218,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->createdUserIds[] = $userId;
 
 		// Create auth token
-		$sql = "INSERT INTO cms.authtokens (token, usr, creator, editor)
+		$sql = "INSERT INTO {$tokensTable} (token, usr, creator, editor)
 				VALUES (:token, :usr, 1, 1)";
 
 		$db->execute($sql, [
@@ -223,8 +244,10 @@ class End2EndTestCase extends IntegrationTestCase
 		$factory = new Laminas();
 		$router = new Router();
 		$registry = $this->registry();
+		$dbConfig = self::testDbConfig();
+
 		$config = $this->config([
-			'db.dsn' => 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+			'db.dsn' => $dbConfig->dsn(),
 			'path.root' => self::root(),
 			'path.public' => self::root() . '/public',
 			'path.uploads' => self::root() . '/public/uploads',

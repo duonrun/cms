@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests;
 
 use Duon\Cms\Config;
 use Duon\Cms\Locales;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Core\Factory;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Request;
@@ -42,6 +43,11 @@ class TestCase extends BaseTestCase
 	protected static function root(): string
 	{
 		return dirname(__DIR__);
+	}
+
+	protected static function testDbConfig(): TestDbConfig
+	{
+		return TestDbConfig::getInstance();
 	}
 
 	public function throws(string $exception, ?string $message = null): void
@@ -135,29 +141,20 @@ class TestCase extends BaseTestCase
 
 	/**
 	 * Stub db() method for unit tests that need to create Context objects.
+	 * Uses the configured test driver (defaults to pgsql, configurable via CMS_TEST_DRIVER).
 	 * This method creates a database instance but is not meant for actual database operations.
 	 * For real database operations, use IntegrationTestCase instead.
 	 */
 	public function db(): \Duon\Quma\Database
 	{
+		$config = self::testDbConfig();
+
 		return new \Duon\Quma\Database(
 			new \Duon\Quma\Connection(
-				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				[
-					'pgsql' => self::root() . '/db/sql/pgsql',
-					'sqlite' => self::root() . '/db/sql/sqlite',
-				],
-				[
-					'install' => [[
-						'pgsql' => self::root() . '/db/migrations/install/pgsql',
-						'sqlite' => self::root() . '/db/migrations/install/sqlite',
-					]],
-					'default' => [[
-						'pgsql' => self::root() . '/db/migrations/update/pgsql',
-						'sqlite' => self::root() . '/db/migrations/update/sqlite',
-					]],
-				],
-				fetchMode: PDO::FETCH_ASSOC,
+				$config->dsn(),
+				$config->sqlDirs(self::root()),
+				$config->migrationDirs(self::root()),
+				fetchMode: $config->fetchMode(),
 				print: false,
 			),
 		);
@@ -165,28 +162,38 @@ class TestCase extends BaseTestCase
 
 	/**
 	 * Stub dbSqlite() method for unit tests that need to create Context objects with SQLite dialect.
+	 * This is always SQLite, regardless of CMS_TEST_DRIVER, for dialect-specific tests.
 	 * This method creates a database instance but is not meant for actual database operations.
 	 * For real database operations, use IntegrationTestCase instead.
 	 */
 	public function dbSqlite(): \Duon\Quma\Database
 	{
+		$config = self::testDbConfig();
+
 		return new \Duon\Quma\Database(
 			new \Duon\Quma\Connection(
 				'sqlite::memory:',
-				[
-					'pgsql' => self::root() . '/db/sql/pgsql',
-					'sqlite' => self::root() . '/db/sql/sqlite',
-				],
-				[
-					'install' => [[
-						'pgsql' => self::root() . '/db/migrations/install/pgsql',
-						'sqlite' => self::root() . '/db/migrations/install/sqlite',
-					]],
-					'default' => [[
-						'pgsql' => self::root() . '/db/migrations/update/pgsql',
-						'sqlite' => self::root() . '/db/migrations/update/sqlite',
-					]],
-				],
+				$config->sqlDirs(self::root()),
+				$config->migrationDirs(self::root()),
+				fetchMode: PDO::FETCH_ASSOC,
+				print: false,
+			),
+		);
+	}
+
+	/**
+	 * Create a PostgreSQL database instance for dialect-specific tests.
+	 * Always uses PostgreSQL, regardless of CMS_TEST_DRIVER.
+	 */
+	public function dbPgsql(): \Duon\Quma\Database
+	{
+		$config = self::testDbConfig();
+
+		return new \Duon\Quma\Database(
+			new \Duon\Quma\Connection(
+				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+				$config->sqlDirs(self::root()),
+				$config->migrationDirs(self::root()),
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,
 			),
