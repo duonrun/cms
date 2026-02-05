@@ -122,15 +122,53 @@ class Cms implements Plugin
 			[$root . '/db/migrations/update'],
 		);
 
-		$this->connection = new Connection(
-			$this->config->get('db.dsn'),
-			$sql,
-			$namespacedMigrations,
-			fetchMode: PDO::FETCH_ASSOC,
-			options: $this->config->get('db.options'),
-			print: $this->config->get('db.print'),
-		);
+		try {
+			$this->connection = new Connection(
+				$this->config->get('db.dsn'),
+				$sql,
+				$namespacedMigrations,
+				fetchMode: PDO::FETCH_ASSOC,
+				options: $this->config->get('db.options'),
+				print: $this->config->get('db.print'),
+			);
+		} catch (\RuntimeException $e) {
+			$driverMessage = $this->missingDriverMessage($e);
+
+			if ($driverMessage !== null) {
+				throw new RuntimeException($driverMessage, previous: $e);
+			}
+
+			throw $e;
+		}
 		$this->db = new Database($this->connection);
+	}
+
+	private function missingDriverMessage(\RuntimeException $exception): ?string
+	{
+		$prefix = 'PDO driver not supported: ';
+		$message = $exception->getMessage();
+
+		if (!str_starts_with($message, $prefix)) {
+			return null;
+		}
+
+		$driver = trim(substr($message, strlen($prefix)));
+
+		if ($driver === '') {
+			return null;
+		}
+
+		$extension = match ($driver) {
+			'pgsql' => 'pdo_pgsql',
+			'sqlite' => 'pdo_sqlite',
+			default => 'pdo_' . $driver,
+		};
+
+		return sprintf(
+			'PDO driver not supported: %s. Install extension ext-%s.',
+			$driver,
+			$extension,
+		);
 	}
 
 	/**

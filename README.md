@@ -19,7 +19,17 @@ createdb --owner duoncms duoncms
 System Requirements:
 
 ```bash
-apt install php8.5 php8.5-pgsql php8.5-gd php8.5-xml php8.5-intl php8.5-curl
+apt install php8.5 php8.5-pdo php8.5-gd php8.5-xml php8.5-intl php8.5-curl
+```
+
+Database drivers:
+
+```bash
+# PostgreSQL
+apt install php8.5-pgsql
+
+# SQLite
+apt install php8.5-sqlite3
 ```
 
 For development
