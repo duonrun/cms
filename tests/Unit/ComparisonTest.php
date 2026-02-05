@@ -79,22 +79,22 @@ final class ComparisonTest extends TestCase
 
 		$this->assertJsonPathQuery(
 			'field ~ /^test$/',
-			'n.content @? :q1',
+			'jsonb_path_exists(n.content, :q1)',
 			'$.field.value ? (@ like_regex ' . $pattern . ')',
 		);
 		$this->assertJsonPathQuery(
 			'field ~* /^test$/',
-			'n.content @? :q1',
+			'jsonb_path_exists(n.content, :q1)',
 			'$.field.value ? (@ like_regex ' . $pattern . ' flag "i")',
 		);
 		$this->assertJsonPathQuery(
 			'field !~ /^test$/',
-			'NOT n.content @? :q1',
+			'NOT jsonb_path_exists(n.content, :q1)',
 			'$.field.value ? (@ like_regex ' . $pattern . ')',
 		);
 		$this->assertJsonPathQuery(
 			'field !~* /^test$/',
-			'NOT n.content @? :q1',
+			'NOT jsonb_path_exists(n.content, :q1)',
 			'$.field.value ? (@ like_regex ' . $pattern . ' flag "i")',
 		);
 	}

@@ -65,9 +65,10 @@ final class PostgresDialect implements SqlDialect
 	): array {
 		$flag = $ignoreCase ? ' flag "i"' : '';
 		$expression = "\$.{$path} ? (@ like_regex {$this->jsonPathString($pattern)}{$flag})";
+		$sql = "jsonb_path_exists({$column}, {$placeholder})";
 
 		return [
-			'sql' => ($negate ? 'NOT ' : '') . "{$column} @? {$placeholder}",
+			'sql' => $negate ? "NOT {$sql}" : $sql,
 			'paramValue' => $expression,
 		];
 	}
