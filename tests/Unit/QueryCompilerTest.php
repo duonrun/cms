@@ -278,4 +278,103 @@ final class QueryCompilerTest extends TestCase
 		);
 		$this->assertSame(['p0' => 'pattern'], $result->params);
 	}
+
+	public function testExistsQueryPostgres(): void
+	{
+		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+
+		// Simple field existence check
+		$result = $compiler->compile('title');
+		$this->assertSame("n.content ? 'title'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		// Combined with other conditions
+		$result = $compiler->compile('title & builtin = 1');
+		$this->assertSame("n.content ? 'title' AND builtin = 1", $result->sql);
+	}
+
+	public function testExistsQuerySqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, ['builtin' => 'builtin']);
+
+		// Simple field existence check
+		$result = $compiler->compile('title');
+		$this->assertSame(
+			"json_type(n.content, '\$.title') IS NOT NULL",
+			$result->sql,
+		);
+		$this->assertSame([], $result->params);
+	}
+
+	public function testUrlPathQueryPostgres(): void
+	{
+		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+
+		// Exact path match
+		$result = $compiler->compile("path = '/home'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms.urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path = :p0)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/home'], $result->params);
+
+		// Path with locale filter
+		$result = $compiler->compile("path.en = '/english'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms.urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path = :p0 AND up.locale = :p1)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/english', 'p1' => 'en'], $result->params);
+
+		// Path with LIKE pattern
+		$result = $compiler->compile("path ~~ '/products/%'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms.urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path LIKE :p0)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/products/%'], $result->params);
+
+		// Path not equal (negated EXISTS)
+		$result = $compiler->compile("path != '/home'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms.urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path != :p0)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/home'], $result->params);
+	}
+
+	public function testUrlPathQuerySqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, ['builtin' => 'builtin']);
+
+		// Exact path match (uses flattened table name)
+		$result = $compiler->compile("path = '/home'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms_urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path = :p0)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/home'], $result->params);
+
+		// Path with locale and ILIKE (SQLite uses COLLATE NOCASE)
+		$result = $compiler->compile("path.de ~~* '/produkte%'");
+		$this->assertSame(
+			'EXISTS (SELECT 1 FROM cms_urlpaths up WHERE up.node = n.node AND up.inactive IS NULL AND up.path LIKE :p0 COLLATE NOCASE AND up.locale = :p1)',
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '/produkte%', 'p1' => 'de'], $result->params);
+	}
 }

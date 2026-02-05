@@ -211,7 +211,7 @@ final class QueryParser
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
-			return new UrlPath($left, $operator, $right);
+			return new UrlPath($left, $operator, $right, $this->context, $this->paramCounter);
 		}
 
 		return new Comparison(
@@ -237,7 +237,7 @@ final class QueryParser
 		$this->readyForCondition = false;
 		$this->pos++;
 
-		return new Exists($token);
+		return new Exists($token, $this->context);
 	}
 
 	/**
