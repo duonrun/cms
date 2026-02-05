@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Config;
+use Duon\Cms\Database\CmsDatabase;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Block;
 use Duon\Cms\Node\Document;
@@ -133,7 +134,7 @@ class Cms implements Plugin
 			options: $this->config->get('db.options'),
 			print: $this->config->get('db.print'),
 		);
-		$this->db = new Database($this->connection);
+		$this->db = new CmsDatabase($this->connection, $this->config);
 	}
 
 	/**
