@@ -68,10 +68,11 @@ class IntegrationTestCase extends TestCase
 		)->one()['exists'] ?? false;
 
 		if (!$tableExists) {
-			echo "\n⚠ Test database not initialized. Run: ./run recreate-db && ./run migrate --apply\n\n";
+			$diagnostics = self::databaseDiagnostics();
+			echo "\n⚠ Test database not initialized.\n{$diagnostics}\nRun: ./run recreate-db && ./run migrate --apply\n\n";
 
 			throw new RuntimeException(
-				'Test database not initialized. Run: ./run recreate-db && ./run migrate --apply',
+				"Test database not initialized. {$diagnostics}Run: ./run recreate-db && ./run migrate --apply",
 			);
 		}
 
@@ -84,10 +85,11 @@ class IntegrationTestCase extends TestCase
 		)->one()['exists'] ?? false;
 
 		if (!$schemaExists) {
-			echo "\n⚠ Migrations not applied. Run: ./run migrate --apply\n\n";
+			$diagnostics = self::databaseDiagnostics();
+			echo "\n⚠ Migrations not applied.\n{$diagnostics}\nRun: ./run migrate --apply\n\n";
 
 			throw new RuntimeException(
-				'Migrations not applied to test database. Run: ./run migrate --apply',
+				"Migrations not applied to test database. {$diagnostics}Run: ./run migrate --apply",
 			);
 		}
 	}
@@ -136,6 +138,22 @@ class IntegrationTestCase extends TestCase
 		usort($files, fn(string $a, string $b): int => strcmp(basename($a), basename($b)));
 
 		return $files;
+	}
+
+	private static function databaseDiagnostics(): string
+	{
+		$driver = TestDbConfig::driver();
+		$dsn = TestDbConfig::sanitizedDsn();
+		$installDirs = TestDbConfig::migrationDirsForDriver('install');
+		$updateDirs = TestDbConfig::migrationDirsForDriver('default');
+
+		return sprintf(
+			"Driver: %s\nDSN: %s\nInstall migrations: %s\nUpdate migrations: %s\n",
+			$driver,
+			$dsn,
+			implode(', ', $installDirs),
+			implode(', ', $updateDirs),
+		);
 	}
 
 	protected function setUp(): void

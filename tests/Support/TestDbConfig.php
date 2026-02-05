@@ -32,6 +32,14 @@ final class TestDbConfig
 		return $dsn !== false && $dsn !== '' ? $dsn : self::DEFAULT_PGSQL_DSN;
 	}
 
+	public static function sanitizedDsn(): string
+	{
+		$dsn = self::dsn();
+		$masked = preg_replace('/(password|pass)=([^;]+)/i', '$1=***', $dsn);
+
+		return $masked ?? $dsn;
+	}
+
 	public static function sqlitePath(): string
 	{
 		if (self::$sqlitePathOverride !== null) {
