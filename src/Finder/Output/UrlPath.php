@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Finder\Input\Token;
+use Duon\Cms\Finder\QueryParams;
 
 final readonly class UrlPath extends Expression implements Output
 {
@@ -14,7 +15,7 @@ final readonly class UrlPath extends Expression implements Output
 		public Token $right,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
 		return '';
 	}

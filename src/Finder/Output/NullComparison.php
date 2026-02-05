@@ -8,6 +8,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
+use Duon\Cms\Finder\QueryParams;
 
 final readonly class NullComparison extends Expression implements Output
 {
@@ -19,13 +20,13 @@ final readonly class NullComparison extends Expression implements Output
 		private array $builtins,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
 		switch ($this->operator->type) {
 			case TokenType::Equal:
-				return $this->getSqlExpression(true);
+				return $this->getSqlExpression(true, $params);
 			case TokenType::Unequal:
-				return $this->getSqlExpression(false);
+				return $this->getSqlExpression(false, $params);
 		}
 
 		throw new ParserOutputException(
@@ -34,13 +35,13 @@ final readonly class NullComparison extends Expression implements Output
 		);
 	}
 
-	private function getSqlExpression(bool $equal): string
+	private function getSqlExpression(bool $equal, QueryParams $params): string
 	{
 		return sprintf(
 			'%s %s %s',
-			$this->getOperand($this->left, $this->context->db, $this->builtins),
+			$this->getOperand($this->left, $params, $this->builtins),
 			$equal ? 'IS' : 'IS NOT',
-			$this->getOperand($this->right, $this->context->db, $this->builtins),
+			$this->getOperand($this->right, $params, $this->builtins),
 		);
 	}
 }

@@ -119,7 +119,6 @@ final class QueryParser
 					$currentListPos,
 					$currentList,
 					$token->position - $currentListPos,
-					$this->context->db,
 				);
 				$currentList = [];
 				$currentListPos = null;

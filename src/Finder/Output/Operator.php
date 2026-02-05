@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder\Output;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
+use Duon\Cms\Finder\QueryParams;
 
 class Operator implements Output
 {
@@ -14,7 +15,7 @@ class Operator implements Output
 		public Token $token,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
 		return match ($this->token->type) {
 			TokenType::And => ' AND ',

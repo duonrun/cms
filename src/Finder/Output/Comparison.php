@@ -8,6 +8,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
+use Duon\Cms\Finder\QueryParams;
 
 final readonly class Comparison extends Expression implements Output
 {
@@ -19,7 +20,7 @@ final readonly class Comparison extends Expression implements Output
 		private array $builtins,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
 		switch ($this->operator->type) {
 			case TokenType::Like:
@@ -28,7 +29,7 @@ final readonly class Comparison extends Expression implements Output
 			case TokenType::IUnlike:
 			case TokenType::In:
 			case TokenType::NotIn:
-				return $this->getSqlExpression();
+				return $this->getSqlExpression($params);
 		}
 
 		if ($this->left->type === TokenType::Field) {
@@ -36,14 +37,14 @@ final readonly class Comparison extends Expression implements Output
 				$this->right->type === TokenType::Builtin
 				|| $this->right->type === TokenType::Field
 			) {
-				return $this->getSqlExpression();
+				return $this->getSqlExpression($params);
 			}
 
-			return $this->getJsonPathExpression();
+			return $this->getJsonPathExpression($params);
 		}
 
 		if ($this->left->type === TokenType::Builtin) {
-			return $this->getSqlExpression();
+			return $this->getSqlExpression($params);
 		}
 
 		throw new ParserOutputException(
@@ -52,28 +53,28 @@ final readonly class Comparison extends Expression implements Output
 		);
 	}
 
-	private function getJsonPathExpression(): string
+	private function getJsonPathExpression(QueryParams $params): string
 	{
 		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
-			TokenType::Equal => ['@@', '==', $this->getRight(), false],
+			TokenType::Equal => ['@@', '==', $this->getJsonPathRight(), false],
 			TokenType::Regex => ['@?', '?', $this->getRegex(false), false],
 			TokenType::IRegex => ['@?', '?', $this->getRegex(true), false],
 			TokenType::NotRegex => ['@?', '?', $this->getRegex(false), true],
 			TokenType::INotRegex => ['@?', '?', $this->getRegex(true), true],
-			TokenType::In => ['@@', 'in', $this->getRight(), false],
-			TokenType::NotIn => ['@@', 'nin', $this->getRight(), false],
-			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
+			TokenType::In => ['@@', 'in', $this->getJsonPathRight(), false],
+			TokenType::NotIn => ['@@', 'nin', $this->getJsonPathRight(), false],
+			default => ['@@', $this->operator->lexeme, $this->getJsonPathRight(), false],
 		};
 
 		$left = $this->getField();
+		$path = sprintf('$.%s %s %s', $left, $jsonOperator, $right);
+		$placeholder = $params->add($path);
 
 		return sprintf(
-			"%sn.content %s '$.%s %s %s'",
+			'%sn.content %s %s',
 			$negate ? 'NOT ' : '',
 			$operator,
-			$left,
-			$jsonOperator,
-			$right,
+			$placeholder,
 		);
 	}
 
@@ -88,10 +89,11 @@ final readonly class Comparison extends Expression implements Output
 
 		$case = $ignoreCase ? ' flag "i"' : '';
 
-		// TODO: quote double quotes, check also in tests
-		$pattern = '"' . trim($this->context->db->quote($this->right->lexeme), "'") . '"';
-
-		return sprintf('(@ like_regex %s%s)', $pattern, $case);
+		return sprintf(
+			'(@ like_regex %s%s)',
+			$this->jsonPathString($this->right->lexeme),
+			$case,
+		);
 	}
 
 	private function getField(): string
@@ -133,14 +135,14 @@ final readonly class Comparison extends Expression implements Output
 		return $this->context->localeId();
 	}
 
-	private function getRight(): string
+	private function getJsonPathRight(): string
 	{
 		return match ($this->right->type) {
-			TokenType::String => $this->quote($this->right->lexeme),
-			TokenType::Number,
-			TokenType::Boolean,
-			TokenType::List,
-			TokenType::Null => $this->right->lexeme,
+			TokenType::String => $this->jsonPathString($this->right->lexeme),
+			TokenType::Number => $this->right->lexeme,
+			TokenType::Boolean => strtolower($this->right->lexeme),
+			TokenType::List => $this->jsonPathList($this->right),
+			TokenType::Null => 'null',
 			default => throw new ParserOutputException(
 				$this->right,
 				'The right hand side in a field expression must be a literal',
@@ -148,27 +150,53 @@ final readonly class Comparison extends Expression implements Output
 		};
 	}
 
-	private function getSqlExpression(): string
+	private function getSqlExpression(QueryParams $params): string
 	{
 		return sprintf(
 			'%s %s %s',
-			$this->getOperand($this->left, $this->context->db, $this->builtins),
+			$this->getOperand($this->left, $params, $this->builtins),
 			$this->getOperator($this->operator->type),
-			$this->getOperand($this->right, $this->context->db, $this->builtins),
+			$this->getOperand($this->right, $params, $this->builtins),
 		);
 	}
 
-	private function quote(string $string): string
+	private function jsonPathString(string $string): string
 	{
-		return sprintf(
-			'"%s"',
-			// Escape all unescaped double quotes
-			// TODO: can prepended backslashes be exploited
-			preg_replace(
-				'/(?<!\\\\)(")/',
-				'\\"',
-				trim($this->context->db->quote($string), "'"),
-			),
-		);
+		$encoded = json_encode($string, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+		if ($encoded === false) {
+			return '""';
+		}
+
+		return $encoded;
+	}
+
+	private function jsonPathList(Token $token): string
+	{
+		$items = $token->items;
+
+		if ($items === null || $items === []) {
+			throw new ParserOutputException($token, 'Invalid query: empty list');
+		}
+
+		$itemType = $items[0]->type;
+		$values = [];
+
+		foreach ($items as $item) {
+			if ($item->type !== $itemType) {
+				throw new ParserOutputException($token, 'Invalid query: mixed list item types');
+			}
+
+			$values[] = match ($item->type) {
+				TokenType::String => $this->jsonPathString($item->lexeme),
+				TokenType::Number => $item->lexeme,
+				default => throw new ParserOutputException(
+					$token,
+					'Invalid query: token type not supported in list',
+				),
+			};
+		}
+
+		return '(' . implode(', ', $values) . ')';
 	}
 }

@@ -15,14 +15,18 @@ final class QueryCompiler
 		private readonly array $builtins,
 	) {}
 
-	public function compile(string $query): string
+	public function compile(string $query, string $paramPrefix = 'q'): CompiledQuery
 	{
+		$params = new QueryParams($paramPrefix);
 		$parser = new QueryParser($this->context, $this->builtins);
 
-		return $this->build($parser->parse($query));
+		return new CompiledQuery(
+			$this->build($parser->parse($query), $params),
+			$params->all(),
+		);
 	}
 
-	private function build(array $parserOutput): string
+	private function build(array $parserOutput, QueryParams $params): string
 	{
 		if (count($parserOutput) === 0) {
 			return '';
@@ -31,7 +35,7 @@ final class QueryCompiler
 		$clause = '';
 
 		foreach ($parserOutput as $output) {
-			$clause .= $output->get();
+			$clause .= $output->get($params);
 		}
 
 		return $clause;

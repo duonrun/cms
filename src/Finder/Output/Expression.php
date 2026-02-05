@@ -8,7 +8,7 @@ use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Finder\CompilesField;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
-use Duon\Quma\Database;
+use Duon\Cms\Finder\QueryParams;
 
 abstract readonly class Expression
 {
@@ -37,18 +37,46 @@ abstract readonly class Expression
 		};
 	}
 
-	protected function getOperand(Token $token, Database $db, array $builtins): string
+	protected function getOperand(Token $token, QueryParams $params, array $builtins): string
 	{
 		return match ($token->type) {
-			TokenType::Boolean => strtolower($token->lexeme),
+			TokenType::Boolean => $params->add(strtolower($token->lexeme) === 'true'),
 			TokenType::Field => $this->compileField($token->lexeme, 'n.content'),
 			TokenType::Builtin => $builtins[$token->lexeme],
 			TokenType::Keyword => $this->translateKeyword($token->lexeme),
 			TokenType::Null => 'NULL',
-			TokenType::Number => $token->lexeme,
-			TokenType::String => $db->quote($token->lexeme),
-			TokenType::List => $token->lexeme,
+			TokenType::Number => $params->add($token->lexeme),
+			TokenType::String => $params->add($token->lexeme),
+			TokenType::List => $this->compileList($token, $params),
 		};
+	}
+
+	private function compileList(Token $token, QueryParams $params): string
+	{
+		$items = $token->items;
+
+		if ($items === null || $items === []) {
+			throw new ParserException('Invalid query: empty list');
+		}
+
+		$itemType = $items[0]->type;
+		$placeholders = [];
+
+		foreach ($items as $item) {
+			if ($item->type !== $itemType) {
+				throw new ParserException('Invalid query: mixed list item types');
+			}
+
+			$placeholders[] = match ($item->type) {
+				TokenType::String => $params->add($item->lexeme),
+				TokenType::Number => $params->add($item->lexeme),
+				default => throw new ParserException(
+					'Invalid query: token type not supported in list',
+				),
+			};
+		}
+
+		return '(' . implode(', ', $placeholders) . ')';
 	}
 
 	protected function translateKeyword(string $keyword): string
