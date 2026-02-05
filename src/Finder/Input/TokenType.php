@@ -37,6 +37,7 @@ enum TokenType
 	// Operands
 	case Boolean;
 	case Builtin;
+	case Fulltext;
 	case Path;
 	case Field;
 	case Keyword;

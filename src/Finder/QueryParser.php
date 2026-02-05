@@ -13,6 +13,7 @@ use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\Output\Comparison;
 use Duon\Cms\Finder\Output\Exists;
 use Duon\Cms\Finder\Output\Expression;
+use Duon\Cms\Finder\Output\Fulltext;
 use Duon\Cms\Finder\Output\LeftParen;
 use Duon\Cms\Finder\Output\NullComparison;
 use Duon\Cms\Finder\Output\Operator;
@@ -212,6 +213,10 @@ final class QueryParser
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
 			return new UrlPath($left, $operator, $right, $this->context, $this->paramCounter);
+		}
+
+		if ($left->type === TokenType::Fulltext || $right->type === TokenType::Fulltext) {
+			return new Fulltext($left, $operator, $right, $this->context, $this->paramCounter);
 		}
 
 		return new Comparison(

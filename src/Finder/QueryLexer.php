@@ -343,6 +343,10 @@ final class QueryLexer
 					return TokenType::Path;
 				}
 
+				if ($lexeme === 'fulltext' || str_starts_with($lexeme, 'fulltext.')) {
+					return TokenType::Fulltext;
+				}
+
 				if (in_array($lexeme, $this->builtins)) {
 					return TokenType::Builtin;
 				}

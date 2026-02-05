@@ -135,4 +135,13 @@ final readonly class PostgresDialect implements SqlDialect
 	{
 		return 'NOW()';
 	}
+
+	public function fulltext(string $nodeColumn, string $paramName, ?string $locale = null): string
+	{
+		$localeCondition = $locale !== null
+			? " AND f.locale = '{$locale}'"
+			: '';
+
+		return "{$nodeColumn} IN (SELECT f.node FROM cms.fulltext f WHERE f.document @@ websearch_to_tsquery('english', {$paramName}){$localeCondition})";
+	}
 }

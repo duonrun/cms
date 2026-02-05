@@ -94,4 +94,13 @@ final readonly class SqliteDialect implements SqlDialect
 		// SQLite uses different datetime functions
 		return "datetime('now')";
 	}
+
+	public function fulltext(string $nodeColumn, string $paramName, ?string $locale = null): string
+	{
+		$localeCondition = $locale !== null
+			? " AND idx.locale = '{$locale}'"
+			: '';
+
+		return "{$nodeColumn} IN (SELECT idx.node FROM cms_fulltext_idx idx JOIN cms_fulltext_fts fts ON idx.rowid = fts.rowid WHERE cms_fulltext_fts MATCH {$paramName}{$localeCondition})";
+	}
 }

@@ -139,4 +139,20 @@ interface SqlDialect
 	 * @return string SQL expression for current timestamp (e.g., 'NOW()')
 	 */
 	public function now(): string;
+
+	/**
+	 * Generate SQL for fulltext search condition.
+	 *
+	 * Returns a condition that checks if the node matches the fulltext query.
+	 * The condition uses a subquery that joins with the fulltext index.
+	 *
+	 * PostgreSQL: n.node IN (SELECT node FROM cms.fulltext WHERE document @@ websearch_to_tsquery(...))
+	 * SQLite: n.node IN (SELECT node FROM cms_fulltext_idx idx JOIN cms_fulltext_fts fts ON ...)
+	 *
+	 * @param string $nodeColumn The node column reference (e.g., 'n.node')
+	 * @param string $paramName The parameter placeholder for the query (e.g., ':ft0')
+	 * @param string|null $locale Optional locale filter (null = all locales)
+	 * @return string SQL condition for fulltext match
+	 */
+	public function fulltext(string $nodeColumn, string $paramName, ?string $locale = null): string;
 }

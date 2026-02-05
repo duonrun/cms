@@ -264,4 +264,39 @@ final class SqlDialectTest extends TestCase
 		$this->assertEquals('col NOT LIKE :p0', $dialect->unlike('col', ':p0'));
 		$this->assertEquals('col NOT LIKE :p0 COLLATE NOCASE', $dialect->iunlike('col', ':p0'));
 	}
+
+	// Fulltext search
+	public function testPostgresFulltext(): void
+	{
+		$dialect = new PostgresDialect();
+
+		// Without locale filter
+		$this->assertEquals(
+			"n.node IN (SELECT f.node FROM cms.fulltext f WHERE f.document @@ websearch_to_tsquery('english', :ft0))",
+			$dialect->fulltext('n.node', ':ft0'),
+		);
+
+		// With locale filter
+		$this->assertEquals(
+			"n.node IN (SELECT f.node FROM cms.fulltext f WHERE f.document @@ websearch_to_tsquery('english', :ft0) AND f.locale = 'en')",
+			$dialect->fulltext('n.node', ':ft0', 'en'),
+		);
+	}
+
+	public function testSqliteFulltext(): void
+	{
+		$dialect = new SqliteDialect();
+
+		// Without locale filter
+		$this->assertEquals(
+			'n.node IN (SELECT idx.node FROM cms_fulltext_idx idx JOIN cms_fulltext_fts fts ON idx.rowid = fts.rowid WHERE cms_fulltext_fts MATCH :ft0)',
+			$dialect->fulltext('n.node', ':ft0'),
+		);
+
+		// With locale filter
+		$this->assertEquals(
+			"n.node IN (SELECT idx.node FROM cms_fulltext_idx idx JOIN cms_fulltext_fts fts ON idx.rowid = fts.rowid WHERE cms_fulltext_fts MATCH :ft0 AND idx.locale = 'de')",
+			$dialect->fulltext('n.node', ':ft0', 'de'),
+		);
+	}
 }
