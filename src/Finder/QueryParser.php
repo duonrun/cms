@@ -36,6 +36,7 @@ final class QueryParser
 	public function __construct(
 		private readonly Context $context,
 		private readonly array $builtins = [],
+		private readonly ?ParamCounter $paramCounter = null,
 	) {}
 
 	/**
@@ -119,7 +120,6 @@ final class QueryParser
 					$currentListPos,
 					$currentList,
 					$token->position - $currentListPos,
-					$this->context->db,
 				);
 				$currentList = [];
 				$currentListPos = null;
@@ -200,14 +200,27 @@ final class QueryParser
 		}
 
 		if ($right->type === TokenType::Null) {
-			return new NullComparison($left, $operator, $right, $this->context, $this->builtins);
+			return new NullComparison(
+				$left,
+				$operator,
+				$right,
+				$this->builtins,
+				$this->paramCounter,
+			);
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
 			return new UrlPath($left, $operator, $right);
 		}
 
-		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
+		return new Comparison(
+			$left,
+			$operator,
+			$right,
+			$this->context,
+			$this->builtins,
+			$this->paramCounter,
+		);
 	}
 
 	private function getExistsCondition(Token $token): Exists

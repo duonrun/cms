@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder;
 
 use Duon\Cms\Context;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
 use Generator;
 use Iterator;
 
 final class Nodes implements Iterator
 {
-	private string $whereFields = '';
-	private string $whereTypes = '';
+	private ?CompiledQuery $filterQuery = null;
+	private ?CompiledQuery $typesQuery = null;
 	private string $order = '';
 	private ?int $limit = null;
-	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
-	private ?bool $published = true; // ditto
-	private ?bool $hidden = false; // ditto
+	private ?bool $deleted = false;
+	private ?bool $published = true;
+	private ?bool $hidden = false;
 	private readonly array $builtins;
 	private Generator $result;
 
@@ -46,21 +45,21 @@ final class Nodes implements Iterator
 	public function filter(string $query): self
 	{
 		$compiler = new QueryCompiler($this->context, $this->builtins);
-		$this->whereFields = $compiler->compile($query);
+		$this->filterQuery = $compiler->compile($query);
 
 		return $this;
 	}
 
 	public function types(string ...$types): self
 	{
-		$this->whereTypes = $this->typesCondition($types);
+		$this->typesQuery = $this->typesCondition($types);
 
 		return $this;
 	}
 
 	public function type(string $type): self
 	{
-		$this->whereTypes = $this->typesCondition([$type]);
+		$this->typesQuery = $this->typesCondition([$type]);
 
 		return $this;
 	}
@@ -148,11 +147,23 @@ final class Nodes implements Iterator
 
 	private function fetchResult(): void
 	{
-		$conditions = implode(' AND ', array_filter([
-			trim($this->whereFields),
-			trim($this->whereTypes),
-		], fn($clause) => !empty($clause)));
+		// Build condition SQL
+		$conditionParts = [];
+		$filterParams = [];
 
+		if ($this->filterQuery !== null && $this->filterQuery->sql !== '') {
+			$conditionParts[] = trim($this->filterQuery->sql);
+			$filterParams = array_merge($filterParams, $this->filterQuery->params);
+		}
+
+		if ($this->typesQuery !== null && $this->typesQuery->sql !== '') {
+			$conditionParts[] = trim($this->typesQuery->sql);
+			$filterParams = array_merge($filterParams, $this->typesQuery->params);
+		}
+
+		$conditions = implode(' AND ', $conditionParts);
+
+		// Build query params for Quma
 		$params = [
 			'condition' => $conditions,
 			'limit' => $this->limit,
@@ -174,27 +185,43 @@ final class Nodes implements Iterator
 			$params['order'] = $this->order;
 		}
 
+		// Merge filter parameters into the query params
+		$params = array_merge($params, $filterParams);
+
 		$this->result = $this->context->db->nodes->find($params)->lazy();
 	}
 
-	private function typesCondition(array $types): string
+	/**
+	 * @param array<string> $types
+	 */
+	private function typesCondition(array $types): CompiledQuery
 	{
-		$result = [];
+		if (count($types) === 0) {
+			return CompiledQuery::empty();
+		}
 
+		$params = [];
+		$conditions = [];
+		$paramIndex = 0;
+
+		// Use 't' prefix for type params to avoid collision with filter params
 		foreach ($types as $type) {
 			if (class_exists($type)) {
 				$type = $type::handle();
 			}
 
-			$result[] = 't.handle = ' . $this->context->db->quote($type);
+			$paramName = 'type' . $paramIndex++;
+			$params[$paramName] = $type;
+			$conditions[] = 't.handle = :' . $paramName;
 		}
 
-		return match (count($result)) {
-			0 => '',
-			1 => '    ' . $result[0],
+		$sql = match (count($conditions)) {
+			1 => '    ' . $conditions[0],
 			default => "    (\n        "
-				. implode("\n        OR ", $result)
+				. implode("\n        OR ", $conditions)
 				. "\n    )",
 		};
+
+		return new CompiledQuery($sql, $params);
 	}
 }

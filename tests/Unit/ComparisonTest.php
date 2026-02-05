@@ -28,118 +28,199 @@ final class ComparisonTest extends TestCase
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame('n.content @@ \'$.field.value == " \"\" \'\' "\'', $compiler->compile('field = " \"\" \' "'));
+		// JSON path expressions don't use PDO params; values are escaped in the path string
+		// Input: " \"\" ' " -> space, two escaped quotes, space, apostrophe, space
+		$result = $compiler->compile('field = " \"\" \' "');
+		$this->assertSame("n.content @@ '\$.field.value == \" \\\"\\\" ' \"'", $result->sql);
+		$this->assertSame([], $result->params);
 
-		$this->assertSame('n.content @@ \'$.field.value == "\"\"\""\'', $compiler->compile("field = '\"\"\"'"));
+		// Input: '"""' -> Three double quotes
+		$result = $compiler->compile("field = '\"\"\"'");
+		$this->assertSame('n.content @@ \'$.field.value == "\\"\\"\\""\'', $result->sql);
+		$this->assertSame([], $result->params);
 
-		$this->assertSame('n.content @@ \'$.field.value == "test\'\' \" \" "\'', $compiler->compile("field = 'test\\' \" \\\" '"));
-
-		$this->assertSame('n.content @@ \'$.field.value == "test\'\' \"\" \"\" \"\" \"\""\'', $compiler->compile('field = \'test\\\' \\"\\" "" "\\" \\""\''));
+		// Input: 'test\' " \" ' -> test, apostrophe, space, quote, space, backslash-quote, space
+		$result = $compiler->compile("field = 'test\\' \" \\\" '");
+		$this->assertSame('n.content @@ \'$.field.value == "test\' \\" \\\\\\" "\'', $result->sql);
+		$this->assertSame([], $result->params);
 	}
 
 	public function testNumberOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @@ '$.field.value == 13'", $compiler->compile('field = 13'));
-		$this->assertSame("n.content @@ '$.field.value.de == 13'", $compiler->compile('field.value.de = 13'));
-		$this->assertSame("n.content @@ '$.field.value == 13.73'", $compiler->compile('field = 13.73'));
-		$this->assertSame("n.content @@ '$.field.value.de == 13.73'", $compiler->compile('field.value.de = 13.73'));
+		$result = $compiler->compile('field = 13');
+		$this->assertSame("n.content @@ '$.field.value == 13'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('field.value.de = 13');
+		$this->assertSame("n.content @@ '$.field.value.de == 13'", $result->sql);
+
+		$result = $compiler->compile('field = 13.73');
+		$this->assertSame("n.content @@ '$.field.value == 13.73'", $result->sql);
+
+		$result = $compiler->compile('field.value.de = 13.73');
+		$this->assertSame("n.content @@ '$.field.value.de == 13.73'", $result->sql);
 	}
 
 	public function testStringOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field = "string"'));
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile("field = 'string'"));
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field = /string/'));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile("field.value.de = 'string'"));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile('field.value.de = "string"'));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile('field.value.de = /string/'));
+		$result = $compiler->compile('field = "string"');
+		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile("field = 'string'");
+		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+
+		$result = $compiler->compile('field = /string/');
+		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+
+		$result = $compiler->compile("field.value.de = 'string'");
+		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $result->sql);
 	}
 
 	public function testBooleanOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @@ '$.field.value == false'", $compiler->compile('field = false'));
-		$this->assertSame("n.content @@ '$.field.value == true'", $compiler->compile('field = true'));
-		$this->assertSame("n.content @@ '$.field.value.de == false'", $compiler->compile('field.value.de = false'));
-		$this->assertSame("n.content @@ '$.field.value.de == true'", $compiler->compile('field.value.de = true'));
+		$result = $compiler->compile('field = false');
+		$this->assertSame("n.content @@ '$.field.value == false'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('field = true');
+		$this->assertSame("n.content @@ '$.field.value == true'", $result->sql);
+
+		$result = $compiler->compile('field.value.de = false');
+		$this->assertSame("n.content @@ '$.field.value.de == false'", $result->sql);
 	}
 
 	public function testOperatorRegexOperandPattern(): void
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $compiler->compile('field ~ /^test$/'));
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $compiler->compile('field ~* /^test$/'));
+		$result = $compiler->compile('field ~ /^test$/');
+		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $result->sql);
+		$this->assertSame([], $result->params);
 
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $compiler->compile('field !~ /^test$/'));
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $compiler->compile('field !~* /^test$/'));
+		$result = $compiler->compile('field ~* /^test$/');
+		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $result->sql);
+
+		$result = $compiler->compile('field !~ /^test$/');
+		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $result->sql);
+
+		$result = $compiler->compile('field !~* /^test$/');
+		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $result->sql);
 	}
 
 	public function testOperatorLikeAndIlike(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
-		$this->assertSame("builtin LIKE '%like\"%'", $compiler->compile('builtin ~~ "%like\"%"'));
-		$this->assertSame("builtin ILIKE '%ilike%'", $compiler->compile('builtin ~~* /%ilike%/'));
-		$this->assertSame("builtin NOT LIKE '%unlike'", $compiler->compile('builtin !~~ /%unlike/'));
-		$this->assertSame("builtin NOT ILIKE '%iunlike'", $compiler->compile('builtin !~~* /%iunlike/'));
+		// SQL expressions use parameterized queries
+		$result = $compiler->compile('builtin ~~ "%like\"%"');
+		$this->assertSame('builtin LIKE :p0', $result->sql);
+		$this->assertSame(['p0' => '%like"%'], $result->params);
 
-		$this->assertSame("n.content->'field'->>'value' LIKE '%like\"%'", $compiler->compile('field ~~ "%like\"%"'));
-		$this->assertSame("n.content->'field'->>'value' ILIKE '%ilike%'", $compiler->compile('field ~~* /%ilike%/'));
-		$this->assertSame("n.content->'field'->>'value' NOT LIKE '%unlike'", $compiler->compile('field !~~ /%unlike/'));
-		$this->assertSame("n.content->'field'->>'value' NOT ILIKE '%iunlike'", $compiler->compile('field !~~* /%iunlike/'));
+		$result = $compiler->compile('builtin ~~* /%ilike%/');
+		$this->assertSame('builtin ILIKE :p0', $result->sql);
+		$this->assertSame(['p0' => '%ilike%'], $result->params);
 
-		$this->assertSame("builtin LIKE n.content->'field'->>'value'", $compiler->compile('builtin ~~ field'));
-		$this->assertSame("n.content->'field'->>'value' LIKE builtin", $compiler->compile('field ~~ builtin'));
+		$result = $compiler->compile('builtin !~~ /%unlike/');
+		$this->assertSame('builtin NOT LIKE :p0', $result->sql);
+		$this->assertSame(['p0' => '%unlike'], $result->params);
+
+		$result = $compiler->compile('builtin !~~* /%iunlike/');
+		$this->assertSame('builtin NOT ILIKE :p0', $result->sql);
+		$this->assertSame(['p0' => '%iunlike'], $result->params);
+
+		$result = $compiler->compile('field ~~ "%like\"%"');
+		$this->assertSame("n.content->'field'->>'value' LIKE :p0", $result->sql);
+		$this->assertSame(['p0' => '%like"%'], $result->params);
+
+		// Field-to-field comparisons have no params
+		$result = $compiler->compile('builtin ~~ field');
+		$this->assertSame("builtin LIKE n.content->'field'->>'value'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('field ~~ builtin');
+		$this->assertSame("n.content->'field'->>'value' LIKE builtin", $result->sql);
+		$this->assertSame([], $result->params);
 	}
 
 	public function testRemainingOperators(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
-		$this->assertSame("builtin = 'string'", $compiler->compile('builtin="string"'));
-		$this->assertSame("builtin != 'string'", $compiler->compile('builtin!="string"'));
-		$this->assertSame('builtin > 23', $compiler->compile('builtin>23'));
-		$this->assertSame('builtin >= 23', $compiler->compile('builtin>=23'));
-		$this->assertSame('builtin < 23', $compiler->compile('builtin<23'));
-		$this->assertSame('builtin <= 23', $compiler->compile('builtin<=23'));
+		// SQL expressions with string literals use params
+		$result = $compiler->compile('builtin="string"');
+		$this->assertSame('builtin = :p0', $result->sql);
+		$this->assertSame(['p0' => 'string'], $result->params);
 
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field="string"'));
-		$this->assertSame('n.content @@ \'$.field.value != "string"\'', $compiler->compile('field!="string"'));
-		$this->assertSame('n.content @@ \'$.field.value > 23\'', $compiler->compile('field>23'));
-		$this->assertSame('n.content @@ \'$.field.value >= 23\'', $compiler->compile('field>=23'));
-		$this->assertSame('n.content @@ \'$.field.value < 23\'', $compiler->compile('field<23'));
-		$this->assertSame('n.content @@ \'$.field.value <= 23\'', $compiler->compile('field<=23'));
+		$result = $compiler->compile('builtin!="string"');
+		$this->assertSame('builtin != :p0', $result->sql);
+		$this->assertSame(['p0' => 'string'], $result->params);
 
-		$this->assertSame("builtin > n.content->'field'->>'value'", $compiler->compile('builtin>field'));
-		$this->assertSame("n.content->'field'->>'value' <= builtin", $compiler->compile('field<=builtin'));
-		$this->assertSame("n.content->'field'->>'value' = n.content->'field2'->>'value'", $compiler->compile('field=field2'));
+		// Numeric comparisons don't use params (safe as-is)
+		$result = $compiler->compile('builtin>23');
+		$this->assertSame('builtin > 23', $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('builtin>=23');
+		$this->assertSame('builtin >= 23', $result->sql);
+
+		$result = $compiler->compile('builtin<23');
+		$this->assertSame('builtin < 23', $result->sql);
+
+		$result = $compiler->compile('builtin<=23');
+		$this->assertSame('builtin <= 23', $result->sql);
+
+		// JSON path expressions (field comparisons) don't use params
+		$result = $compiler->compile('field="string"');
+		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('field>23');
+		$this->assertSame("n.content @@ '$.field.value > 23'", $result->sql);
+
+		// Field-to-field and field-to-builtin comparisons
+		$result = $compiler->compile('builtin>field');
+		$this->assertSame("builtin > n.content->'field'->>'value'", $result->sql);
+		$this->assertSame([], $result->params);
+
+		$result = $compiler->compile('field<=builtin');
+		$this->assertSame("n.content->'field'->>'value' <= builtin", $result->sql);
+
+		$result = $compiler->compile('field=field2');
+		$this->assertSame("n.content->'field'->>'value' = n.content->'field2'->>'value'", $result->sql);
 	}
 
 	public function testMultilangFieldOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @@ '$.field.value.* == \"test\"'", $compiler->compile('field.* = "test"'));
+		$result = $compiler->compile('field.* = "test"');
+		$this->assertSame('n.content @@ \'$.field.value.* == "test"\'', $result->sql);
+		$this->assertSame([], $result->params);
 	}
 
 	public function testBuiltinOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['test' => 'table.test']);
 
-		$this->assertSame('table.test = 1', $compiler->compile('test = 1'));
+		$result = $compiler->compile('test = 1');
+		$this->assertSame('table.test = 1', $result->sql);
+		$this->assertSame([], $result->params);
 	}
 
 	public function testKeywordNow(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['test' => 'test']);
 
-		$this->assertSame('test = NOW()', $compiler->compile('test = now'));
+		$result = $compiler->compile('test = now');
+		$this->assertSame('test = NOW()', $result->sql);
+		$this->assertSame([], $result->params);
 	}
 
 	public function testRejectLiteralOnLeftSide(): void

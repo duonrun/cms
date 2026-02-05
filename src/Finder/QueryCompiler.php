@@ -15,26 +15,30 @@ final class QueryCompiler
 		private readonly array $builtins,
 	) {}
 
-	public function compile(string $query): string
+	public function compile(string $query): CompiledQuery
 	{
-		$parser = new QueryParser($this->context, $this->builtins);
+		$paramCounter = new ParamCounter();
+		$parser = new QueryParser($this->context, $this->builtins, $paramCounter);
 
 		return $this->build($parser->parse($query));
 	}
 
-	private function build(array $parserOutput): string
+	/**
+	 * @param array<\Duon\Cms\Finder\Output\Output> $parserOutput
+	 */
+	private function build(array $parserOutput): CompiledQuery
 	{
 		if (count($parserOutput) === 0) {
-			return '';
+			return CompiledQuery::empty();
 		}
 
-		$clause = '';
+		$result = CompiledQuery::empty();
 
 		foreach ($parserOutput as $output) {
-			$clause .= $output->get();
+			$result = $result->merge($output->get());
 		}
 
-		return $clause;
+		return $result;
 	}
 
 	private function translateKeyword(string $keyword): string
