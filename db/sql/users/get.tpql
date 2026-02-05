@@ -39,7 +39,7 @@ INNER JOIN
 <?php if (isset($sessionhash)) : ?>
 INNER JOIN
 	cms.loginsessions s ON
-		s.uid = u.uid
+		s.usr = u.usr
 <?php endif ?>
 
 WHERE

@@ -97,7 +97,7 @@ CREATE TABLE cms.authtokens (
 	CONSTRAINT uc_authtokens_usr UNIQUE (usr),
 	CONSTRAINT ck_authtokens_token CHECK (char_length(token) <= 512)
 );
-CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.users
+CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.authtokens
 	FOR EACH ROW EXECUTE FUNCTION cms.update_changed_column();
 
 
