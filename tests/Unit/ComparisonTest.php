@@ -16,7 +16,7 @@ final class ComparisonTest extends TestCase
 	protected function setUp(): void
 	{
 		$this->context = new Context(
-			$this->db(),
+			$this->dbPgsql(),
 			$this->request(),
 			$this->config(),
 			$this->registry(),

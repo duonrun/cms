@@ -29,7 +29,8 @@ UPDATE SET
 	locked = :locked,
 	hidden = :hidden,
 	editor = :editor,
-	content = :content
+	content = :content,
+	changed = strftime('%Y-%m-%d %H:%M:%f', 'now')
 WHERE
 	cms_nodes.uid = :uid
 

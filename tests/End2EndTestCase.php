@@ -426,8 +426,10 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function assertResponseOk(ResponseInterface $response): void
 	{
 		$statusCode = $response->getStatusCode();
-		$this->assertGreaterThanOrEqual(200, $statusCode, 'Expected successful response');
-		$this->assertLessThan(300, $statusCode, 'Expected successful response');
+		$body = (string) $response->getBody();
+		$msg = "Expected successful response (got {$statusCode}): {$body}";
+		$this->assertGreaterThanOrEqual(200, $statusCode, $msg);
+		$this->assertLessThan(300, $statusCode, $msg);
 	}
 
 	/**

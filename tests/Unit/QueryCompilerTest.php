@@ -17,7 +17,7 @@ final class QueryCompilerTest extends TestCase
 	protected function setup(): void
 	{
 		$this->context = new Context(
-			$this->db(),
+			$this->dbPgsql(),
 			$this->request(),
 			$this->config(),
 			$this->registry(),

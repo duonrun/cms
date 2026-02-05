@@ -26,7 +26,7 @@ class User
 		$this->email = $data['email'];
 		$this->pwhash = $data['pwhash'];
 		$this->role = $data['role'];
-		$this->active = $data['active'];
+		$this->active = (bool) $data['active'];
 		$this->created = $data['created'];
 		$this->changed = $data['changed'];
 		$this->deleted = $data['deleted'];

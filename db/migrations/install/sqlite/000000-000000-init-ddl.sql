@@ -24,8 +24,8 @@ CREATE TABLE cms_users (
 	data TEXT NOT NULL CHECK (json_valid(data)),
 	creator INTEGER NOT NULL,
 	editor INTEGER NOT NULL,
-	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
-	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	deleted TEXT,
 	CONSTRAINT uc_users_uid UNIQUE (uid),
 	CONSTRAINT fk_users_userroles FOREIGN KEY (userrole)
@@ -51,8 +51,8 @@ CREATE UNIQUE INDEX ux_users_email ON cms_users (lower(email))
 CREATE TABLE cms_authtokens (
 	token TEXT NOT NULL,
 	usr INTEGER NOT NULL,
-	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
-	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	creator INTEGER NOT NULL,
 	editor INTEGER NOT NULL,
 	CONSTRAINT pk_authtokens PRIMARY KEY (token),
@@ -71,7 +71,7 @@ CREATE TABLE cms_authtokens (
 CREATE TABLE cms_onetimetokens (
 	token TEXT NOT NULL,
 	usr INTEGER NOT NULL,
-	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	CONSTRAINT pk_onetimetokens PRIMARY KEY (token),
 	CONSTRAINT fk_onetimetokens_users FOREIGN KEY (usr)
 		REFERENCES cms_users (usr),
@@ -112,8 +112,8 @@ CREATE TABLE cms_nodes (
 	type INTEGER NOT NULL,
 	creator INTEGER NOT NULL,
 	editor INTEGER NOT NULL,
-	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
-	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	deleted TEXT,
 	content TEXT NOT NULL CHECK (json_valid(content)),
 	CONSTRAINT uc_nodes_uid UNIQUE (uid),
@@ -154,7 +154,7 @@ CREATE TABLE cms_urlpaths (
 	locale TEXT NOT NULL,
 	creator INTEGER NOT NULL,
 	editor INTEGER NOT NULL,
-	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	created TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	inactive TEXT,
 	CONSTRAINT pk_urlpaths PRIMARY KEY (node, locale, path),
 	CONSTRAINT fk_urlpaths_nodes FOREIGN KEY (node)
@@ -289,7 +289,7 @@ CREATE TABLE audit_users (
 	active INTEGER NOT NULL CHECK (active IN (0, 1)),
 	data TEXT NOT NULL CHECK (json_valid(data)),
 	editor INTEGER NOT NULL,
-	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
+	changed TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now')),
 	deleted TEXT,
 	CONSTRAINT pk_audit_users PRIMARY KEY (usr, changed),
 	CONSTRAINT fk_audit_users FOREIGN KEY (usr)
@@ -303,7 +303,7 @@ CREATE TRIGGER users_trigger_01_change
 	BEFORE UPDATE ON cms_users
 	FOR EACH ROW
 BEGIN
-	UPDATE cms_users SET changed = strftime('%Y-%m-%d %H:%M:%S', 'now')
+	UPDATE cms_users SET changed = strftime('%Y-%m-%d %H:%M:%f', 'now')
 	WHERE usr = NEW.usr;
 END;
 
@@ -311,17 +311,12 @@ CREATE TRIGGER authtokens_trigger_01_change
 	BEFORE UPDATE ON cms_authtokens
 	FOR EACH ROW
 BEGIN
-	UPDATE cms_authtokens SET changed = strftime('%Y-%m-%d %H:%M:%S', 'now')
+	UPDATE cms_authtokens SET changed = strftime('%Y-%m-%d %H:%M:%f', 'now')
 	WHERE token = NEW.token;
 END;
 
-CREATE TRIGGER nodes_trigger_02_change
-	BEFORE UPDATE ON cms_nodes
-	FOR EACH ROW
-BEGIN
-	UPDATE cms_nodes SET changed = strftime('%Y-%m-%d %H:%M:%S', 'now')
-	WHERE node = NEW.node;
-END;
+-- Note: nodes_trigger_02_change removed - changed timestamp is set explicitly
+-- in save.sql and delete.sql queries to avoid trigger-based UPDATE conflicts
 
 
 -- Triggers for audit logging
