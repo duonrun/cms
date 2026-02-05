@@ -16,7 +16,7 @@ class MatrixIntegrationTest extends TestCase
 		$locales = new \Duon\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
-		
+
 		$psrRequest = $psrRequest
 			->withAttribute('locales', $locales)
 			->withAttribute('locale', $locales->get('en'))
@@ -52,7 +52,7 @@ class MatrixIntegrationTest extends TestCase
 			]],
 		]]);
 
-	// Test that matrix field exists and is accessible
+		// Test that matrix field exists and is accessible
 		$matrixField = $node->getField('matrix');
 		$this->assertInstanceOf(\Duon\Cms\Field\Matrix::class, $matrixField);
 		$matrixValue = $node->matrix;
@@ -86,10 +86,10 @@ class MatrixIntegrationTest extends TestCase
 		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
 
 		$matrix = new TestMatrix('test_matrix', new TestNodeWithMatrix($context, $finder, ['content' => []]), new \Duon\Cms\Value\ValueContext('test_matrix', []));
-		
+
 		// Call value() to initialize subfields
 		$matrixValue = $matrix->value();
-		
+
 		$structure = $matrix->structure();
 		$this->assertEquals('matrix', $structure['type']);
 		$this->assertIsArray($structure['value']);
@@ -118,7 +118,7 @@ class MatrixIntegrationTest extends TestCase
 						'content' => ['type' => 'grid', 'columns' => 12, 'value' => []],
 					],
 				],
-			])
+			]),
 		);
 
 		$structure = $matrix->structure();
@@ -126,7 +126,7 @@ class MatrixIntegrationTest extends TestCase
 		// Subfields with #[Translate] should have locale keys in their value
 		$this->assertCount(1, $structure['value']);
 		$titleValue = $structure['value'][0]['title']['value'];
-		
+
 		// Should have locale structure, not empty string
 		$this->assertIsArray($titleValue, 'Translatable subfield should have array value with locale keys');
 		$this->assertArrayHasKey('en', $titleValue);

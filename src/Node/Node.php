@@ -161,9 +161,9 @@ abstract class Node
 		$data = $this->data;
 		$result = [
 			'uid' => $data['uid'],
-			'published' => $data['published'],
-			'hidden' => $data['hidden'],
-			'locked' => $data['locked'],
+			'published' => (bool) $data['published'],
+			'hidden' => (bool) $data['hidden'],
+			'locked' => (bool) $data['locked'],
 			'created' => $data['created'],
 			'changed' => $data['changed'],
 			'deleted' => $data['deleted'],

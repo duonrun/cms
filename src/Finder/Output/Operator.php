@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Finder\CompiledQuery;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 
@@ -14,12 +15,14 @@ class Operator implements Output
 		public Token $token,
 	) {}
 
-	public function get(): string
+	public function get(): CompiledQuery
 	{
-		return match ($this->token->type) {
+		$sql = match ($this->token->type) {
 			TokenType::And => ' AND ',
 			TokenType::Or => ' OR ',
 			default => throw new ParserException('Invalid boolean operator'),
 		};
+
+		return CompiledQuery::sql($sql);
 	}
 }

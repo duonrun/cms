@@ -76,8 +76,8 @@ class Html
 		$result = $sanitizer->sanitize($html);
 
 		// also remove empty lines
-		return $removeEmptyLines ?
-			preg_replace("/(^[\r\n]*|[\r\n]+)[\\s\t]*[\r\n]+/", PHP_EOL, $result) :
-			$result;
+		return $removeEmptyLines
+			? preg_replace("/(^[\r\n]*|[\r\n]+)[\\s\t]*[\r\n]+/", PHP_EOL, $result)
+			: $result;
 	}
 }

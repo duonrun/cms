@@ -7,8 +7,26 @@ This guide explains how to set up and run tests for the Duon CMS project.
 The test suite combines three types of tests:
 
 - **Unit Tests**: Fast tests for isolated components (lexer, parser, utilities, field capabilities)
-- **Integration Tests**: Tests that interact with a real PostgreSQL database directly
+- **Integration Tests**: Tests that interact with a real database directly
 - **End-to-End (E2E) Tests**: Tests that exercise the full HTTP request/response cycle through the application
+
+### Multi-Backend Support
+
+The test suite supports both PostgreSQL and SQLite backends. The same test code runs on both backends, selected via an environment variable:
+
+```bash
+# Run tests on PostgreSQL (default)
+composer test:pgsql
+
+# Run tests on SQLite
+composer test:sqlite
+
+# Run tests on both backends sequentially
+composer test:all
+
+# Run default backend (currently PostgreSQL)
+composer test
+```
 
 ### Key Principles
 
@@ -17,12 +35,13 @@ The test suite combines three types of tests:
 3. **No Transactions for E2E Tests**: E2E tests disable transactions because the CMS creates separate database connections that cannot see uncommitted transaction data
 4. **Fixture-Based**: Tests use SQL fixtures and helper methods for consistent test data
 5. **Hybrid Setup**: Database schema is initialized once per test run, then transactions provide isolation for integration tests
+6. **Backend-Neutral Helpers**: Test helper methods use driver-aware table names and SQL syntax
 
 ## Prerequisites
 
-### 1. PostgreSQL Setup
+### Option A: PostgreSQL Setup
 
-The test suite requires a PostgreSQL database. Ensure PostgreSQL is installed and running:
+For running tests with PostgreSQL:
 
 ```bash
 # Check PostgreSQL status
@@ -30,47 +49,63 @@ sudo systemctl status postgresql
 
 # Start if not running
 sudo systemctl start postgresql
-```
 
-### 2. Database User
-
-Create a PostgreSQL user for testing:
-
-```bash
 # Create user with CREATEDB privilege
-sudo -u postgres createuser -d -P duoncms 
-```
+sudo -u postgres createuser -d -P duoncms
 
-### 3. Initialize Test Database
-
-Create and initialize the test database:
-
-```bash
-# Create the database
+# Create and initialize the database
 ./run recreate-db
-
-# Apply all migrations
 ./run migrate --apply
 ```
 
-The `recreate-db` command:
-- Terminates existing connections to the database
-- Drops the database if it exists
-- Creates a fresh database
-- Sets the owner to `duoncms`
+### Option B: SQLite Setup
+
+For running tests with SQLite, no external setup is required. The test harness automatically:
+
+1. Creates a temporary SQLite database file
+2. Applies all migrations
+3. Cleans up after the test run
+
+SQLite tests are faster and require no external database server.
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CMS_TEST_DRIVER` | Database backend: `sqlite` or `pgsql` | `pgsql` |
+| `CMS_TEST_PGSQL_DSN` | Full PostgreSQL DSN | (derived from parts) |
+| `CMS_TEST_PGSQL_HOST` | PostgreSQL host | `localhost` |
+| `CMS_TEST_PGSQL_PORT` | PostgreSQL port | `5432` |
+| `CMS_TEST_PGSQL_DB` | PostgreSQL database name | `duoncms` |
+| `CMS_TEST_PGSQL_USER` | PostgreSQL username | `duoncms` |
+| `CMS_TEST_PGSQL_PASSWORD` | PostgreSQL password | `duoncms` |
 
 ## Running Tests
 
-### Run All Tests
+### Run All Tests (Default Backend)
 
 ```bash
 composer test
 ```
 
+### Run Tests on Specific Backend
+
+```bash
+# PostgreSQL
+composer test:pgsql
+
+# SQLite
+composer test:sqlite
+
+# Both backends (for CI/release)
+composer test:all
+```
+
 ## How to Resume
 
 - Run `composer test` to verify the suite.
-- If the database is out of date, run `./run recreate-db && ./run migrate --apply`.
+- For PostgreSQL: if the database is out of date, run `./run recreate-db && ./run migrate --apply`.
+- For SQLite: no setup needed; migrations are applied automatically.
 - Use `composer coverage` when you need updated coverage numbers.
 
 ### Run Specific Test Suite
@@ -397,20 +432,26 @@ sudo -u postgres psql -c "ALTER USER duoncms CREATEDB;"
 
 ### Database Connection Configuration
 
-Test database credentials are configured in `tests/TestCase.php`:
+Test database configuration is centralized in `tests/Support/TestDbConfig.php`:
 
 ```php
+// PostgreSQL (default)
 // Database: duoncms
 // User: duoncms
 // Password: duoncms
 // Host: localhost
+// Port: 5432
+
+// SQLite
+// File: {temp_dir}/cms_test_{pid}.sqlite
+// Auto-created and migrated per test run
 ```
 
-To use different credentials, modify the `conn()` method in `TestCase.php`.
+Configure via environment variables (see Prerequisites section above).
 
 ## CI/CD Integration
 
-### GitHub Actions Example
+### GitHub Actions Example (Multi-Backend)
 
 ```yaml
 name: Tests
@@ -418,7 +459,27 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  test:
+  test-sqlite:
+    name: SQLite Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo, pdo_sqlite
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run SQLite tests
+        run: composer test:sqlite
+
+  test-pgsql:
+    name: PostgreSQL Tests
     runs-on: ubuntu-latest
 
     services:
@@ -443,7 +504,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
-          extensions: pdo, pdo_pgsql, pgsql
+          extensions: pdo, pdo_pgsql
 
       - name: Install dependencies
         run: composer install
@@ -453,8 +514,8 @@ jobs:
           ./run recreate-db
           ./run migrate --apply
 
-      - name: Run tests
-        run: composer test
+      - name: Run PostgreSQL tests
+        run: composer test:pgsql
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -505,6 +566,7 @@ To optimize:
 - [x] Add end-to-end tests (HTTP request/response cycle)
 - [x] Add authentication integration tests (via E2E tests)
 - [x] Add URL path resolution tests (via E2E routing tests)
+- [x] Multi-backend support (PostgreSQL + SQLite)
 - [ ] Tag tests with `@group integration` for filtering
 - [ ] Add full-text search integration tests
 - [ ] Database seeder for realistic test data

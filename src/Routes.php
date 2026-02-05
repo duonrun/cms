@@ -23,7 +23,7 @@ class Routes
 {
 	protected string $panelPath;
 	protected string $panelApiPath;
-	protected string|null $apiPath;
+	protected ?string $apiPath;
 	protected InitRequest $initRequestMiddlware;
 	protected Session $session;
 

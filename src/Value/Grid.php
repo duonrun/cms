@@ -167,8 +167,8 @@ class Grid extends Value
 
 		$columns = $this->columns();
 
-		$out = '<' . $tag . ' class="' . $prefix . '-grid ' . $prefix .
-			'-grid-columns-' . $columns . $class . '">';
+		$out = '<' . $tag . ' class="' . $prefix . '-grid ' . $prefix
+			. '-grid-columns-' . $columns . $class . '">';
 
 		foreach ($this->preparedData as $value) {
 			$out .= $this->renderValue($prefix, $value, $args);
@@ -203,8 +203,8 @@ class Grid extends Value
 		$styleClass = $value->styleClass();
 		$class = $styleClass ? ' ' . $styleClass : '';
 
-		$out = '<div class="' . $prefix . '-' . $value->type .
-			' ' . $colspan . ' ' . $rowspan . $class . '">';
+		$out = '<div class="' . $prefix . '-' . $value->type
+			. ' ' . $colspan . ' ' . $rowspan . $class . '">';
 		$out .= match ($value->type) {
 			'html' => $value->data['value'],
 			'text' => $value->data['value'],

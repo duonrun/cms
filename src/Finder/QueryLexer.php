@@ -113,9 +113,9 @@ final class QueryLexer
 					}
 				} else {
 					$this->error(
-						"Invalid operator '!'. " .
-						"It can only be used in combination with '=' " .
-						"and '~', i. e. '!=' and '!~'",
+						"Invalid operator '!'. "
+						. "It can only be used in combination with '=' "
+						. "and '~', i. e. '!=' and '!~'",
 					);
 				}
 				break;
@@ -343,6 +343,10 @@ final class QueryLexer
 					return TokenType::Path;
 				}
 
+				if ($lexeme === 'fulltext' || str_starts_with($lexeme, 'fulltext.')) {
+					return TokenType::Fulltext;
+				}
+
 				if (in_array($lexeme, $this->builtins)) {
 					return TokenType::Builtin;
 				}
@@ -357,10 +361,10 @@ final class QueryLexer
 	private function error(string $msg): never
 	{
 		throw new ParserException(
-			"Parse error at position {$this->start}. {$msg}\n\n" .
-				"Query: `{$this->query}`\n" .
-				str_repeat(' ', $this->start + 8) .
-				str_repeat('^', $this->current - $this->start) . "\n\n",
+			"Parse error at position {$this->start}. {$msg}\n\n"
+				. "Query: `{$this->query}`\n"
+				. str_repeat(' ', $this->start + 8)
+				. str_repeat('^', $this->current - $this->start) . "\n\n",
 		);
 	}
 }

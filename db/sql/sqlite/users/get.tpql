@@ -7,8 +7,8 @@ SELECT
 	u.userrole AS role,
 	u.active,
 	u.data,
-	COALESCE(c.data->>'name', c.username, c.email) AS creator,
-	COALESCE(e.data->>'name', e.username, e.email) AS editor,
+	COALESCE(json_extract(c.data, '$.name'), c.username, c.email) AS creator,
+	COALESCE(json_extract(e.data, '$.name'), e.username, e.email) AS editor,
 <?php if (isset($sessionhash)) : ?>
 	s.expires,
 <?php endif ?>
@@ -16,30 +16,30 @@ SELECT
 	u.changed,
 	u.deleted
 FROM
-	cms.users u
+	cms_users u
 INNER JOIN
-	cms.users c ON
+	cms_users c ON
 		u.creator = c.usr
 INNER JOIN
-	cms.users e ON
+	cms_users e ON
 		u.editor = e.usr
 
 <?php if (isset($token)): ?>
 INNER JOIN
-	cms.authtokens at ON
+	cms_authtokens at ON
 		at.usr = u.usr
 <?php endif ?>
 
 <?php if (isset($onetimetoken)): ?>
 INNER JOIN
-	cms.onetimetokens ott ON
+	cms_onetimetokens ott ON
 		ott.usr = u.usr
 <?php endif ?>
 
 <?php if (isset($sessionhash)) : ?>
 INNER JOIN
-	cms.loginsessions s ON
-		s.uid = u.uid
+	cms_loginsessions s ON
+		s.usr = u.usr
 <?php endif ?>
 
 WHERE
@@ -65,5 +65,5 @@ WHERE
 <?php endif ?>
 
 <?php if (!isset($inactiveAlso) || $inactiveAlso === false) : ?>
-	AND u.active = true
+	AND u.active = 1
 <?php endif ?>

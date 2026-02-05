@@ -5,14 +5,21 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Finder\CompiledQuery;
 use Duon\Cms\Finder\CompilesField;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
-use Duon\Quma\Database;
 
 abstract readonly class Expression
 {
 	use CompilesField;
+
+	/**
+	 * Get the SQL dialect for this expression.
+	 * Must be implemented by subclasses that use dialect-specific features.
+	 */
+	abstract protected function getDialect(): ?SqlDialect;
 
 	protected function getOperator(TokenType $type): string
 	{
@@ -24,37 +31,119 @@ abstract readonly class Expression
 			TokenType::GreaterEqual => '>=',
 			TokenType::Less => '<',
 			TokenType::LessEqual => '<=',
-			TokenType::Like => 'LIKE',
-			TokenType::ILike => 'ILIKE',
 			TokenType::Unequal => '!=',
-			TokenType::Unlike => 'NOT LIKE',
-			TokenType::IUnlike => 'NOT ILIKE',
 			TokenType::And => 'AND',
 			TokenType::Or => 'OR',
 			TokenType::In => 'IN',
 			TokenType::NotIn => 'NOT IN',
+			// LIKE operators are handled by dialect in getSqlExpression
+			TokenType::Like => 'LIKE',
+			TokenType::Unlike => 'NOT LIKE',
+			TokenType::ILike => 'ILIKE',
+			TokenType::IUnlike => 'NOT ILIKE',
 			default => throw new ParserException('Invalid expression operator: ' . $type->name),
 		};
 	}
 
-	protected function getOperand(Token $token, Database $db, array $builtins): string
-	{
+	/**
+	 * Get the SQL operand and any parameters for a token.
+	 *
+	 * @param array<string, scalar|null> $params Reference to params array to add to
+	 * @param int $paramIndex Reference to param counter for unique names
+	 * @return string SQL fragment (may contain parameter placeholders)
+	 */
+	protected function getOperand(
+		Token $token,
+		array $builtins,
+		array &$params,
+		int &$paramIndex,
+	): string {
+		$dialect = $this->getDialect();
+
 		return match ($token->type) {
-			TokenType::Boolean => strtolower($token->lexeme),
-			TokenType::Field => $this->compileField($token->lexeme, 'n.content'),
+			TokenType::Boolean => $this->formatBoolean($token->lexeme, $dialect),
+			TokenType::Field => $this->compileFieldWithDialect($token->lexeme, $dialect),
 			TokenType::Builtin => $builtins[$token->lexeme],
-			TokenType::Keyword => $this->translateKeyword($token->lexeme),
+			TokenType::Keyword => $this->translateKeyword($token->lexeme, $dialect),
 			TokenType::Null => 'NULL',
 			TokenType::Number => $token->lexeme,
-			TokenType::String => $db->quote($token->lexeme),
-			TokenType::List => $token->lexeme,
+			TokenType::String => $this->addParam($token->lexeme, $params, $paramIndex),
+			TokenType::List => $this->compileList($token, $params, $paramIndex),
 		};
 	}
 
-	protected function translateKeyword(string $keyword): string
+	/**
+	 * Compile a field using dialect-specific JSON access.
+	 *
+	 * Transforms 2-part field names like 'title.en' to 'title.value.en'
+	 * to account for the field structure {type: ..., value: ...}.
+	 */
+	protected function compileFieldWithDialect(string $fieldName, ?SqlDialect $dialect): string
+	{
+		if ($dialect === null) {
+			throw new ParserException('Dialect is required for field compilation');
+		}
+
+		// Transform 2-part field names to insert .value for locale access
+		// e.g., 'title.en' → 'title.value.en'
+		$parts = explode('.', $fieldName);
+		if (count($parts) === 2) {
+			$fieldName = $parts[0] . '.value.' . $parts[1];
+		}
+
+		return $this->compileField($fieldName, 'n.content', $dialect);
+	}
+
+	/**
+	 * Format a boolean value for the current dialect.
+	 */
+	protected function formatBoolean(string $value, ?SqlDialect $dialect): string
+	{
+		$lowered = strtolower($value);
+
+		// SQLite uses 1/0 for booleans
+		if ($dialect !== null && $dialect->driver() === 'sqlite') {
+			return $lowered === 'true' ? '1' : '0';
+		}
+
+		return $lowered;
+	}
+
+	/**
+	 * Add a parameter and return its placeholder name.
+	 */
+	protected function addParam(
+		string|int|float|bool|null $value,
+		array &$params,
+		int &$paramIndex,
+	): string {
+		$name = 'p' . $paramIndex++;
+		$params[$name] = $value;
+
+		return ':' . $name;
+	}
+
+	/**
+	 * Compile a list token into IN (...) format with parameters.
+	 */
+	protected function compileList(Token $token, array &$params, int &$paramIndex): string
+	{
+		// The token lexeme contains the raw list items separated by comma
+		// We need to parse and parameterize each item
+		$items = $token->getListItems();
+		$placeholders = [];
+
+		foreach ($items as $item) {
+			$placeholders[] = $this->addParam($item, $params, $paramIndex);
+		}
+
+		return '(' . implode(', ', $placeholders) . ')';
+	}
+
+	protected function translateKeyword(string $keyword, ?SqlDialect $dialect): string
 	{
 		return match ($keyword) {
-			'now' => 'NOW()',
+			'now' => $dialect?->now() ?? 'NOW()',
 		};
 	}
 }

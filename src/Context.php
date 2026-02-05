@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Config;
+use Duon\Cms\Finder\Dialect\DialectFactory;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Core\Factory;
@@ -35,5 +37,13 @@ final class Context
 	public function localeId(): string
 	{
 		return $this->request->get('locale')->id;
+	}
+
+	/**
+	 * Get the SQL dialect for the current database driver.
+	 */
+	public function dialect(): SqlDialect
+	{
+		return DialectFactory::forDriver($this->db->getPdoDriver());
 	}
 }

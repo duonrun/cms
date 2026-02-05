@@ -13,8 +13,20 @@ use Duon\Quma\Connection;
 
 $connection = new Connection(
 	'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-	__DIR__ . '/db/sql',
-	__DIR__ . '/db/migrations/install',
+	[
+		'pgsql' => __DIR__ . '/db/sql/pgsql',
+		'sqlite' => __DIR__ . '/db/sql/sqlite',
+	],
+	[
+		'install' => [[
+			'pgsql' => __DIR__ . '/db/migrations/install/pgsql',
+			'sqlite' => __DIR__ . '/db/migrations/install/sqlite',
+		]],
+		'default' => [[
+			'pgsql' => __DIR__ . '/db/migrations/update/pgsql',
+			'sqlite' => __DIR__ . '/db/migrations/update/sqlite',
+		]],
+	],
 	fetchMode: PDO::FETCH_ASSOC,
 	print: false,
 );
@@ -36,4 +48,3 @@ $runner = new Runner($commands);
 exit($runner->run());
 
 // vim: ft=php
-

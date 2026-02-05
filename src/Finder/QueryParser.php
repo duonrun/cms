@@ -13,6 +13,7 @@ use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\Output\Comparison;
 use Duon\Cms\Finder\Output\Exists;
 use Duon\Cms\Finder\Output\Expression;
+use Duon\Cms\Finder\Output\Fulltext;
 use Duon\Cms\Finder\Output\LeftParen;
 use Duon\Cms\Finder\Output\NullComparison;
 use Duon\Cms\Finder\Output\Operator;
@@ -36,6 +37,7 @@ final class QueryParser
 	public function __construct(
 		private readonly Context $context,
 		private readonly array $builtins = [],
+		private readonly ?ParamCounter $paramCounter = null,
 	) {}
 
 	/**
@@ -119,7 +121,6 @@ final class QueryParser
 					$currentListPos,
 					$currentList,
 					$token->position - $currentListPos,
-					$this->context->db,
 				);
 				$currentList = [];
 				$currentListPos = null;
@@ -200,14 +201,32 @@ final class QueryParser
 		}
 
 		if ($right->type === TokenType::Null) {
-			return new NullComparison($left, $operator, $right, $this->context, $this->builtins);
+			return new NullComparison(
+				$left,
+				$operator,
+				$right,
+				$this->context,
+				$this->builtins,
+				$this->paramCounter,
+			);
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
-			return new UrlPath($left, $operator, $right);
+			return new UrlPath($left, $operator, $right, $this->context, $this->paramCounter);
 		}
 
-		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
+		if ($left->type === TokenType::Fulltext || $right->type === TokenType::Fulltext) {
+			return new Fulltext($left, $operator, $right, $this->context, $this->paramCounter);
+		}
+
+		return new Comparison(
+			$left,
+			$operator,
+			$right,
+			$this->context,
+			$this->builtins,
+			$this->paramCounter,
+		);
 	}
 
 	private function getExistsCondition(Token $token): Exists
@@ -215,15 +234,15 @@ final class QueryParser
 		if ($token->type !== TokenType::Field) {
 			$this->error(
 				$token,
-				'Conditions of type `field exists` must consist of ' .
-				'a single operand of type Field.',
+				'Conditions of type `field exists` must consist of '
+				. 'a single operand of type Field.',
 			);
 		}
 
 		$this->readyForCondition = false;
 		$this->pos++;
 
-		return new Exists($token);
+		return new Exists($token, $this->context);
 	}
 
 	/**
@@ -234,8 +253,8 @@ final class QueryParser
 		if ($this->readyForCondition) {
 			$this->error(
 				$token,
-				'Invalid position for a boolean operator. ' .
-					'Maybe you used && instead of & or || instead of |',
+				'Invalid position for a boolean operator. '
+					. 'Maybe you used && instead of & or || instead of |',
 			);
 		}
 
@@ -303,10 +322,10 @@ final class QueryParser
 		}
 
 		throw new ParserException(
-			"Parse error at position {$position}. {$msg}\n\n" .
-				"Query: `{$this->query}`\n" .
-				str_repeat(' ', $start) .
-				str_repeat('^', $len) . "\n\n",
+			"Parse error at position {$position}. {$msg}\n\n"
+				. "Query: `{$this->query}`\n"
+				. str_repeat(' ', $start)
+				. str_repeat('^', $len) . "\n\n",
 		);
 	}
 }

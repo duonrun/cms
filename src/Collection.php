@@ -80,8 +80,8 @@ abstract class Collection
 
 	public static function handle(): string
 	{
-		return static::$handle ?:
-			ltrim(
+		return static::$handle
+			?: ltrim(
 				strtolower(preg_replace(
 					'/[A-Z]([A-Z](?![a-z]))*/',
 					'-$0',

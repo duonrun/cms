@@ -23,7 +23,7 @@ class GetQuery implements Query
 		$this->_fields = explode(',', $request->param('fields', ''));
 	}
 
-	private function tristateValue(string|null $value): bool|null
+	private function tristateValue(?string $value): ?bool
 	{
 		if ($value === 'true') {
 			return true;

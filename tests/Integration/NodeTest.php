@@ -28,16 +28,13 @@ final class NodeTest extends IntegrationTestCase
 			'content' => $content,
 		]);
 
-		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
+		$node = $this->fetchRow('nodes', 'node', $nodeId);
 
 		$this->assertNotNull($node);
 		$this->assertEquals('integration-test-node-1', $node['uid']);
 		$this->assertEquals($typeId, $node['type']);
-		$this->assertTrue($node['published']);
-		$this->assertFalse($node['hidden']);
+		$this->assertTruthy($node['published']);
+		$this->assertFalsy($node['hidden']);
 
 		$contentData = json_decode($node['content'], true);
 		$this->assertEquals('Testseite', $contentData['title']['value']['de']);
@@ -52,15 +49,12 @@ final class NodeTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
-		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
+		$node = $this->fetchRow('nodes', 'node', $nodeId);
 
 		$this->assertNotNull($node);
-		$this->assertTrue($node['published']); // Default is true
-		$this->assertFalse($node['hidden']); // Default is false
-		$this->assertFalse($node['locked']); // Default is false
+		$this->assertTruthy($node['published']); // Default is true
+		$this->assertFalsy($node['hidden']); // Default is false
+		$this->assertFalsy($node['locked']); // Default is false
 		$this->assertEquals(1, $node['creator']); // System user
 		$this->assertEquals(1, $node['editor']); // System user
 	}
@@ -83,15 +77,9 @@ final class NodeTest extends IntegrationTestCase
 			'subtitle' => ['type' => 'text', 'value' => ['en' => 'New Subtitle']],
 		];
 
-		$this->db()->execute(
-			'UPDATE cms.nodes SET content = :content::jsonb WHERE node = :id',
-			['id' => $nodeId, 'content' => json_encode($updatedContent)],
-		)->run();
+		$this->updateNodeContent($nodeId, $updatedContent);
 
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
+		$node = $this->fetchRow('nodes', 'node', $nodeId);
 
 		$contentData = json_decode($node['content'], true);
 		$this->assertEquals('Updated Title', $contentData['title']['value']['en']);
@@ -106,10 +94,10 @@ final class NodeTest extends IntegrationTestCase
 		$this->createTestNode(['uid' => 'query-node-2', 'type' => $typeId, 'published' => true]);
 		$this->createTestNode(['uid' => 'query-node-3', 'type' => $typeId, 'published' => false]);
 
-		$nodes = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE type = :type AND published = true ORDER BY node',
-			['type' => $typeId],
-		)->all();
+		// Query for published nodes only
+		$config = self::testDbConfig();
+		$publishedValue = $config->isSqlite() ? 1 : true;
+		$nodes = $this->queryNodesByType($typeId, ['published' => $publishedValue]);
 
 		$this->assertCount(2, $nodes);
 		$this->assertEquals('query-node-1', $nodes[0]['uid']);
@@ -131,10 +119,7 @@ final class NodeTest extends IntegrationTestCase
 			'parent' => $parentId,
 		]);
 
-		$children = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE parent = :parent',
-			['parent' => $parentId],
-		)->all();
+		$children = $this->queryNodesByParent($parentId);
 
 		$this->assertCount(1, $children);
 		$this->assertEquals('hierarchy-child', $children[0]['uid']);
@@ -149,22 +134,11 @@ final class NodeTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
-		$exists = $this->db()->execute(
-			'SELECT EXISTS(SELECT 1 FROM cms.nodes WHERE node = :id) as exists',
-			['id' => $nodeId],
-		)->one()['exists'];
-		$this->assertTrue($exists);
+		$this->assertTrue($this->rowExists('nodes', 'node', $nodeId));
 
-		$this->db()->execute(
-			'DELETE FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->run();
+		$this->deleteRow('nodes', 'node', $nodeId);
 
-		$exists = $this->db()->execute(
-			'SELECT EXISTS(SELECT 1 FROM cms.nodes WHERE node = :id) as exists',
-			['id' => $nodeId],
-		)->one()['exists'];
-		$this->assertFalse($exists);
+		$this->assertFalse($this->rowExists('nodes', 'node', $nodeId));
 	}
 
 	public function testNodeJsonbQuerying(): void
@@ -187,17 +161,11 @@ final class NodeTest extends IntegrationTestCase
 			],
 		]);
 
-		$nodes = $this->db()->execute(
-			"SELECT uid, content->'title'->'value'->>'en' as title
-			 FROM cms.nodes
-			 WHERE type = :type
-			 AND content->'title'->'value'->>'en' LIKE '%Second%'",
-			['type' => $typeId],
-		)->all();
+		$nodes = $this->queryNodesByJsonField($typeId, 'title.value.en', '%Second%');
 
 		$this->assertCount(1, $nodes);
 		$this->assertEquals('jsonb-node-2', $nodes[0]['uid']);
-		$this->assertEquals('Second Title', $nodes[0]['title']);
+		$this->assertEquals('Second Title', $nodes[0]['extracted_value']);
 	}
 
 	public function testCreateTestUserMatchesSchema(): void
@@ -210,17 +178,14 @@ final class NodeTest extends IntegrationTestCase
 			'data' => ['name' => 'Integration User'],
 		]);
 
-		$user = $this->db()->execute(
-			'SELECT uid, username, email, userrole, active, data FROM cms.users WHERE usr = :usr',
-			['usr' => $userId],
-		)->one();
+		$user = $this->fetchUser($userId);
 
 		$this->assertNotNull($user);
 		$this->assertSame('integration-test-user', $user['uid']);
 		$this->assertSame('integration-user', $user['username']);
 		$this->assertSame('integration-user@example.com', $user['email']);
 		$this->assertSame('admin', $user['userrole']);
-		$this->assertTrue($user['active']);
+		$this->assertTruthy($user['active']);
 		$data = json_decode($user['data'], true);
 		$this->assertSame('Integration User', ($data['name'] ?? null));
 	}
@@ -253,5 +218,21 @@ final class NodeTest extends IntegrationTestCase
 				'title' => ['type' => 'text', 'value' => ['en' => 'Title']],
 			],
 		]);
+	}
+
+	/**
+	 * Assert that a value is truthy (works with both boolean true and integer 1).
+	 */
+	private function assertTruthy(mixed $value): void
+	{
+		$this->assertTrue((bool) $value, 'Expected truthy value');
+	}
+
+	/**
+	 * Assert that a value is falsy (works with both boolean false and integer 0).
+	 */
+	private function assertFalsy(mixed $value): void
+	{
+		$this->assertFalse((bool) $value, 'Expected falsy value');
 	}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Config;
+use Duon\Cms\Database\CmsDatabase;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Block;
 use Duon\Cms\Node\Document;
@@ -108,29 +109,48 @@ class Cms implements Plugin
 			throw new RuntimeException('No config given');
 		}
 
+		$dsn = $this->config->get('db.dsn');
+		$this->validateDriver($dsn);
+
 		$root = dirname(__DIR__);
+
+		// Driver-aware SQL directories: pgsql and sqlite scripts are separate
 		$sqlConfig = $this->config->get('db.sql', []);
+		$userSqlDirs = $sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [];
 		$sql = array_merge(
-			[$root . '/db/sql'],
-			$sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [],
+			$userSqlDirs,
+			[[
+				'pgsql' => $root . '/db/sql/pgsql',
+				'sqlite' => $root . '/db/sql/sqlite',
+			]],
 		);
+
 		$migrations = $this->config->get('db.migrations', []);
+		$userMigrations = $migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [];
+
+		// Driver-aware migrations: pgsql and sqlite migrations are separate
 		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
+		$namespacedMigrations['install'] = [[
+			'pgsql' => $root . '/db/migrations/install/pgsql',
+			'sqlite' => $root . '/db/migrations/install/sqlite',
+		]];
 		$namespacedMigrations['default'] = array_merge(
-			$migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [],
-			[$root . '/db/migrations/update'],
+			$userMigrations,
+			[[
+				'pgsql' => $root . '/db/migrations/update/pgsql',
+				'sqlite' => $root . '/db/migrations/update/sqlite',
+			]],
 		);
 
 		$this->connection = new Connection(
-			$this->config->get('db.dsn'),
+			$dsn,
 			$sql,
 			$namespacedMigrations,
 			fetchMode: PDO::FETCH_ASSOC,
 			options: $this->config->get('db.options'),
 			print: $this->config->get('db.print'),
 		);
-		$this->db = new Database($this->connection);
+		$this->db = new CmsDatabase($this->connection, $this->config);
 	}
 
 	/**
@@ -175,5 +195,33 @@ class Cms implements Plugin
 				])->run();
 			}
 		}
+	}
+
+	/**
+	 * Validates that the PDO driver for the given DSN is available.
+	 *
+	 * @throws RuntimeException If the driver is not available
+	 */
+	protected function validateDriver(string $dsn): void
+	{
+		$driver = explode(':', $dsn)[0];
+		$available = PDO::getAvailableDrivers();
+
+		if (in_array($driver, $available, true)) {
+			return;
+		}
+
+		$extensions = match ($driver) {
+			'pgsql' => 'ext-pdo_pgsql',
+			'sqlite' => 'ext-pdo_sqlite',
+			'mysql' => 'ext-pdo_mysql',
+			default => "ext-pdo_{$driver}",
+		};
+
+		throw new RuntimeException(
+			"PDO driver '{$driver}' is not available. "
+			. "Install the {$extensions} PHP extension. "
+			. 'Available drivers: ' . implode(', ', $available),
+		);
 	}
 }

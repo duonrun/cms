@@ -1,6 +1,9 @@
-CREATE EXTENSION btree_gist;
-CREATE EXTENSION btree_gin;
-CREATE EXTENSION unaccent;
+-- Extensions for CMS functionality
+-- btree_gist: Reserved for future exclusion constraints (e.g., date range overlaps)
+-- unaccent: For accent-insensitive fulltext search (optional but recommended)
+-- Note: tsvector GIN indexes work without extensions
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 CREATE SCHEMA cms;
 CREATE SCHEMA audit;
@@ -97,7 +100,7 @@ CREATE TABLE cms.authtokens (
 	CONSTRAINT uc_authtokens_usr UNIQUE (usr),
 	CONSTRAINT ck_authtokens_token CHECK (char_length(token) <= 512)
 );
-CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.users
+CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.authtokens
 	FOR EACH ROW EXECUTE FUNCTION cms.update_changed_column();
 
 
@@ -330,6 +333,7 @@ CREATE TABLE cms.nodetags (
 	CONSTRAINT fk_nodetags_tags FOREIGN KEY (tag)
 		REFERENCES cms.tags (tag)
 );
+CREATE INDEX ix_nodetags_tag ON cms.nodetags (tag);
 
 
 CREATE TABLE audit.nodes (

@@ -31,6 +31,7 @@ class Config implements ConfigInterface
 			'db.migrations' => [],
 			'db.print' => false,
 			'db.options' => [],
+			'db.features.fulltext' => null, // null = auto-detect by driver
 			'session.options' => [
 				'cookie_httponly' => true,
 				'cookie_lifetime' => 0,
@@ -119,7 +120,7 @@ class Config implements ConfigInterface
 		return $this->settings['path.panel'];
 	}
 
-	public function apiPath(): string|null
+	public function apiPath(): ?string
 	{
 		return $this->get('path.api', null);
 	}
@@ -133,8 +134,8 @@ class Config implements ConfigInterface
 	{
 		if (!preg_match('/^[a-zA-Z0-9_$-]{1,64}$/', $app)) {
 			throw new ValueError(
-				'The app name must be a nonempty string which consist only of lower case ' .
-					'letters and numbers. Its length must not be longer than 32 characters.',
+				'The app name must be a nonempty string which consist only of lower case '
+					. 'letters and numbers. Its length must not be longer than 32 characters.',
 			);
 		}
 	}
