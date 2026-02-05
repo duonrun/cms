@@ -52,4 +52,14 @@ final class SqlDialectTest extends TestCase
 		);
 		$this->assertSame('^Test', $result['paramValue']);
 	}
+
+	public function testSqliteLikeOperators(): void
+	{
+		$dialect = new SqliteDialect();
+
+		$this->assertSame('left LIKE right', $dialect->like('left', 'right'));
+		$this->assertSame('left LIKE right COLLATE NOCASE', $dialect->ilike('left', 'right'));
+		$this->assertSame('left NOT LIKE right', $dialect->unlike('left', 'right'));
+		$this->assertSame('left NOT LIKE right COLLATE NOCASE', $dialect->iunlike('left', 'right'));
+	}
 }
