@@ -43,6 +43,17 @@ final class SqliteDialect implements SqlDialect
 		mixed $value,
 		string $placeholder,
 	): array {
+		if ($this->isWildcardPath($path)) {
+			$basePath = $this->stripWildcard($path);
+			$source = "json_each({$column}, '\$.{$basePath}')";
+			$sql = "EXISTS (SELECT 1 FROM {$source} WHERE value {$operator} {$placeholder})";
+
+			return [
+				'sql' => $sql,
+				'paramValue' => $value,
+			];
+		}
+
 		$field = "json_extract({$column}, '\$.{$path}')";
 
 		return [
@@ -59,6 +70,21 @@ final class SqliteDialect implements SqlDialect
 		bool $negate,
 		string $placeholder,
 	): array {
+		if ($this->isWildcardPath($path)) {
+			$basePath = $this->stripWildcard($path);
+			$source = "json_each({$column}, '\$.{$basePath}')";
+			$expr = $ignoreCase
+				? "regexp_i(value, {$placeholder})"
+				: "value REGEXP {$placeholder}";
+			$condition = $negate ? "NOT ({$expr})" : $expr;
+			$sql = "EXISTS (SELECT 1 FROM {$source} WHERE {$condition})";
+
+			return [
+				'sql' => $sql,
+				'paramValue' => $pattern,
+			];
+		}
+
 		$field = "json_extract({$column}, '\$.{$path}')";
 
 		if ($ignoreCase) {
@@ -71,6 +97,16 @@ final class SqliteDialect implements SqlDialect
 			'sql' => $negate ? "NOT ({$expr})" : $expr,
 			'paramValue' => $pattern,
 		];
+	}
+
+	private function isWildcardPath(string $path): bool
+	{
+		return str_ends_with($path, '.*');
+	}
+
+	private function stripWildcard(string $path): string
+	{
+		return substr($path, 0, -2);
 	}
 
 	public function jsonPathExists(string $column, string $path): string

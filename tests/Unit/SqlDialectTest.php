@@ -28,4 +28,28 @@ final class SqlDialectTest extends TestCase
 		$this->assertSame('cms_nodes', $dialect->table('nodes'));
 		$this->assertSame('audit_nodes', $dialect->table('audit.nodes'));
 	}
+
+	public function testSqliteWildcardJsonFieldCompare(): void
+	{
+		$dialect = new SqliteDialect();
+		$result = $dialect->jsonFieldCompare('n.content', 'title.value.*', '=', 'Test Homepage', ':q1');
+
+		$this->assertSame(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.title.value') WHERE value = :q1)",
+			$result['sql'],
+		);
+		$this->assertSame('Test Homepage', $result['paramValue']);
+	}
+
+	public function testSqliteWildcardJsonFieldRegex(): void
+	{
+		$dialect = new SqliteDialect();
+		$result = $dialect->jsonFieldRegex('n.content', 'title.value.*', '^Test', false, false, ':q1');
+
+		$this->assertSame(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.title.value') WHERE value REGEXP :q1)",
+			$result['sql'],
+		);
+		$this->assertSame('^Test', $result['paramValue']);
+	}
 }
