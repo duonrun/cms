@@ -24,31 +24,107 @@ final class SqliteDialect implements SqlDialect
 
 	public function jsonExtract(string $column, string $path, bool $text = true): string
 	{
-		throw new RuntimeException('JSON extraction not implemented for SQLite dialect.');
+		$parts = explode('.', $path);
+		$count = count($parts);
+
+		if ($count === 1) {
+			return "json_extract({$column}, '\$.{$parts[0]}.value')";
+		}
+
+		$jsonPath = implode('.', $parts);
+
+		return "json_extract({$column}, '\$.{$jsonPath}')";
+	}
+
+	public function jsonFieldCompare(
+		string $column,
+		string $path,
+		string $operator,
+		mixed $value,
+		string $placeholder,
+	): array {
+		$field = "json_extract({$column}, '\$.{$path}')";
+
+		return [
+			'sql' => "{$field} {$operator} {$placeholder}",
+			'paramValue' => $value,
+		];
+	}
+
+	public function jsonFieldRegex(
+		string $column,
+		string $path,
+		string $pattern,
+		bool $ignoreCase,
+		bool $negate,
+		string $placeholder,
+	): array {
+		$field = "json_extract({$column}, '\$.{$path}')";
+
+		if ($ignoreCase) {
+			$expr = "regexp_i({$field}, {$placeholder})";
+		} else {
+			$expr = "{$field} REGEXP {$placeholder}";
+		}
+
+		return [
+			'sql' => $negate ? "NOT ({$expr})" : $expr,
+			'paramValue' => $pattern,
+		];
+	}
+
+	public function jsonPathExists(string $column, string $path): string
+	{
+		return "json_extract({$column}, '\$.{$path}') IS NOT NULL";
 	}
 
 	public function like(string $left, string $right): string
 	{
-		throw new RuntimeException('LIKE operator not implemented for SQLite dialect.');
+		return "{$left} LIKE {$right}";
 	}
 
 	public function ilike(string $left, string $right): string
 	{
-		throw new RuntimeException('ILIKE operator not implemented for SQLite dialect.');
+		return "{$left} LIKE {$right} COLLATE NOCASE";
+	}
+
+	public function unlike(string $left, string $right): string
+	{
+		return "{$left} NOT LIKE {$right}";
+	}
+
+	public function iunlike(string $left, string $right): string
+	{
+		return "{$left} NOT LIKE {$right} COLLATE NOCASE";
 	}
 
 	public function regex(string $left, string $right): string
 	{
-		throw new RuntimeException('Regex operator not implemented for SQLite dialect.');
+		return "{$left} REGEXP {$right}";
 	}
 
 	public function iregex(string $left, string $right): string
 	{
-		throw new RuntimeException('Regex operator not implemented for SQLite dialect.');
+		return "regexp_i({$left}, {$right})";
+	}
+
+	public function notRegex(string $left, string $right): string
+	{
+		return "NOT ({$left} REGEXP {$right})";
+	}
+
+	public function notIregex(string $left, string $right): string
+	{
+		return "NOT regexp_i({$left}, {$right})";
 	}
 
 	public function fulltext(string $document, string $query): string
 	{
 		throw new RuntimeException('Fulltext predicate not implemented for SQLite dialect.');
+	}
+
+	public function now(): string
+	{
+		return "strftime('%Y-%m-%d %H:%M:%S', 'now')";
 	}
 }

@@ -6,6 +6,7 @@ namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\QueryParams;
@@ -17,6 +18,7 @@ final readonly class Comparison extends Expression implements Output
 		private Token $operator,
 		private Token $right,
 		private Context $context,
+		private SqlDialect $dialect,
 		private array $builtins,
 	) {}
 
@@ -40,7 +42,11 @@ final readonly class Comparison extends Expression implements Output
 				return $this->getSqlExpression($params);
 			}
 
-			return $this->getJsonPathExpression($params);
+			if ($this->isRegexOperator()) {
+				return $this->getJsonFieldRegexExpression($params);
+			}
+
+			return $this->getJsonFieldCompareExpression($params);
 		}
 
 		if ($this->left->type === TokenType::Builtin) {
@@ -53,47 +59,78 @@ final readonly class Comparison extends Expression implements Output
 		);
 	}
 
-	private function getJsonPathExpression(QueryParams $params): string
+	private function getJsonFieldCompareExpression(QueryParams $params): string
 	{
-		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
-			TokenType::Equal => ['@@', '==', $this->getJsonPathRight(), false],
-			TokenType::Regex => ['@?', '?', $this->getRegex(false), false],
-			TokenType::IRegex => ['@?', '?', $this->getRegex(true), false],
-			TokenType::NotRegex => ['@?', '?', $this->getRegex(false), true],
-			TokenType::INotRegex => ['@?', '?', $this->getRegex(true), true],
-			TokenType::In => ['@@', 'in', $this->getJsonPathRight(), false],
-			TokenType::NotIn => ['@@', 'nin', $this->getJsonPathRight(), false],
-			default => ['@@', $this->operator->lexeme, $this->getJsonPathRight(), false],
-		};
+		$field = $this->getField();
+		$operator = $this->mapOperator();
+		$value = $this->getRightValue();
+		$placeholder = $params->placeholder();
 
-		$left = $this->getField();
-		$path = sprintf('$.%s %s %s', $left, $jsonOperator, $right);
-		$placeholder = $params->add($path);
+		$result = $this->dialect->jsonFieldCompare('n.content', $field, $operator, $value, $placeholder);
+		$params->set($placeholder, $result['paramValue']);
 
-		return sprintf(
-			'%sn.content %s %s',
-			$negate ? 'NOT ' : '',
-			$operator,
-			$placeholder,
-		);
+		return $result['sql'];
 	}
 
-	private function getRegex(bool $ignoreCase): string
+	private function getJsonFieldRegexExpression(QueryParams $params): string
 	{
-		if (!($this->right->type === TokenType::String)) {
+		if ($this->right->type !== TokenType::String) {
 			throw new ParserOutputException(
 				$this->right,
-				'Only strings are allowed on the right side of a regex expressions.',
+				'Only strings are allowed on the right side of a regex expression.',
 			);
 		}
 
-		$case = $ignoreCase ? ' flag "i"' : '';
+		$field = $this->getField();
+		$pattern = $this->right->lexeme;
+		$ignoreCase = in_array($this->operator->type, [TokenType::IRegex, TokenType::INotRegex], true);
+		$negate = in_array($this->operator->type, [TokenType::NotRegex, TokenType::INotRegex], true);
+		$placeholder = $params->placeholder();
 
-		return sprintf(
-			'(@ like_regex %s%s)',
-			$this->jsonPathString($this->right->lexeme),
-			$case,
-		);
+		$result = $this->dialect->jsonFieldRegex('n.content', $field, $pattern, $ignoreCase, $negate, $placeholder);
+		$params->set($placeholder, $result['paramValue']);
+
+		return $result['sql'];
+	}
+
+	private function isRegexOperator(): bool
+	{
+		return in_array($this->operator->type, [
+			TokenType::Regex,
+			TokenType::IRegex,
+			TokenType::NotRegex,
+			TokenType::INotRegex,
+		], true);
+	}
+
+	private function mapOperator(): string
+	{
+		return match ($this->operator->type) {
+			TokenType::Equal => '=',
+			TokenType::Unequal => '!=',
+			TokenType::Greater => '>',
+			TokenType::GreaterEqual => '>=',
+			TokenType::Less => '<',
+			TokenType::LessEqual => '<=',
+			default => throw new ParserOutputException(
+				$this->operator,
+				'Unsupported operator for JSON field comparison.',
+			),
+		};
+	}
+
+	private function getRightValue(): mixed
+	{
+		return match ($this->right->type) {
+			TokenType::String => $this->right->lexeme,
+			TokenType::Number => $this->right->lexeme,
+			TokenType::Boolean => strtolower($this->right->lexeme) === 'true',
+			TokenType::Null => null,
+			default => throw new ParserOutputException(
+				$this->right,
+				'The right hand side in a field expression must be a literal',
+			),
+		};
 	}
 
 	private function getField(): string
@@ -101,13 +138,13 @@ final readonly class Comparison extends Expression implements Output
 		$parts = explode('.', $this->left->lexeme);
 
 		return match (count($parts)) {
-			2 => $this->compileField($parts),
+			2 => $this->compileFieldPath($parts),
 			1 => $parts[0] . '.value',
 			default => $this->compileAccessor($parts),
 		};
 	}
 
-	private function compileField(array $segments): string
+	private function compileFieldPath(array $segments): string
 	{
 		return match ($segments[1]) {
 			'*' => $segments[0] . '.value.*',
@@ -135,68 +172,11 @@ final readonly class Comparison extends Expression implements Output
 		return $this->context->localeId();
 	}
 
-	private function getJsonPathRight(): string
-	{
-		return match ($this->right->type) {
-			TokenType::String => $this->jsonPathString($this->right->lexeme),
-			TokenType::Number => $this->right->lexeme,
-			TokenType::Boolean => strtolower($this->right->lexeme),
-			TokenType::List => $this->jsonPathList($this->right),
-			TokenType::Null => 'null',
-			default => throw new ParserOutputException(
-				$this->right,
-				'The right hand side in a field expression must be a literal',
-			),
-		};
-	}
-
 	private function getSqlExpression(QueryParams $params): string
 	{
-		return sprintf(
-			'%s %s %s',
-			$this->getOperand($this->left, $params, $this->builtins),
-			$this->getOperator($this->operator->type),
-			$this->getOperand($this->right, $params, $this->builtins),
-		);
-	}
+		$left = $this->getOperand($this->left, $params, $this->builtins, $this->dialect);
+		$right = $this->getOperand($this->right, $params, $this->builtins, $this->dialect);
 
-	private function jsonPathString(string $string): string
-	{
-		$encoded = json_encode($string, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-		if ($encoded === false) {
-			return '""';
-		}
-
-		return $encoded;
-	}
-
-	private function jsonPathList(Token $token): string
-	{
-		$items = $token->items;
-
-		if ($items === null || $items === []) {
-			throw new ParserOutputException($token, 'Invalid query: empty list');
-		}
-
-		$itemType = $items[0]->type;
-		$values = [];
-
-		foreach ($items as $item) {
-			if ($item->type !== $itemType) {
-				throw new ParserOutputException($token, 'Invalid query: mixed list item types');
-			}
-
-			$values[] = match ($item->type) {
-				TokenType::String => $this->jsonPathString($item->lexeme),
-				TokenType::Number => $item->lexeme,
-				default => throw new ParserOutputException(
-					$token,
-					'Invalid query: token type not supported in list',
-				),
-			};
-		}
-
-		return '(' . implode(', ', $values) . ')';
+		return $this->getOperatorExpression($this->operator->type, $this->dialect, $left, $right);
 	}
 }

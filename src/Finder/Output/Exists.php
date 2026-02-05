@@ -17,6 +17,11 @@ final readonly class Exists extends Expression implements Output
 
 	public function get(QueryParams $params): string
 	{
-		return '';
+		$parts = explode('.', $this->token->lexeme);
+		$path = count($parts) === 1
+			? $parts[0] . '.value'
+			: implode('.', $parts);
+
+		return $this->dialect->jsonPathExists('n.content', $path);
 	}
 }

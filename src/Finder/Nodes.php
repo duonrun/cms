@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder;
 
 use Duon\Cms\Context;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
 use Generator;
@@ -70,7 +71,8 @@ final class Nodes implements Iterator
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins);
+		$dialect = SqlDialectFactory::fromDriver($this->context->db->getPdoDriver());
+		$compiler = new OrderCompiler($dialect, $this->builtins);
 		$this->order = $compiler->compile(implode(',', $order));
 
 		return $this;

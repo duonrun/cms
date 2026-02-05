@@ -6,6 +6,7 @@ namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\QueryParams;
@@ -17,6 +18,7 @@ final readonly class NullComparison extends Expression implements Output
 		private Token $operator,
 		private Token $right,
 		private Context $context,
+		private SqlDialect $dialect,
 		private array $builtins,
 	) {}
 
@@ -39,9 +41,9 @@ final readonly class NullComparison extends Expression implements Output
 	{
 		return sprintf(
 			'%s %s %s',
-			$this->getOperand($this->left, $params, $this->builtins),
+			$this->getOperand($this->left, $params, $this->builtins, $this->dialect),
 			$equal ? 'IS' : 'IS NOT',
-			$this->getOperand($this->right, $params, $this->builtins),
+			$this->getOperand($this->right, $params, $this->builtins, $this->dialect),
 		);
 	}
 }

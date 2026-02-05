@@ -23,6 +23,19 @@ final class QueryParams
 		return ':' . $name;
 	}
 
+	public function placeholder(): string
+	{
+		$this->index++;
+
+		return ':' . $this->prefix . $this->index;
+	}
+
+	public function set(string $placeholder, string|int|bool|null $value): void
+	{
+		$name = ltrim($placeholder, ':');
+		$this->params[$name] = $value;
+	}
+
 	/** @return array<string, scalar|null> */
 	public function all(): array
 	{

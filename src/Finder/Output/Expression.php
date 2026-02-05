@@ -6,6 +6,7 @@ namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Finder\CompilesField;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
 use Duon\Cms\Finder\QueryParams;
@@ -14,7 +15,7 @@ abstract readonly class Expression
 {
 	use CompilesField;
 
-	protected function getOperator(TokenType $type): string
+	protected function getOperator(TokenType $type, SqlDialect $dialect): string
 	{
 		return match ($type) {
 			TokenType::LeftParen => '(',
@@ -24,11 +25,7 @@ abstract readonly class Expression
 			TokenType::GreaterEqual => '>=',
 			TokenType::Less => '<',
 			TokenType::LessEqual => '<=',
-			TokenType::Like => 'LIKE',
-			TokenType::ILike => 'ILIKE',
 			TokenType::Unequal => '!=',
-			TokenType::Unlike => 'NOT LIKE',
-			TokenType::IUnlike => 'NOT ILIKE',
 			TokenType::And => 'AND',
 			TokenType::Or => 'OR',
 			TokenType::In => 'IN',
@@ -37,13 +34,28 @@ abstract readonly class Expression
 		};
 	}
 
-	protected function getOperand(Token $token, QueryParams $params, array $builtins): string
+	protected function getOperatorExpression(TokenType $type, SqlDialect $dialect, string $left, string $right): string
+	{
+		return match ($type) {
+			TokenType::Like => $dialect->like($left, $right),
+			TokenType::ILike => $dialect->ilike($left, $right),
+			TokenType::Unlike => $dialect->unlike($left, $right),
+			TokenType::IUnlike => $dialect->iunlike($left, $right),
+			TokenType::Regex => $dialect->regex($left, $right),
+			TokenType::IRegex => $dialect->iregex($left, $right),
+			TokenType::NotRegex => $dialect->notRegex($left, $right),
+			TokenType::INotRegex => $dialect->notIregex($left, $right),
+			default => sprintf('%s %s %s', $left, $this->getOperator($type, $dialect), $right),
+		};
+	}
+
+	protected function getOperand(Token $token, QueryParams $params, array $builtins, SqlDialect $dialect): string
 	{
 		return match ($token->type) {
 			TokenType::Boolean => $params->add(strtolower($token->lexeme) === 'true'),
-			TokenType::Field => $this->compileField($token->lexeme, 'n.content'),
+			TokenType::Field => $this->compileField($token->lexeme, 'n.content', $dialect),
 			TokenType::Builtin => $builtins[$token->lexeme],
-			TokenType::Keyword => $this->translateKeyword($token->lexeme),
+			TokenType::Keyword => $this->translateKeyword($token->lexeme, $dialect),
 			TokenType::Null => 'NULL',
 			TokenType::Number => $params->add($token->lexeme),
 			TokenType::String => $params->add($token->lexeme),
@@ -79,10 +91,10 @@ abstract readonly class Expression
 		return '(' . implode(', ', $placeholders) . ')';
 	}
 
-	protected function translateKeyword(string $keyword): string
+	protected function translateKeyword(string $keyword, SqlDialect $dialect): string
 	{
 		return match ($keyword) {
-			'now' => 'NOW()',
+			'now' => $dialect->now(),
 		};
 	}
 }

@@ -201,14 +201,14 @@ final class QueryParser
 		}
 
 		if ($right->type === TokenType::Null) {
-			return new NullComparison($left, $operator, $right, $this->context, $this->builtins);
+			return new NullComparison($left, $operator, $right, $this->context, $this->dialect, $this->builtins);
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
 			return new UrlPath($left, $operator, $right, $this->dialect);
 		}
 
-		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
+		return new Comparison($left, $operator, $right, $this->context, $this->dialect, $this->builtins);
 	}
 
 	private function getExistsCondition(Token $token): Exists
