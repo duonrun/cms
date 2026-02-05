@@ -52,7 +52,13 @@
 		}
 	},
 	"scripts": {
-		"test": "./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test": "CMS_TEST_DRIVER=pgsql ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test:pgsql": "CMS_TEST_DRIVER=pgsql ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test:sqlite": "CMS_TEST_DRIVER=sqlite ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test:all": [
+			"composer test:pgsql",
+			"composer test:sqlite"
+		],
 		"mdlint": "markdownlint-cli2 README.md CHANGELOG.md LICENSE.md",
 		"coverage": [
 			"./vendor/bin/phpunit --testdox --path-coverage --coverage-text --coverage-php=coverage/cover.php --colors=always",
