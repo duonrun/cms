@@ -162,10 +162,10 @@ class Image
 			ResizeMode::Width => 'w' . $size->firstDimension,
 			ResizeMode::Fit => $size->firstDimension . 'x' . $size->secondDimension . '-fit',
 			ResizeMode::Crop => $size->firstDimension . 'x' . $size->secondDimension . '-crop' . $size->cropMode,
-			ResizeMode::FreeCrop => $size->firstDimension . 'x' .
-				$size->secondDimension . '-crop-x' .
-				$size->cropMode['x'] .
-				'y' . $size->cropMode['y'],
+			ResizeMode::FreeCrop => $size->firstDimension . 'x'
+				. $size->secondDimension . '-crop-x'
+				. $size->cropMode['x']
+				. 'y' . $size->cropMode['y'],
 			ResizeMode::Height => 'h' . $size->firstDimension,
 			ResizeMode::LongSide => 'l' . $size->firstDimension,
 			ResizeMode::ShortSide => 's' . $size->firstDimension,
