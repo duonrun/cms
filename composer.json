@@ -12,7 +12,7 @@
 	"homepage": "https://duon.run/cms",
 	"require": {
 		"php": "^8.5",
-		"ext-pgsql": "*",
+		"ext-pdo": "*",
 		"ext-gd": "*",
 		"ext-intl": "*",
 		"ext-curl": "*",
@@ -27,6 +27,10 @@
 		"hidehalo/nanoid-php": "^2",
 		"laminas/laminas-httphandlerrunner": "^2.4",
 		"psr/http-message-implementation": "^1.0"
+	},
+	"suggest": {
+		"ext-pdo_pgsql": "Required for PostgreSQL database support",
+		"ext-pdo_sqlite": "Required for SQLite database support"
 	},
 	"require-dev": {
 		"duon/cms-boiler": "^0.1",

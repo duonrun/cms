@@ -108,6 +108,9 @@ class Cms implements Plugin
 			throw new RuntimeException('No config given');
 		}
 
+		$dsn = $this->config->get('db.dsn');
+		$this->validateDriver($dsn);
+
 		$root = dirname(__DIR__);
 		$sqlConfig = $this->config->get('db.sql', []);
 		$sql = array_merge(
@@ -123,7 +126,7 @@ class Cms implements Plugin
 		);
 
 		$this->connection = new Connection(
-			$this->config->get('db.dsn'),
+			$dsn,
 			$sql,
 			$namespacedMigrations,
 			fetchMode: PDO::FETCH_ASSOC,
@@ -175,5 +178,33 @@ class Cms implements Plugin
 				])->run();
 			}
 		}
+	}
+
+	/**
+	 * Validates that the PDO driver for the given DSN is available.
+	 *
+	 * @throws RuntimeException If the driver is not available
+	 */
+	protected function validateDriver(string $dsn): void
+	{
+		$driver = explode(':', $dsn)[0];
+		$available = PDO::getAvailableDrivers();
+
+		if (in_array($driver, $available, true)) {
+			return;
+		}
+
+		$extensions = match ($driver) {
+			'pgsql' => 'ext-pdo_pgsql',
+			'sqlite' => 'ext-pdo_sqlite',
+			'mysql' => 'ext-pdo_mysql',
+			default => "ext-pdo_{$driver}",
+		};
+
+		throw new RuntimeException(
+			"PDO driver '{$driver}' is not available. "
+			. "Install the {$extensions} PHP extension. "
+			. 'Available drivers: ' . implode(', ', $available),
+		);
 	}
 }
