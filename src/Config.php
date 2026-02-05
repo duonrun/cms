@@ -31,6 +31,7 @@ class Config implements ConfigInterface
 			'db.migrations' => [],
 			'db.print' => false,
 			'db.options' => [],
+			'db.features.fulltext' => null, // null = auto-detect by driver
 			'session.options' => [
 				'cookie_httponly' => true,
 				'cookie_lifetime' => 0,
