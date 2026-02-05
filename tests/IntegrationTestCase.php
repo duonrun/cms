@@ -261,6 +261,9 @@ class IntegrationTestCase extends TestCase
 	/**
 	 * Load SQL fixture files into the test database.
 	 *
+	 * Note: For SQLite, this uses PDO::exec() to support multi-statement
+	 * SQL files. Prepared statements only execute the first statement.
+	 *
 	 * @param string ...$fixtures Fixture names (without .sql extension)
 	 */
 	protected function loadFixtures(string ...$fixtures): void
@@ -283,7 +286,13 @@ class IntegrationTestCase extends TestCase
 			}
 
 			$sql = file_get_contents($path);
-			$db->execute($sql)->run();
+
+			if ($config->isSqlite()) {
+				// SQLite: use exec() for multi-statement SQL
+				$db->getConn()->exec($sql);
+			} else {
+				$db->execute($sql)->run();
+			}
 		}
 	}
 
@@ -421,5 +430,181 @@ class IntegrationTestCase extends TestCase
 	protected function createFinder(): Finder
 	{
 		return new Finder($this->createContext());
+	}
+
+	/**
+	 * Get the driver-aware table name for a CMS table.
+	 *
+	 * @param string $table The base table name (e.g., 'nodes', 'types', 'users')
+	 * @return string The qualified table name (e.g., 'cms.nodes' or 'cms_nodes')
+	 */
+	protected function table(string $table): string
+	{
+		$config = self::testDbConfig();
+
+		return $config->isSqlite() ? "cms_{$table}" : "cms.{$table}";
+	}
+
+	/**
+	 * Get the JSONB cast suffix for the current driver.
+	 *
+	 * @return string '::jsonb' for PostgreSQL, '' for SQLite
+	 */
+	protected function jsonbCast(): string
+	{
+		return self::testDbConfig()->isSqlite() ? '' : '::jsonb';
+	}
+
+	/**
+	 * Check if a row exists by ID.
+	 *
+	 * @param string $table The base table name (e.g., 'nodes')
+	 * @param string $pkColumn The primary key column name
+	 * @param int $id The ID to check
+	 * @return bool True if the row exists
+	 */
+	protected function rowExists(string $table, string $pkColumn, int $id): bool
+	{
+		$tableName = $this->table($table);
+		$sql = "SELECT 1 FROM {$tableName} WHERE {$pkColumn} = :id LIMIT 1";
+
+		return $this->db()->execute($sql, ['id' => $id])->one() !== null;
+	}
+
+	/**
+	 * Fetch a single row from a CMS table by its primary key.
+	 *
+	 * @param string $table The base table name (e.g., 'nodes')
+	 * @param string $pkColumn The primary key column name
+	 * @param int $id The primary key value
+	 * @return array|null The row data or null if not found
+	 */
+	protected function fetchRow(string $table, string $pkColumn, int $id): ?array
+	{
+		$tableName = $this->table($table);
+		$sql = "SELECT * FROM {$tableName} WHERE {$pkColumn} = :id";
+
+		return $this->db()->execute($sql, ['id' => $id])->one();
+	}
+
+	/**
+	 * Delete a row from a CMS table.
+	 *
+	 * @param string $table The base table name (e.g., 'nodes')
+	 * @param string $pkColumn The primary key column name
+	 * @param int $id The primary key value
+	 */
+	protected function deleteRow(string $table, string $pkColumn, int $id): void
+	{
+		$tableName = $this->table($table);
+		$sql = "DELETE FROM {$tableName} WHERE {$pkColumn} = :id";
+
+		$this->db()->execute($sql, ['id' => $id])->run();
+	}
+
+	/**
+	 * Update JSONB content column for a node.
+	 *
+	 * @param int $nodeId The node ID
+	 * @param array $content The new content
+	 */
+	protected function updateNodeContent(int $nodeId, array $content): void
+	{
+		$tableName = $this->table('nodes');
+		$cast = $this->jsonbCast();
+		$sql = "UPDATE {$tableName} SET content = :content{$cast} WHERE node = :id";
+
+		$this->db()->execute($sql, [
+			'id' => $nodeId,
+			'content' => json_encode($content),
+		])->run();
+	}
+
+	/**
+	 * Query nodes by type and additional conditions.
+	 *
+	 * @param int $typeId The type ID
+	 * @param array $conditions Additional WHERE conditions
+	 * @return array List of matching nodes
+	 */
+	protected function queryNodesByType(int $typeId, array $conditions = []): array
+	{
+		$tableName = $this->table('nodes');
+		$sql = "SELECT * FROM {$tableName} WHERE type = :type";
+		$params = ['type' => $typeId];
+
+		foreach ($conditions as $column => $value) {
+			$sql .= " AND {$column} = :{$column}";
+			$params[$column] = $value;
+		}
+
+		$sql .= ' ORDER BY node';
+
+		return $this->db()->execute($sql, $params)->all();
+	}
+
+	/**
+	 * Query nodes by parent.
+	 *
+	 * @param int $parentId The parent node ID
+	 * @return array List of child nodes
+	 */
+	protected function queryNodesByParent(int $parentId): array
+	{
+		$tableName = $this->table('nodes');
+		$sql = "SELECT * FROM {$tableName} WHERE parent = :parent";
+
+		return $this->db()->execute($sql, ['parent' => $parentId])->all();
+	}
+
+	/**
+	 * Query nodes with JSON field extraction (driver-aware).
+	 *
+	 * For PostgreSQL uses: content->'field'->'subfield'->>'key'
+	 * For SQLite uses: json_extract(content, '$.field.subfield.key')
+	 *
+	 * @param int $typeId The type ID
+	 * @param string $jsonPath The JSON path (dot notation, e.g., 'title.value.en')
+	 * @param string $likePattern The LIKE pattern to match
+	 * @return array List of matching nodes with uid and extracted value
+	 */
+	protected function queryNodesByJsonField(int $typeId, string $jsonPath, string $likePattern): array
+	{
+		$tableName = $this->table('nodes');
+		$config = self::testDbConfig();
+
+		if ($config->isSqlite()) {
+			$extract = "json_extract(content, '\$.{$jsonPath}')";
+		} else {
+			// Convert dot notation to PostgreSQL JSON operators
+			$parts = explode('.', $jsonPath);
+			$last = array_pop($parts);
+			$path = "content->'" . implode("'->'", $parts) . "'->>'{$last}'";
+			$extract = $path;
+		}
+
+		$sql = "SELECT uid, {$extract} as extracted_value
+				FROM {$tableName}
+				WHERE type = :type
+				AND {$extract} LIKE :pattern";
+
+		return $this->db()->execute($sql, [
+			'type' => $typeId,
+			'pattern' => $likePattern,
+		])->all();
+	}
+
+	/**
+	 * Fetch a user by ID.
+	 *
+	 * @param int $userId The user ID
+	 * @return array|null The user data or null
+	 */
+	protected function fetchUser(int $userId): ?array
+	{
+		$tableName = $this->table('users');
+		$sql = "SELECT uid, username, email, userrole, active, data FROM {$tableName} WHERE usr = :usr";
+
+		return $this->db()->execute($sql, ['usr' => $userId])->one();
 	}
 }
