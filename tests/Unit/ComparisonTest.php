@@ -205,6 +205,44 @@ final class ComparisonTest extends TestCase
 		$this->assertSame([], $result->params);
 	}
 
+	public function testMultilangFieldOperandSqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, []);
+
+		$result = $compiler->compile('field.* = "test"');
+		$this->assertSame(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.field.value') WHERE value = :p0)",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'test'], $result->params);
+	}
+
+	public function testMultilangFieldWithNumberSqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, []);
+
+		$result = $compiler->compile('field.* > 5');
+		$this->assertSame(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.field.value') WHERE value > 5)",
+			$result->sql,
+		);
+		$this->assertSame([], $result->params);
+	}
+
 	public function testBuiltinOperand(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['test' => 'table.test']);

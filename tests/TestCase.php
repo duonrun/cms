@@ -163,6 +163,36 @@ class TestCase extends BaseTestCase
 		);
 	}
 
+	/**
+	 * Stub dbSqlite() method for unit tests that need to create Context objects with SQLite dialect.
+	 * This method creates a database instance but is not meant for actual database operations.
+	 * For real database operations, use IntegrationTestCase instead.
+	 */
+	public function dbSqlite(): \Duon\Quma\Database
+	{
+		return new \Duon\Quma\Database(
+			new \Duon\Quma\Connection(
+				'sqlite::memory:',
+				[
+					'pgsql' => self::root() . '/db/sql/pgsql',
+					'sqlite' => self::root() . '/db/sql/sqlite',
+				],
+				[
+					'install' => [[
+						'pgsql' => self::root() . '/db/migrations/install/pgsql',
+						'sqlite' => self::root() . '/db/migrations/install/sqlite',
+					]],
+					'default' => [[
+						'pgsql' => self::root() . '/db/migrations/update/pgsql',
+						'sqlite' => self::root() . '/db/migrations/update/sqlite',
+					]],
+				],
+				fetchMode: PDO::FETCH_ASSOC,
+				print: false,
+			),
+		);
+	}
+
 	public function set(string $method, array $values): void
 	{
 		global $_GET;

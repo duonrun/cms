@@ -209,4 +209,58 @@ final class SqlDialectTest extends TestCase
 
 		$this->assertEquals("datetime('now')", $dialect->now());
 	}
+
+	// Wildcard locale matching
+	public function testPostgresJsonWildcardMatch(): void
+	{
+		$dialect = new PostgresDialect();
+
+		$this->assertEquals(
+			"n.content @@ '\$.field.value.* == :p0'",
+			$dialect->jsonWildcardMatch('n.content', 'field.value', '=', ':p0'),
+		);
+		$this->assertEquals(
+			"n.content @@ '\$.title.value.* != :p0'",
+			$dialect->jsonWildcardMatch('n.content', 'title.value', '!=', ':p0'),
+		);
+		$this->assertEquals(
+			"n.content @@ '\$.count.value.* > 5'",
+			$dialect->jsonWildcardMatch('n.content', 'count.value', '>', '5'),
+		);
+	}
+
+	public function testSqliteJsonWildcardMatch(): void
+	{
+		$dialect = new SqliteDialect();
+
+		$this->assertEquals(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.field.value') WHERE value = :p0)",
+			$dialect->jsonWildcardMatch('n.content', 'field.value', '=', ':p0'),
+		);
+		$this->assertEquals(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.title.value') WHERE value != :p0)",
+			$dialect->jsonWildcardMatch('n.content', 'title.value', '!=', ':p0'),
+		);
+		$this->assertEquals(
+			"EXISTS (SELECT 1 FROM json_each(n.content, '\$.count.value') WHERE value > 5)",
+			$dialect->jsonWildcardMatch('n.content', 'count.value', '>', '5'),
+		);
+	}
+
+	// NOT LIKE operators
+	public function testPostgresUnlikeOperators(): void
+	{
+		$dialect = new PostgresDialect();
+
+		$this->assertEquals('col NOT LIKE :p0', $dialect->unlike('col', ':p0'));
+		$this->assertEquals('col NOT ILIKE :p0', $dialect->iunlike('col', ':p0'));
+	}
+
+	public function testSqliteUnlikeOperators(): void
+	{
+		$dialect = new SqliteDialect();
+
+		$this->assertEquals('col NOT LIKE :p0', $dialect->unlike('col', ':p0'));
+		$this->assertEquals('col NOT LIKE :p0 COLLATE NOCASE', $dialect->iunlike('col', ':p0'));
+	}
 }

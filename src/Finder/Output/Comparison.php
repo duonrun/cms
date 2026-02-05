@@ -90,6 +90,12 @@ final readonly class Comparison extends Expression implements Output
 		$paramIndex = $this->paramCounter?->current() ?? 0;
 
 		$left = $this->getFieldPath();
+
+		// Handle wildcard locale queries (field.* = "value")
+		if (str_ends_with($left, '.*')) {
+			return $this->getSqliteWildcardExpression($left, $params, $paramIndex);
+		}
+
 		$column = $dialect->jsonExtractText('n.content', $left);
 
 		// Handle regex operators specially
@@ -135,6 +141,43 @@ final readonly class Comparison extends Expression implements Output
 		};
 
 		$sql = "{$column} {$operator} {$right}";
+
+		if ($this->paramCounter !== null) {
+			while ($this->paramCounter->current() < $paramIndex) {
+				$this->paramCounter->next();
+			}
+		}
+
+		return new CompiledQuery($sql, $params);
+	}
+
+	/**
+	 * Generate SQLite wildcard locale expression using json_each().
+	 */
+	private function getSqliteWildcardExpression(
+		string $fieldPath,
+		array &$params,
+		int &$paramIndex,
+	): CompiledQuery {
+		$dialect = $this->context->dialect();
+
+		// Remove the trailing .* to get the base path
+		$basePath = substr($fieldPath, 0, -2);
+		$operator = $this->getOperator($this->operator->type);
+
+		// Get the right-hand side value as a parameter
+		$right = match ($this->right->type) {
+			TokenType::String => $this->addParam($this->right->lexeme, $params, $paramIndex),
+			TokenType::Number => $this->right->lexeme,
+			TokenType::Boolean => $this->formatBoolean($this->right->lexeme, $dialect),
+			TokenType::Null => 'NULL',
+			default => throw new ParserOutputException(
+				$this->right,
+				'Wildcard locale queries only support scalar values',
+			),
+		};
+
+		$sql = $dialect->jsonWildcardMatch('n.content', $basePath, $operator, $right);
 
 		if ($this->paramCounter !== null) {
 			while ($this->paramCounter->current() < $paramIndex) {

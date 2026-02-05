@@ -115,6 +115,25 @@ interface SqlDialect
 	public function jsonExists(string $column, string $path): string;
 
 	/**
+	 * Generate SQL for matching any value in a JSON object (wildcard locale).
+	 *
+	 * Used for queries like `field.* = "value"` which should match if ANY
+	 * locale value equals the specified value.
+	 *
+	 * @param string $column The JSON column (e.g., 'n.content')
+	 * @param string $basePath The base JSON path without wildcard (e.g., 'title.value')
+	 * @param string $operator The SQL comparison operator (e.g., '=', '!=', 'LIKE')
+	 * @param string $paramOrValue The parameter placeholder or literal value
+	 * @return string SQL expression for wildcard match
+	 */
+	public function jsonWildcardMatch(
+		string $column,
+		string $basePath,
+		string $operator,
+		string $paramOrValue,
+	): string;
+
+	/**
 	 * Get the SQL function for current timestamp.
 	 *
 	 * @return string SQL expression for current timestamp (e.g., 'NOW()')

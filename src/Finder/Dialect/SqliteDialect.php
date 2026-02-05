@@ -78,6 +78,17 @@ final readonly class SqliteDialect implements SqlDialect
 		return "json_type({$column}, '\$.{$path}') IS NOT NULL";
 	}
 
+	public function jsonWildcardMatch(
+		string $column,
+		string $basePath,
+		string $operator,
+		string $paramOrValue,
+	): string {
+		// SQLite uses json_each() to iterate over object values
+		// EXISTS (SELECT 1 FROM json_each(column, '$.basePath') WHERE value <op> param)
+		return "EXISTS (SELECT 1 FROM json_each({$column}, '\$.{$basePath}') WHERE value {$operator} {$paramOrValue})";
+	}
+
 	public function now(): string
 	{
 		// SQLite uses different datetime functions

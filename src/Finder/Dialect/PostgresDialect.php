@@ -103,6 +103,28 @@ final readonly class PostgresDialect implements SqlDialect
 		return $this->jsonExtract($column, $path) . ' IS NOT NULL';
 	}
 
+	public function jsonWildcardMatch(
+		string $column,
+		string $basePath,
+		string $operator,
+		string $paramOrValue,
+	): string {
+		// PostgreSQL uses jsonpath with wildcard and @@ operator
+		// Maps SQL operators to jsonpath operators
+		$jsonOperator = match ($operator) {
+			'=' => '==',
+			'!=' => '!=',
+			'<' => '<',
+			'>' => '>',
+			'<=' => '<=',
+			'>=' => '>=',
+			default => '==',
+		};
+
+		// Use jsonpath: $.field.value.* == "value"
+		return "{$column} @@ '\$.{$basePath}.* {$jsonOperator} {$paramOrValue}'";
+	}
+
 	public function now(): string
 	{
 		return 'NOW()';
