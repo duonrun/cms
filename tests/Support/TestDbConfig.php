@@ -6,11 +6,13 @@ namespace Duon\Cms\Tests\Support;
 
 use Duon\Quma\Connection;
 use PDO;
+use RuntimeException;
 
 final class TestDbConfig
 {
 	private const DEFAULT_PGSQL_DSN = 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms';
 	private const DEFAULT_SQLITE_FILE = 'duon-cms-test.sqlite';
+	private static ?string $sqlitePathOverride = null;
 
 	public static function driver(): string
 	{
@@ -32,6 +34,10 @@ final class TestDbConfig
 
 	public static function sqlitePath(): string
 	{
+		if (self::$sqlitePathOverride !== null) {
+			return self::$sqlitePathOverride;
+		}
+
 		$path = getenv('CMS_TEST_SQLITE_PATH');
 
 		if ($path !== false && $path !== '') {
@@ -41,6 +47,31 @@ final class TestDbConfig
 		$directory = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
 
 		return $directory . DIRECTORY_SEPARATOR . self::DEFAULT_SQLITE_FILE;
+	}
+
+	public static function initSqliteFile(): string
+	{
+		$envPath = getenv('CMS_TEST_SQLITE_PATH');
+
+		if ($envPath !== false && $envPath !== '') {
+			self::$sqlitePathOverride = $envPath;
+
+			return $envPath;
+		}
+
+		$path = tempnam(sys_get_temp_dir(), 'duon-cms-sqlite-');
+
+		if ($path === false) {
+			throw new RuntimeException('Unable to create temporary sqlite file');
+		}
+
+		self::$sqlitePathOverride = $path;
+
+		register_shutdown_function(static function () use ($path): void {
+			self::cleanupSqliteFile($path);
+		});
+
+		return $path;
 	}
 
 	public static function sqlDirs(): array
@@ -67,6 +98,24 @@ final class TestDbConfig
 				'sqlite' => $root . '/db/migrations/update/sqlite',
 			],
 		];
+	}
+
+	public static function migrationDirsForDriver(string $namespace): array
+	{
+		$migrations = self::migrationDirs();
+		$dirs = $migrations[$namespace] ?? [];
+
+		if (is_string($dirs)) {
+			return [$dirs];
+		}
+
+		if (is_array($dirs) && array_key_exists(self::driver(), $dirs)) {
+			$entry = $dirs[self::driver()];
+
+			return is_array($entry) ? $entry : [$entry];
+		}
+
+		return [];
 	}
 
 	public static function options(): array
@@ -108,5 +157,21 @@ final class TestDbConfig
 	private static function root(): string
 	{
 		return dirname(__DIR__, 2);
+	}
+
+	private static function cleanupSqliteFile(string $path): void
+	{
+		$walPath = $path . '-wal';
+		$shmPath = $path . '-shm';
+
+		if (is_file($walPath)) {
+			unlink($walPath);
+		}
+		if (is_file($shmPath)) {
+			unlink($shmPath);
+		}
+		if (is_file($path)) {
+			unlink($path);
+		}
 	}
 }

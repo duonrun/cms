@@ -43,10 +43,18 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
+		$driver = TestDbConfig::driver();
+
+		if ($driver === 'sqlite') {
+			TestDbConfig::initSqliteFile();
+		}
+
 		self::$sharedConnection = TestDbConfig::connection();
 		$db = new Database(self::$sharedConnection);
 
-		if (TestDbConfig::driver() !== 'pgsql') {
+		if ($driver === 'sqlite') {
+			self::applySqliteMigrations($db);
+
 			return;
 		}
 
@@ -82,6 +90,52 @@ class IntegrationTestCase extends TestCase
 				'Migrations not applied to test database. Run: ./run migrate --apply',
 			);
 		}
+	}
+
+	private static function applySqliteMigrations(Database $db): void
+	{
+		$installDirs = TestDbConfig::migrationDirsForDriver('install');
+		$updateDirs = TestDbConfig::migrationDirsForDriver('default');
+
+		self::runSqlMigrations($db, $installDirs);
+		self::runSqlMigrations($db, $updateDirs);
+	}
+
+	private static function runSqlMigrations(Database $db, array $dirs): void
+	{
+		foreach (self::collectMigrationFiles($dirs) as $migration) {
+			$script = file_get_contents($migration);
+
+			if ($script === false) {
+				throw new RuntimeException("Migration file not readable: {$migration}");
+			}
+
+			if (trim($script) === '') {
+				continue;
+			}
+
+			$db->execute($script)->run();
+		}
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private static function collectMigrationFiles(array $dirs): array
+	{
+		$files = [];
+
+		foreach ($dirs as $dir) {
+			foreach (glob(rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.sql') as $file) {
+				if (is_string($file) && is_file($file)) {
+					$files[] = $file;
+				}
+			}
+		}
+
+		usort($files, fn(string $a, string $b): int => strcmp(basename($a), basename($b)));
+
+		return $files;
 	}
 
 	protected function setUp(): void
