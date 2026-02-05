@@ -264,6 +264,7 @@ CREATE TABLE cms_nodetags (
 	CONSTRAINT fk_nodetags_tags FOREIGN KEY (tag)
 		REFERENCES cms_tags (tag)
 );
+CREATE INDEX ix_nodetags_tag ON cms_nodetags (tag);
 
 
 -- Audit tables for version history

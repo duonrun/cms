@@ -333,6 +333,7 @@ CREATE TABLE cms.nodetags (
 	CONSTRAINT fk_nodetags_tags FOREIGN KEY (tag)
 		REFERENCES cms.tags (tag)
 );
+CREATE INDEX ix_nodetags_tag ON cms.nodetags (tag);
 
 
 CREATE TABLE audit.nodes (

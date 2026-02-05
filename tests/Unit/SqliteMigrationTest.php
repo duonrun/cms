@@ -269,4 +269,64 @@ final class SqliteMigrationTest extends TestCase
 
 		return array_column($stmt->fetchAll(), 'name');
 	}
+
+	/**
+	 * Performance regression guard: verify hot queries use indexes.
+	 *
+	 * This test ensures that commonly-executed queries use SEARCH (indexed)
+	 * rather than SCAN (full table scan) operations.
+	 */
+	public function testHotQueriesUseIndexes(): void
+	{
+		$this->db = $this->createDatabase();
+		$pdo = $this->db->getConn();
+
+		// Apply migrations
+		$pdo->exec('PRAGMA foreign_keys = ON');
+		$pdo->exec(file_get_contents(self::root() . '/db/migrations/install/sqlite/000000-000000-init-ddl.sql'));
+		$pdo->exec('CREATE TABLE migrations (migration TEXT PRIMARY KEY, applied TEXT NOT NULL)');
+		$pdo->exec(file_get_contents(self::root() . '/db/migrations/install/sqlite/000000-000001-init-data.sql'));
+
+		foreach (glob(self::root() . '/db/migrations/update/sqlite/*.sql') as $file) {
+			$pdo->exec(file_get_contents($file));
+		}
+
+		// Test urlpaths lookup by path - should use ux_urlpaths_path
+		$plan = $this->explainQueryPlan($pdo, "SELECT * FROM cms_urlpaths WHERE path = '/test'");
+		$this->assertStringContainsString('SEARCH', $plan, 'byPath query should use an index');
+		$this->assertStringContainsString('ux_urlpaths_path', $plan, 'byPath query should use ux_urlpaths_path index');
+
+		// Test nodes lookup by type - should use ix_nodes_type
+		$plan = $this->explainQueryPlan($pdo, 'SELECT * FROM cms_nodes WHERE type = 1 AND deleted IS NULL');
+		$this->assertStringContainsString('SEARCH', $plan, 'nodes by type query should use an index');
+
+		// Test nodetags lookup by tag - should use ix_nodetags_tag
+		$plan = $this->explainQueryPlan($pdo, 'SELECT * FROM cms_nodetags WHERE tag = 1');
+		$this->assertStringContainsString('SEARCH', $plan, 'nodetags by tag query should use an index');
+		$this->assertStringContainsString('ix_nodetags_tag', $plan, 'nodetags query should use ix_nodetags_tag index');
+
+		// Test fulltext search - should use FTS5 virtual table
+		$plan = $this->explainQueryPlan($pdo, "
+			SELECT idx.node FROM cms_fulltext_idx idx
+			JOIN cms_fulltext_fts fts ON idx.rowid = fts.rowid
+			WHERE cms_fulltext_fts MATCH 'test'
+		");
+		$this->assertStringContainsString('VIRTUAL TABLE', $plan, 'fulltext search should use FTS5 virtual table');
+	}
+
+	/**
+	 * Run EXPLAIN QUERY PLAN and return the output as a string.
+	 */
+	private function explainQueryPlan(PDO $pdo, string $sql): string
+	{
+		$stmt = $pdo->query('EXPLAIN QUERY PLAN ' . $sql);
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$output = [];
+
+		foreach ($rows as $row) {
+			$output[] = $row['detail'] ?? json_encode($row);
+		}
+
+		return implode("\n", $output);
+	}
 }
