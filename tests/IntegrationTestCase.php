@@ -6,6 +6,8 @@ namespace Duon\Cms\Tests;
 
 use Duon\Cms\CmsDatabase;
 use Duon\Cms\Context;
+use Duon\Cms\Finder\Dialect\SqlDialect;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Quma\Connection;
@@ -246,9 +248,13 @@ class IntegrationTestCase extends TestCase
 	protected function loadFixtures(string ...$fixtures): void
 	{
 		$db = $this->db();
+		$driver = TestDbConfig::driver();
 
 		foreach ($fixtures as $fixture) {
-			$path = self::root() . "/tests/Fixtures/data/{$fixture}.sql";
+			$driverPath = self::root() . "/tests/Fixtures/data/{$driver}/{$fixture}.sql";
+			$path = is_file($driverPath)
+				? $driverPath
+				: self::root() . "/tests/Fixtures/data/{$fixture}.sql";
 
 			if (!file_exists($path)) {
 				throw new RuntimeException("Fixture file not found: {$path}");
@@ -266,7 +272,8 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestType(string $handle, string $kind = 'page'): int
 	{
-		$sql = "INSERT INTO cms.types (handle, kind)
+		$table = $this->table('types');
+		$sql = "INSERT INTO {$table} (handle, kind)
 				VALUES (:handle, :kind)
 				RETURNING type";
 
@@ -292,8 +299,8 @@ class IntegrationTestCase extends TestCase
 			'locked' => false,
 			'creator' => 1, // System user
 			'editor' => 1,
-			'created' => 'now()',
-			'changed' => 'now()',
+			'created' => null,
+			'changed' => null,
 			'content' => '{}',
 		];
 
@@ -304,8 +311,12 @@ class IntegrationTestCase extends TestCase
 			$data['content'] = json_encode($data['content']);
 		}
 
-		$sql = "INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
+		$table = $this->table('nodes');
+		$jsonCast = $this->jsonCast();
+		$now = $this->now();
+		$sql = "INSERT INTO {$table} (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
+				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor,
+					COALESCE(:created, {$now}), COALESCE(:changed, {$now}), :content{$jsonCast})
 				RETURNING node";
 
 		return $this->db()->execute($sql, $data)->one()['node'];
@@ -337,8 +348,10 @@ class IntegrationTestCase extends TestCase
 			$data['data'] = json_encode($data['data']);
 		}
 
-		$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data::jsonb, :creator, :editor)
+		$table = $this->table('users');
+		$jsonCast = $this->jsonCast();
+		$sql = "INSERT INTO {$table} (uid, username, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data{$jsonCast}, :creator, :editor)
 				RETURNING usr";
 
 		return $this->db()->execute($sql, $data)->one()['usr'];
@@ -353,7 +366,8 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestPath(int $nodeId, string $path, string $locale = 'en'): void
 	{
-		$sql = "INSERT INTO cms.urlpaths (node, path, locale, creator, editor)
+		$table = $this->table('urlpaths');
+		$sql = "INSERT INTO {$table} (node, path, locale, creator, editor)
 				VALUES (:node, :path, :locale, 1, 1)";
 
 		$this->db()->execute($sql, [
@@ -377,5 +391,46 @@ class IntegrationTestCase extends TestCase
 	protected function createFinder(): Finder
 	{
 		return new Finder($this->createContext());
+	}
+
+	protected function dialect(): SqlDialect
+	{
+		return SqlDialectFactory::fromDriver($this->db()->getPdoDriver());
+	}
+
+	protected function table(string $name): string
+	{
+		return $this->dialect()->table($name);
+	}
+
+	protected function jsonCast(): string
+	{
+		return $this->dialect()->driver() === 'pgsql' ? '::jsonb' : '';
+	}
+
+	protected function now(): string
+	{
+		return $this->dialect()->now();
+	}
+
+	protected function tableExists(string $table): bool
+	{
+		$driver = $this->dialect()->driver();
+
+		if ($driver === 'sqlite') {
+			$result = $this->db()->execute(
+				"SELECT name FROM sqlite_master WHERE type = 'table' AND name = :name",
+				['name' => $table],
+			)->one();
+
+			return !empty($result);
+		}
+
+		$result = $this->db()->execute(
+			"SELECT to_regclass(:name) AS name",
+			['name' => $table],
+		)->one();
+
+		return !empty($result['name']);
 	}
 }

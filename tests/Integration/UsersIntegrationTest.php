@@ -39,10 +39,11 @@ final class UsersIntegrationTest extends IntegrationTestCase
 		]);
 		$token = bin2hex(random_bytes(16));
 		$oldChanged = '2000-01-01 00:00:00+00';
+		$authTokensTable = $this->table('authtokens');
 
 		$this->db()->execute(
-			'INSERT INTO cms.authtokens (token, usr, creator, editor, changed)
-			VALUES (:token, :usr, :creator, :editor, :changed)',
+			"INSERT INTO {$authTokensTable} (token, usr, creator, editor, changed)
+			VALUES (:token, :usr, :creator, :editor, :changed)",
 			[
 				'token' => $token,
 				'usr' => $userId,
@@ -53,7 +54,7 @@ final class UsersIntegrationTest extends IntegrationTestCase
 		)->run();
 
 		$this->db()->execute(
-			'UPDATE cms.authtokens SET editor = :editor WHERE token = :token',
+			"UPDATE {$authTokensTable} SET editor = :editor WHERE token = :token",
 			[
 				'editor' => $userId,
 				'token' => $token,
@@ -61,7 +62,7 @@ final class UsersIntegrationTest extends IntegrationTestCase
 		)->run();
 
 		$updated = $this->db()->execute(
-			'SELECT changed FROM cms.authtokens WHERE token = :token',
+			"SELECT changed FROM {$authTokensTable} WHERE token = :token",
 			['token' => $token],
 		)->one();
 

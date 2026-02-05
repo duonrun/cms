@@ -81,36 +81,48 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function cleanupTestData(): void
 	{
 		$db = $this->db();
+		$oneTimeTable = $this->table('onetimetokens');
+		$authTable = $this->table('authtokens');
+		$userTable = $this->table('users');
+		$pathsTable = $this->table('urlpaths');
+		$fulltextTable = $this->table('fulltext');
+		$nodetagsTable = $this->table('nodetags');
+		$draftsTable = $this->table('drafts');
+		$auditNodesTable = $this->table('audit.nodes');
+		$nodesTable = $this->table('nodes');
+		$typesTable = $this->table('types');
 
 		// Delete created one-time tokens
 		foreach ($this->createdOneTimeTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.onetimetokens WHERE token = :token', ['token' => $tokenHash])->run();
+			$db->execute("DELETE FROM {$oneTimeTable} WHERE token = :token", ['token' => $tokenHash])->run();
 		}
 
 		// Delete created auth tokens
 		foreach ($this->createdAuthTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.authtokens WHERE token = :token', ['token' => $tokenHash])->run();
+			$db->execute("DELETE FROM {$authTable} WHERE token = :token", ['token' => $tokenHash])->run();
 		}
 
 		// Delete created users
 		foreach ($this->createdUserIds as $userId) {
-			$db->execute('DELETE FROM cms.users WHERE usr = :usr', ['usr' => $userId])->run();
+			$db->execute("DELETE FROM {$userTable} WHERE usr = :usr", ['usr' => $userId])->run();
 		}
 
 		// Delete created paths and nodes in reverse order (children before parents)
 		// Also delete related records that reference the nodes via FKs
 		foreach (array_reverse($this->createdNodeIds) as $nodeId) {
-			$db->execute('DELETE FROM cms.urlpaths WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.fulltext WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodetags WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM audit.nodes WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodes WHERE node = :node', ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$pathsTable} WHERE node = :node", ['node' => $nodeId])->run();
+			if ($this->tableExists($fulltextTable)) {
+				$db->execute("DELETE FROM {$fulltextTable} WHERE node = :node", ['node' => $nodeId])->run();
+			}
+			$db->execute("DELETE FROM {$nodetagsTable} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$draftsTable} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$auditNodesTable} WHERE node = :node", ['node' => $nodeId])->run();
+			$db->execute("DELETE FROM {$nodesTable} WHERE node = :node", ['node' => $nodeId])->run();
 		}
 
 		// Delete created types
 		foreach ($this->createdTypeHandles as $handle) {
-			$db->execute('DELETE FROM cms.types WHERE handle = :handle', ['handle' => $handle])->run();
+			$db->execute("DELETE FROM {$typesTable} WHERE handle = :handle", ['handle' => $handle])->run();
 		}
 
 		$this->createdNodeIds = [];
@@ -126,8 +138,9 @@ class End2EndTestCase extends IntegrationTestCase
 	 */
 	protected function trackNodeByUid(string $uid): int
 	{
+		$table = $this->table('nodes');
 		$node = $this->db()->execute(
-			'SELECT node FROM cms.nodes WHERE uid = :uid',
+			"SELECT node FROM {$table} WHERE uid = :uid",
 			['uid' => $uid],
 		)->one();
 		$this->assertNotEmpty($node);
@@ -171,17 +184,20 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function createAuthenticatedUser(string $role = 'editor'): string
 	{
 		$db = $this->db();
+		$usersTable = $this->table('users');
+		$authTokensTable = $this->table('authtokens');
+		$jsonCast = $this->jsonCast();
 		$uid = 'test-auth-' . uniqid();
 		$token = bin2hex(random_bytes(32));
 		$tokenHash = hash('sha256', $token);
 
 		// Create user with correct schema (userrole instead of role)
-		$sql = "INSERT INTO cms.users (uid, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, :creator, :editor)
+		$sql = "INSERT INTO {$usersTable} (uid, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :email, :pwhash, :userrole, :active, '{}'{$jsonCast}, :creator, :editor)
 				RETURNING usr";
 
 		$systemUser = $db->execute(
-			"SELECT usr FROM cms.users WHERE userrole = 'system' LIMIT 1",
+			"SELECT usr FROM {$usersTable} WHERE userrole = 'system' LIMIT 1",
 		)->one();
 		$this->assertNotEmpty($systemUser);
 		$systemUserId = (int) $systemUser['usr'];
@@ -191,6 +207,7 @@ class End2EndTestCase extends IntegrationTestCase
 			'email' => $uid . '@example.com',
 			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
 			'userrole' => $role,
+			'active' => true,
 			'creator' => $systemUserId,
 			'editor' => $systemUserId,
 		])->one()['usr'];
@@ -198,7 +215,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->createdUserIds[] = $userId;
 
 		// Create auth token
-		$sql = "INSERT INTO cms.authtokens (token, usr, creator, editor)
+		$sql = "INSERT INTO {$authTokensTable} (token, usr, creator, editor)
 				VALUES (:token, :usr, 1, 1)";
 
 		$db->execute($sql, [

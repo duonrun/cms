@@ -28,8 +28,9 @@ final class NodeTest extends IntegrationTestCase
 			'content' => $content,
 		]);
 
+		$nodesTable = $this->table('nodes');
 		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
+			"SELECT * FROM {$nodesTable} WHERE node = :id",
 			['id' => $nodeId],
 		)->one();
 
@@ -52,8 +53,9 @@ final class NodeTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
+		$nodesTable = $this->table('nodes');
 		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
+			"SELECT * FROM {$nodesTable} WHERE node = :id",
 			['id' => $nodeId],
 		)->one();
 
@@ -83,13 +85,15 @@ final class NodeTest extends IntegrationTestCase
 			'subtitle' => ['type' => 'text', 'value' => ['en' => 'New Subtitle']],
 		];
 
+		$nodesTable = $this->table('nodes');
+		$jsonCast = $this->jsonCast();
 		$this->db()->execute(
-			'UPDATE cms.nodes SET content = :content::jsonb WHERE node = :id',
+			"UPDATE {$nodesTable} SET content = :content{$jsonCast} WHERE node = :id",
 			['id' => $nodeId, 'content' => json_encode($updatedContent)],
 		)->run();
 
 		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
+			"SELECT content FROM {$nodesTable} WHERE node = :id",
 			['id' => $nodeId],
 		)->one();
 
@@ -106,9 +110,10 @@ final class NodeTest extends IntegrationTestCase
 		$this->createTestNode(['uid' => 'query-node-2', 'type' => $typeId, 'published' => true]);
 		$this->createTestNode(['uid' => 'query-node-3', 'type' => $typeId, 'published' => false]);
 
+		$nodesTable = $this->table('nodes');
 		$nodes = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE type = :type AND published = true ORDER BY node',
-			['type' => $typeId],
+			"SELECT * FROM {$nodesTable} WHERE type = :type AND published = :published ORDER BY node",
+			['type' => $typeId, 'published' => true],
 		)->all();
 
 		$this->assertCount(2, $nodes);
@@ -131,8 +136,9 @@ final class NodeTest extends IntegrationTestCase
 			'parent' => $parentId,
 		]);
 
+		$nodesTable = $this->table('nodes');
 		$children = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE parent = :parent',
+			"SELECT * FROM {$nodesTable} WHERE parent = :parent",
 			['parent' => $parentId],
 		)->all();
 
@@ -149,19 +155,20 @@ final class NodeTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
+		$nodesTable = $this->table('nodes');
 		$exists = $this->db()->execute(
-			'SELECT EXISTS(SELECT 1 FROM cms.nodes WHERE node = :id) as exists',
+			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as exists",
 			['id' => $nodeId],
 		)->one()['exists'];
 		$this->assertTrue($exists);
 
 		$this->db()->execute(
-			'DELETE FROM cms.nodes WHERE node = :id',
+			"DELETE FROM {$nodesTable} WHERE node = :id",
 			['id' => $nodeId],
 		)->run();
 
 		$exists = $this->db()->execute(
-			'SELECT EXISTS(SELECT 1 FROM cms.nodes WHERE node = :id) as exists',
+			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as exists",
 			['id' => $nodeId],
 		)->one()['exists'];
 		$this->assertFalse($exists);
@@ -187,12 +194,23 @@ final class NodeTest extends IntegrationTestCase
 			],
 		]);
 
-		$nodes = $this->db()->execute(
-			"SELECT uid, content->'title'->'value'->>'en' as title
-			 FROM cms.nodes
+		$nodesTable = $this->table('nodes');
+		$pattern = '%Second%';
+		if ($this->dialect()->driver() === 'pgsql') {
+			$sql = "SELECT uid, content->'title'->'value'->>'en' as title
+			 FROM {$nodesTable}
 			 WHERE type = :type
-			 AND content->'title'->'value'->>'en' LIKE '%Second%'",
-			['type' => $typeId],
+			 AND content->'title'->'value'->>'en' LIKE :pattern";
+		} else {
+			$sql = "SELECT uid, json_extract(content, '$.title.value.en') as title
+			 FROM {$nodesTable}
+			 WHERE type = :type
+			 AND json_extract(content, '$.title.value.en') LIKE :pattern";
+		}
+
+		$nodes = $this->db()->execute(
+			$sql,
+			['type' => $typeId, 'pattern' => $pattern],
 		)->all();
 
 		$this->assertCount(1, $nodes);
@@ -210,8 +228,9 @@ final class NodeTest extends IntegrationTestCase
 			'data' => ['name' => 'Integration User'],
 		]);
 
+		$usersTable = $this->table('users');
 		$user = $this->db()->execute(
-			'SELECT uid, username, email, userrole, active, data FROM cms.users WHERE usr = :usr',
+			"SELECT uid, username, email, userrole, active, data FROM {$usersTable} WHERE usr = :usr",
 			['usr' => $userId],
 		)->one();
 

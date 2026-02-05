@@ -53,13 +53,15 @@ final class InactivePathRedirectTest extends End2EndTestCase
 		];
 
 		$db = $this->db();
+		$pathsTable = $this->table('urlpaths');
+		$now = $this->now();
 		$oldPathRow = $db->execute(
-			'SELECT path, locale FROM cms.urlpaths WHERE node = :node ORDER BY created DESC LIMIT 1',
+			"SELECT path, locale FROM {$pathsTable} WHERE node = :node ORDER BY created DESC LIMIT 1",
 			['node' => $nodeId],
 		)->one();
 		$this->assertNotEmpty($oldPathRow);
 		$db->execute(
-			'UPDATE cms.urlpaths SET inactive = now(), editor = :editor WHERE path = :path AND locale = :locale',
+			"UPDATE {$pathsTable} SET inactive = {$now}, editor = :editor WHERE path = :path AND locale = :locale",
 			[
 				'editor' => 1,
 				'path' => $oldPathRow['path'],
@@ -67,7 +69,7 @@ final class InactivePathRedirectTest extends End2EndTestCase
 			],
 		)->run();
 		$db->execute(
-			'INSERT INTO cms.urlpaths (node, path, locale, creator, editor) VALUES (:node, :path, :locale, :creator, :editor)',
+			"INSERT INTO {$pathsTable} (node, path, locale, creator, editor) VALUES (:node, :path, :locale, :creator, :editor)",
 			[
 				'node' => $nodeId,
 				'path' => $updatedPath,
@@ -78,13 +80,13 @@ final class InactivePathRedirectTest extends End2EndTestCase
 		)->run();
 
 		$pathRow = $db->execute(
-			'SELECT path, inactive FROM cms.urlpaths WHERE path = :path',
+			"SELECT path, inactive FROM {$pathsTable} WHERE path = :path",
 			['path' => $initialPath],
 		)->one();
 		$this->assertNotEmpty($pathRow);
 		$this->assertNotNull($pathRow['inactive']);
 		$activePathRow = $db->execute(
-			'SELECT path FROM cms.urlpaths WHERE node = :node AND inactive IS NULL',
+			"SELECT path FROM {$pathsTable} WHERE node = :node AND inactive IS NULL",
 			['node' => $nodeId],
 		)->one();
 		$this->assertSame($updatedPath, $activePathRow['path'] ?? null);
