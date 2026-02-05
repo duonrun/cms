@@ -37,10 +37,20 @@ final class SqlitePragmaTest extends TestCase
 				'pgsql' => self::root() . '/db/sql/pgsql',
 				'sqlite' => self::root() . '/db/sql/sqlite',
 			];
+			$migrations = [
+				'install' => [
+					'pgsql' => self::root() . '/db/migrations/install/pgsql',
+					'sqlite' => self::root() . '/db/migrations/install/sqlite',
+				],
+				'default' => [
+					'pgsql' => self::root() . '/db/migrations/update/pgsql',
+					'sqlite' => self::root() . '/db/migrations/update/sqlite',
+				],
+			];
 			$conn = new Connection(
 				$dsn,
 				$sql,
-				self::root() . '/db/migrations',
+				$migrations,
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,
 			);

@@ -144,12 +144,22 @@ class TestCase extends BaseTestCase
 			'pgsql' => self::root() . '/db/sql/pgsql',
 			'sqlite' => self::root() . '/db/sql/sqlite',
 		];
+		$migrations = [
+			'install' => [
+				'pgsql' => self::root() . '/db/migrations/install/pgsql',
+				'sqlite' => self::root() . '/db/migrations/install/sqlite',
+			],
+			'default' => [
+				'pgsql' => self::root() . '/db/migrations/update/pgsql',
+				'sqlite' => self::root() . '/db/migrations/update/sqlite',
+			],
+		];
 
 		return new \Duon\Quma\Database(
 			new \Duon\Quma\Connection(
 				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
 				$sql,
-				self::root() . '/db/migrations',
+				$migrations,
 				fetchMode: PDO::FETCH_ASSOC,
 				print: false,
 			),

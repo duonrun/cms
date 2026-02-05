@@ -141,13 +141,43 @@ class Cms implements Plugin
 			'sqlite' => array_merge([$root . '/db/sql/sqlite'], $additionalSql['sqlite']),
 			'all' => $additionalSql['all'],
 		];
-		$migrations = $this->config->get('db.migrations', []);
+		$migrationsConfig = $this->config->get('db.migrations', []);
+		$additionalMigrations = [
+			'pgsql' => [],
+			'sqlite' => [],
+			'all' => [],
+		];
+
+		if (is_string($migrationsConfig) && $migrationsConfig !== '') {
+			$additionalMigrations['all'][] = $migrationsConfig;
+		} elseif (is_array($migrationsConfig)) {
+			if (array_is_list($migrationsConfig)) {
+				$additionalMigrations['all'] = array_merge($additionalMigrations['all'], $migrationsConfig);
+			} else {
+				foreach (['pgsql', 'sqlite', 'all'] as $key) {
+					if (!array_key_exists($key, $migrationsConfig)) {
+						continue;
+					}
+
+					$value = $migrationsConfig[$key];
+					$additionalMigrations[$key] = array_merge(
+						$additionalMigrations[$key],
+						is_array($value) ? $value : [$value],
+					);
+				}
+			}
+		}
+
 		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge(
-			$migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [],
-			[$root . '/db/migrations/update'],
-		);
+		$namespacedMigrations['install'] = [
+			'pgsql' => [$root . '/db/migrations/install/pgsql'],
+			'sqlite' => [$root . '/db/migrations/install/sqlite'],
+		];
+		$namespacedMigrations['default'] = [
+			'pgsql' => array_merge([$root . '/db/migrations/update/pgsql'], $additionalMigrations['pgsql']),
+			'sqlite' => array_merge([$root . '/db/migrations/update/sqlite'], $additionalMigrations['sqlite']),
+			'all' => $additionalMigrations['all'],
+		];
 
 		try {
 			$this->connection = new Connection(
