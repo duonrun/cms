@@ -52,7 +52,7 @@
 		}
 	},
 	"scripts": {
-		"test": "@test:pgsql",
+		"test": "@test:sqlite",
 		"test:sqlite": "CMS_TEST_DRIVER=sqlite ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
 		"test:pgsql": "CMS_TEST_DRIVER=pgsql ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
 		"test:all": [
