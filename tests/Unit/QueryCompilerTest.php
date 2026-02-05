@@ -78,6 +78,33 @@ final class QueryCompilerTest extends TestCase
 		$this->assertSame(['p0' => '1', 'p1' => '0.0002', 'p2' => '3', 'p3' => '4'], $result->params);
 	}
 
+	public function testInAndNotInQueryWithFieldSqlite(): void
+	{
+		$sqliteContext = new Context(
+			$this->dbSqlite(),
+			$this->request(),
+			$this->config(),
+			$this->registry(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($sqliteContext, ['builtin' => 'builtin']);
+
+		// IN with fields uses json_extract on SQLite
+		$result = $compiler->compile("field @ ['v1', 'v2']");
+		$this->assertSame(
+			"json_extract(n.content, '\$.field.value') IN (:p0, :p1)",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => 'v1', 'p1' => 'v2'], $result->params);
+
+		$result = $compiler->compile("field !@ [1, 2, 3]");
+		$this->assertSame(
+			"json_extract(n.content, '\$.field.value') NOT IN (:p0, :p1, :p2)",
+			$result->sql,
+		);
+		$this->assertSame(['p0' => '1', 'p1' => '2', 'p2' => '3'], $result->params);
+	}
+
 	public function testSimpleOrQuery(): void
 	{
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
