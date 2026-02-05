@@ -32,11 +32,11 @@ class TranslatedImage extends Image
 
 	protected function getMediaPath(int $index): string
 	{
-		return $this->node->config->get('path.prefix') . '/media/image/' .
-			$this->assetsPath() .
-			$this->translated('file', $index) .
-			$this->queryString .
-			($this->quality ? "&quality={$this->quality}" : '');
+		return $this->node->config->get('path.prefix') . '/media/image/'
+			. $this->assetsPath()
+			. $this->translated('file', $index)
+			. $this->queryString
+			. ($this->quality ? "&quality={$this->quality}" : '');
 	}
 
 	protected function translated(string $key, int $index): string

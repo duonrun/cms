@@ -67,6 +67,19 @@ The `recreate-db` command:
 composer test
 ```
 
+### Backend Selection
+
+The test suite is executed once per backend by setting `CMS_TEST_DRIVER` and running PHPUnit.
+This avoids mixing drivers inside a single process and keeps integration/E2E stable.
+
+Phase A (SQLite support in progress): run PostgreSQL only:
+
+```bash
+CMS_TEST_DRIVER=pgsql ./vendor/bin/phpunit
+```
+
+When SQLite parity is reached, CI should run the same command once per driver.
+
 ## How to Resume
 
 - Run `composer test` to verify the suite.

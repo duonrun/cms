@@ -101,16 +101,16 @@ class Menu implements Iterator
 		if ($out) {
 			$class = $class ? sprintf(' class="%s"', $class) : '';
 
-			return $tag ?
-				sprintf(
+			return $tag
+				? sprintf(
 					'<%s%s><ul class="nav-level-%s">%s</ul></%s>',
 					$tag,
 					$class,
 					$item->level(),
 					$out,
 					$tag,
-				) :
-				sprintf('<ul%s class="nav-level-%s">%s</ul>', $class, $item->level(), $out);
+				)
+				: sprintf('<ul%s class="nav-level-%s">%s</ul>', $class, $item->level(), $out);
 		}
 
 		return '';

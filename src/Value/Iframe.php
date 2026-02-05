@@ -57,8 +57,8 @@ class Iframe extends Value
 			return '';
 		}
 
-		$this->value = isset($this->data['value']) ?
-			$this->data['value'] : '';
+		$this->value = isset($this->data['value'])
+			? $this->data['value'] : '';
 
 		return $this->value;
 	}
