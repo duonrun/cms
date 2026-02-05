@@ -134,8 +134,27 @@ CREATE INDEX ix_nodes_parent ON cms_nodes (parent) WHERE parent IS NOT NULL;
 CREATE INDEX ix_nodes_deleted ON cms_nodes (deleted) WHERE deleted IS NULL;
 
 
--- Fulltext search table (FTS5 virtual table created separately in Step 7)
--- For now, create a regular table that can be used until FTS5 is set up
+-- Fulltext search index mapping table
+-- Maps (node, locale) to FTS5 rowid for efficient lookups
+CREATE TABLE cms_fulltext_idx (
+	rowid INTEGER PRIMARY KEY,
+	node INTEGER NOT NULL,
+	locale TEXT NOT NULL,
+	CONSTRAINT uq_fulltext_idx UNIQUE (node, locale),
+	CONSTRAINT fk_fulltext_idx_nodes FOREIGN KEY (node)
+		REFERENCES cms_nodes (node) ON DELETE CASCADE
+);
+
+-- FTS5 virtual table for fulltext search
+-- Stores content internally for proper delete/update support
+-- Tokenizer: porter stemming + unicode normalization + diacritic removal
+CREATE VIRTUAL TABLE cms_fulltext_fts USING fts5(
+	document,
+	tokenize='porter unicode61 remove_diacritics 2'
+);
+
+-- Legacy fulltext table (kept for backwards compatibility)
+-- New code should use cms_fulltext_fts + cms_fulltext_idx
 CREATE TABLE cms_fulltext (
 	node INTEGER NOT NULL,
 	locale TEXT NOT NULL,
