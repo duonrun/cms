@@ -67,7 +67,7 @@ The `recreate-db` command:
 composer test
 ```
 
-By default, `composer test` runs against PostgreSQL during Phase A.
+By default, `composer test` runs against SQLite now that parity is reached.
 
 ### Run Tests Per Backend
 
