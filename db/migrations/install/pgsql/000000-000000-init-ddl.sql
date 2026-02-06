@@ -1,6 +1,13 @@
-CREATE EXTENSION btree_gist;
-CREATE EXTENSION btree_gin;
-CREATE EXTENSION unaccent;
+DO $$
+BEGIN
+	CREATE EXTENSION IF NOT EXISTS unaccent;
+EXCEPTION
+	WHEN insufficient_privilege THEN
+		RAISE NOTICE 'Skipping unaccent extension (insufficient privileges)';
+	WHEN undefined_file THEN
+		RAISE NOTICE 'Skipping unaccent extension (not available)';
+END;
+$$;
 
 CREATE SCHEMA cms;
 CREATE SCHEMA audit;

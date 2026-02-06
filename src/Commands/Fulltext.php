@@ -21,19 +21,14 @@ class Fulltext extends Command
 			return 0;
 		}
 
-		$this->env->db->fulltext->clean();
-		$this->update($this->env->db);
+		$db = $this->env->db;
+		if ($db->getPdoDriver() === 'pgsql') {
+			$db->fulltext->rebuild()->run();
+
+			return 0;
+		}
 
 		return 0;
-	}
-
-	private function update(Database $db): void
-	{
-		foreach ($db->fulltext->nodes()->lazy() as $node) {
-			$json = json_decode($node['content'], true);
-			error_log(print_r($json, true));
-			break;
-		}
 	}
 
 	private function fulltextEnabled(Database $db): bool

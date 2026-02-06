@@ -22,7 +22,8 @@ final class FulltextDisabledTest extends IntegrationTestCase
 
 	public function testFinderWorksWhenFulltextDisabled(): void
 	{
-		$typeId = $this->createTestType('test-page', 'page');
+		$type = $this->db()->nodes->type(['handle' => 'test-page'])->one();
+		$typeId = $type ? (int) $type['type'] : $this->createTestType('test-page', 'page');
 		$this->createTestNode([
 			'uid' => 'fulltext-disabled-node',
 			'type' => $typeId,
@@ -32,7 +33,7 @@ final class FulltextDisabledTest extends IntegrationTestCase
 		]);
 
 		$nodes = iterator_to_array(
-			$this->createFinder()->nodes->types('test-page'),
+			$this->createFinder()->nodes->filter('uid = "fulltext-disabled-node"')->types('test-page'),
 		);
 
 		$this->assertCount(1, $nodes);
