@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder;
 
 use Duon\Cms\Context;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
 use Generator;
@@ -12,8 +13,8 @@ use Iterator;
 
 final class Nodes implements Iterator
 {
-	private string $whereFields = '';
-	private string $whereTypes = '';
+	private CompiledQuery $whereFields;
+	private CompiledQuery $whereTypes;
 	private string $order = '';
 	private ?int $limit = null;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
@@ -40,13 +41,17 @@ final class Nodes implements Iterator
 			'handle' => 't.handle',
 			'uid' => 'n.uid',
 			'kind' => 't.kind',
+			'fulltext' => 'fulltext',
 		];
+
+		$this->whereFields = new CompiledQuery('', []);
+		$this->whereTypes = new CompiledQuery('', []);
 	}
 
 	public function filter(string $query): self
 	{
 		$compiler = new QueryCompiler($this->context, $this->builtins);
-		$this->whereFields = $compiler->compile($query);
+		$this->whereFields = $compiler->compile($query, 'f');
 
 		return $this;
 	}
@@ -67,7 +72,8 @@ final class Nodes implements Iterator
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins);
+		$dialect = SqlDialectFactory::fromDriver($this->context->db->getPdoDriver());
+		$compiler = new OrderCompiler($dialect, $this->builtins);
 		$this->order = $compiler->compile(implode(',', $order));
 
 		return $this;
@@ -148,15 +154,19 @@ final class Nodes implements Iterator
 
 	private function fetchResult(): void
 	{
-		$conditions = implode(' AND ', array_filter([
-			trim($this->whereFields),
-			trim($this->whereTypes),
-		], fn($clause) => !empty($clause)));
-
+		$conditions = [];
 		$params = [
-			'condition' => $conditions,
 			'limit' => $this->limit,
 		];
+
+		foreach ([$this->whereFields, $this->whereTypes] as $compiled) {
+			if (trim($compiled->sql) !== '') {
+				$conditions[] = $compiled->sql;
+				$params = array_merge($params, $compiled->params);
+			}
+		}
+
+		$params['condition'] = implode(' AND ', $conditions);
 
 		if (is_bool($this->deleted)) {
 			$params['deleted'] = $this->deleted;
@@ -177,24 +187,27 @@ final class Nodes implements Iterator
 		$this->result = $this->context->db->nodes->find($params)->lazy();
 	}
 
-	private function typesCondition(array $types): string
+	private function typesCondition(array $types): CompiledQuery
 	{
 		$result = [];
+		$params = new QueryParams('t');
 
 		foreach ($types as $type) {
 			if (class_exists($type)) {
 				$type = $type::handle();
 			}
 
-			$result[] = 't.handle = ' . $this->context->db->quote($type);
+			$result[] = 't.handle = ' . $params->add($type);
 		}
 
-		return match (count($result)) {
+		$sql = match (count($result)) {
 			0 => '',
 			1 => '    ' . $result[0],
 			default => "    (\n        "
 				. implode("\n        OR ", $result)
 				. "\n    )",
 		};
+
+		return new CompiledQuery($sql, $params->all());
 	}
 }

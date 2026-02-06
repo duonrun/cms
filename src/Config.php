@@ -31,6 +31,13 @@ class Config implements ConfigInterface
 			'db.migrations' => [],
 			'db.print' => false,
 			'db.options' => [],
+			'db.features.fulltext.enabled' => null,
+			'db.sqlite.pragmas.foreign_keys' => true,
+			'db.sqlite.pragmas.journal_mode' => 'WAL',
+			'db.sqlite.pragmas.synchronous' => 'NORMAL',
+			'db.sqlite.pragmas.busy_timeout_ms' => 5000,
+			'db.sqlite.pragmas.secure_delete' => false,
+			'db.sqlite.pragmas.trusted_schema' => false,
 			'session.options' => [
 				'cookie_httponly' => true,
 				'cookie_lifetime' => 0,
@@ -119,9 +126,34 @@ class Config implements ConfigInterface
 		return $this->settings['path.panel'];
 	}
 
-	public function apiPath(): string|null
+	public function apiPath(): ?string
 	{
 		return $this->get('path.api', null);
+	}
+
+	public function fulltextEnabled(string $driver): bool
+	{
+		$value = $this->get('db.features.fulltext.enabled', null);
+
+		if (is_bool($value)) {
+			return $value;
+		}
+
+		if (is_int($value)) {
+			return $value === 1;
+		}
+
+		if (is_string($value)) {
+			$normalized = strtolower($value);
+			if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+				return true;
+			}
+			if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
+				return false;
+			}
+		}
+
+		return strtolower($driver) !== 'sqlite';
 	}
 
 	public function env(): string
@@ -133,8 +165,8 @@ class Config implements ConfigInterface
 	{
 		if (!preg_match('/^[a-zA-Z0-9_$-]{1,64}$/', $app)) {
 			throw new ValueError(
-				'The app name must be a nonempty string which consist only of lower case ' .
-					'letters and numbers. Its length must not be longer than 32 characters.',
+				'The app name must be a nonempty string which consist only of lower case '
+					. 'letters and numbers. Its length must not be longer than 32 characters.',
 			);
 		}
 	}

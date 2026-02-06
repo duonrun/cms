@@ -110,27 +110,122 @@ class Cms implements Plugin
 
 		$root = dirname(__DIR__);
 		$sqlConfig = $this->config->get('db.sql', []);
-		$sql = array_merge(
-			[$root . '/db/sql'],
-			$sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [],
-		);
-		$migrations = $this->config->get('db.migrations', []);
-		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge(
-			$migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [],
-			[$root . '/db/migrations/update'],
-		);
+		$additionalSql = [
+			'pgsql' => [],
+			'sqlite' => [],
+			'all' => [],
+		];
 
-		$this->connection = new Connection(
-			$this->config->get('db.dsn'),
-			$sql,
-			$namespacedMigrations,
-			fetchMode: PDO::FETCH_ASSOC,
-			options: $this->config->get('db.options'),
-			print: $this->config->get('db.print'),
+		if (is_string($sqlConfig) && $sqlConfig !== '') {
+			$additionalSql['all'][] = $sqlConfig;
+		} elseif (is_array($sqlConfig)) {
+			if (array_is_list($sqlConfig)) {
+				$additionalSql['all'] = array_merge($additionalSql['all'], $sqlConfig);
+			} else {
+				foreach (['pgsql', 'sqlite', 'all'] as $key) {
+					if (!array_key_exists($key, $sqlConfig)) {
+						continue;
+					}
+
+					$value = $sqlConfig[$key];
+					$additionalSql[$key] = array_merge(
+						$additionalSql[$key],
+						is_array($value) ? $value : [$value],
+					);
+				}
+			}
+		}
+
+		$sql = [
+			'pgsql' => array_merge([$root . '/db/sql/pgsql'], $additionalSql['pgsql']),
+			'sqlite' => array_merge([$root . '/db/sql/sqlite'], $additionalSql['sqlite']),
+			'all' => $additionalSql['all'],
+		];
+		$migrationsConfig = $this->config->get('db.migrations', []);
+		$additionalMigrations = [
+			'pgsql' => [],
+			'sqlite' => [],
+			'all' => [],
+		];
+
+		if (is_string($migrationsConfig) && $migrationsConfig !== '') {
+			$additionalMigrations['all'][] = $migrationsConfig;
+		} elseif (is_array($migrationsConfig)) {
+			if (array_is_list($migrationsConfig)) {
+				$additionalMigrations['all'] = array_merge($additionalMigrations['all'], $migrationsConfig);
+			} else {
+				foreach (['pgsql', 'sqlite', 'all'] as $key) {
+					if (!array_key_exists($key, $migrationsConfig)) {
+						continue;
+					}
+
+					$value = $migrationsConfig[$key];
+					$additionalMigrations[$key] = array_merge(
+						$additionalMigrations[$key],
+						is_array($value) ? $value : [$value],
+					);
+				}
+			}
+		}
+
+		$namespacedMigrations = [];
+		$namespacedMigrations['install'] = [
+			'pgsql' => [$root . '/db/migrations/install/pgsql'],
+			'sqlite' => [$root . '/db/migrations/install/sqlite'],
+		];
+		$namespacedMigrations['default'] = [
+			'pgsql' => array_merge([$root . '/db/migrations/update/pgsql'], $additionalMigrations['pgsql']),
+			'sqlite' => array_merge([$root . '/db/migrations/update/sqlite'], $additionalMigrations['sqlite']),
+			'all' => $additionalMigrations['all'],
+		];
+
+		try {
+			$this->connection = new Connection(
+				$this->config->get('db.dsn'),
+				$sql,
+				$namespacedMigrations,
+				fetchMode: PDO::FETCH_ASSOC,
+				options: $this->config->get('db.options'),
+				print: $this->config->get('db.print'),
+			);
+		} catch (\RuntimeException $e) {
+			$driverMessage = $this->missingDriverMessage($e);
+
+			if ($driverMessage !== null) {
+				throw new RuntimeException($driverMessage, previous: $e);
+			}
+
+			throw $e;
+		}
+		$this->db = new CmsDatabase($this->connection, $this->config);
+	}
+
+	private function missingDriverMessage(\RuntimeException $exception): ?string
+	{
+		$prefix = 'PDO driver not supported: ';
+		$message = $exception->getMessage();
+
+		if (!str_starts_with($message, $prefix)) {
+			return null;
+		}
+
+		$driver = trim(substr($message, strlen($prefix)));
+
+		if ($driver === '') {
+			return null;
+		}
+
+		$extension = match ($driver) {
+			'pgsql' => 'pdo_pgsql',
+			'sqlite' => 'pdo_sqlite',
+			default => 'pdo_' . $driver,
+		};
+
+		return sprintf(
+			'PDO driver not supported: %s. Install extension ext-%s.',
+			$driver,
+			$extension,
 		);
-		$this->db = new Database($this->connection);
 	}
 
 	/**

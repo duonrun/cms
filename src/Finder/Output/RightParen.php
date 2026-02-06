@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Finder\Input\Token;
+use Duon\Cms\Finder\QueryParams;
 
 class RightParen implements Output
 {
@@ -12,7 +13,7 @@ class RightParen implements Output
 		public Token $token,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
 		return ')';
 	}

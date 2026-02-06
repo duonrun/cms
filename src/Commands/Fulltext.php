@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Commands;
 
+use Duon\Cms\Config;
 use Duon\Quma\Commands\Command;
 use Duon\Quma\Database;
 
@@ -16,18 +17,24 @@ class Fulltext extends Command
 
 	public function run(): int
 	{
-		$this->env->db->fulltext->clean();
-		$this->update($this->env->db);
+		if (!$this->fulltextEnabled($this->env->db)) {
+			return 0;
+		}
+
+		$db = $this->env->db;
+		$db->fulltext->clear()->run();
+		$db->fulltext->rebuild()->run();
 
 		return 0;
 	}
 
-	private function update(Database $db): void
+	private function fulltextEnabled(Database $db): bool
 	{
-		foreach ($db->fulltext->nodes()->lazy() as $node) {
-			$json = json_decode($node['content'], true);
-			error_log(print_r($json, true));
-			break;
+		$config = $this->env->options['config'] ?? null;
+		if ($config instanceof Config) {
+			return $config->fulltextEnabled($db->getPdoDriver());
 		}
+
+		return $db->getPdoDriver() !== 'sqlite';
 	}
 }

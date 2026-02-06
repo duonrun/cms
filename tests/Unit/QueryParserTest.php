@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\Output\Comparison;
 use Duon\Cms\Finder\Output\Exists;
 use Duon\Cms\Finder\Output\LeftParen;
@@ -21,13 +22,17 @@ final class QueryParserTest extends TestCase
 
 	protected function setUp(): void
 	{
-		$this->parser = new QueryParser(new Context(
-			$this->db(),
-			$this->request(),
-			$this->config(),
-			$this->registry(),
-			$this->factory(),
-		), ['builtin' => 'c.builtin']);
+		$this->parser = new QueryParser(
+			new Context(
+				$this->db(),
+				$this->request(),
+				$this->config(),
+				$this->registry(),
+				$this->factory(),
+			),
+			SqlDialectFactory::fromDriver('pgsql'),
+			['builtin' => 'c.builtin'],
+		);
 	}
 
 	public function testParseQuery(): void

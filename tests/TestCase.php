@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests;
 
+use Duon\Cms\CmsDatabase;
 use Duon\Cms\Config;
 use Duon\Cms\Locales;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Core\Factory;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Request;
@@ -32,8 +34,8 @@ class TestCase extends BaseTestCase
 		$_SERVER['HTTP_ACCEPT_ENCODING'] = 'gzip, deflate, br';
 		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US,de;q=0.7,en;q=0.3';
 		$_SERVER['HTTP_HOST'] = 'www.example.com';
-		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) ' .
-			'Gecko/20100101 Firefox/108.0';
+		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) '
+			. 'Gecko/20100101 Firefox/108.0';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_SERVER['REQUEST_URI'] = '/';
 		$_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
@@ -140,14 +142,9 @@ class TestCase extends BaseTestCase
 	 */
 	public function db(): \Duon\Quma\Database
 	{
-		return new \Duon\Quma\Database(
-			new \Duon\Quma\Connection(
-				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				self::root() . '/db/sql',
-				self::root() . '/db/migrations',
-				fetchMode: PDO::FETCH_ASSOC,
-				print: false,
-			),
+		return new CmsDatabase(
+			TestDbConfig::connection(),
+			$this->config(),
 		);
 	}
 

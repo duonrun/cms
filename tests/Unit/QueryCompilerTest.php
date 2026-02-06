@@ -7,6 +7,8 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\QueryCompiler;
 use Duon\Cms\Tests\TestCase;
 
@@ -27,114 +29,141 @@ final class QueryCompilerTest extends TestCase
 
 	public function testSimpleAndQuery(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
-
-		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND builtin = 2",
-			$compiler->compile('field=1 & builtin=2'),
+		$field = $this->fieldComparison('field.value', '=', '1', ':q1');
+		$this->assertCompiled(
+			'field=1 & builtin=2',
+			['builtin' => 'builtin'],
+			$field['sql'] . ' AND builtin = :q2',
+			array_merge($field['params'], ['q2' => '2']),
 		);
 	}
 
 	public function testInAndNotInQueryWithBuiltin(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
-
-		$this->assertSame(
-			"builtin IN ('v1', 'v\"2', 'v3''')",
-			$compiler->compile("builtin @ ['v1'  , 'v\"2''v3\'']"),
+		$this->assertCompiled(
+			'builtin @ ["v1", "v2", "v3"]',
+			['builtin' => 'builtin'],
+			'builtin IN (:q1, :q2, :q3)',
+			['q1' => 'v1', 'q2' => 'v2', 'q3' => 'v3'],
 		);
-		$this->assertSame(
-			"builtin IN ('1', '2', '3', '4')",
-			$compiler->compile("builtin @ [,1, 2,3 4]"),
+		$this->assertCompiled(
+			'builtin @ [1, 2, 3, 4]',
+			['builtin' => 'builtin'],
+			'builtin IN (:q1, :q2, :q3, :q4)',
+			['q1' => '1', 'q2' => '2', 'q3' => '3', 'q4' => '4'],
 		);
-
-		$this->assertSame(
-			"builtin NOT IN ('''v1', 'v2', 'v3')",
-			$compiler->compile("builtin !@ ['\'v1''v2''v3']"),
+		$this->assertCompiled(
+			'builtin !@ ["v1", "v2", "v3"]',
+			['builtin' => 'builtin'],
+			'builtin NOT IN (:q1, :q2, :q3)',
+			['q1' => 'v1', 'q2' => 'v2', 'q3' => 'v3'],
 		);
-		$this->assertSame(
-			"builtin NOT IN ('1', '2', '3', '4')",
-			$compiler->compile("builtin !@ [1    2  3,,4]"),
+		$this->assertCompiled(
+			'builtin !@ [1, 2, 3, 4]',
+			['builtin' => 'builtin'],
+			'builtin NOT IN (:q1, :q2, :q3, :q4)',
+			['q1' => '1', 'q2' => '2', 'q3' => '3', 'q4' => '4'],
 		);
 	}
 
 	public function testInAndNotInQueryWithField(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
-
-		$this->assertSame(
-			"n.content->'field'->>'value' IN ('v1', 'v2', 'v''3', 'v4')",
-			$compiler->compile("field @ ['v1', 'v2' , 'v\'3''v4' ,]"),
+		$field = $this->fieldExpr('field');
+		$numericField = $this->numericFieldExpr('field');
+		$this->assertCompiled(
+			'field @ ["v1", "v2", "v3", "v4"]',
+			['builtin' => 'builtin'],
+			"{$field} IN (:q1, :q2, :q3, :q4)",
+			['q1' => 'v1', 'q2' => 'v2', 'q3' => 'v3', 'q4' => 'v4'],
 		);
-		$this->assertSame(
-			"n.content->'field'->>'value' IN ('1', '2', '3', '4.513')",
-			$compiler->compile("field @ [1,2 , 3 4.513]"),
+		$this->assertCompiled(
+			'field @ [1, 2, 3, 4.513]',
+			['builtin' => 'builtin'],
+			"{$numericField} IN (:q1, :q2, :q3, :q4)",
+			['q1' => '1', 'q2' => '2', 'q3' => '3', 'q4' => '4.513'],
 		);
-
-		$this->assertSame(
-			"n.content->'field'->>'value' NOT IN ('v1', 'v2', 'v3', 'v4')",
-			$compiler->compile("field !@ [, 'v1''v2''v3''v4' ,]"),
+		$this->assertCompiled(
+			'field !@ ["v1", "v2", "v3", "v4"]',
+			['builtin' => 'builtin'],
+			"{$field} NOT IN (:q1, :q2, :q3, :q4)",
+			['q1' => 'v1', 'q2' => 'v2', 'q3' => 'v3', 'q4' => 'v4'],
 		);
-		$this->assertSame(
-			"n.content->'field'->>'value' NOT IN ('1', '0.0002', '3', '4')",
-			$compiler->compile("field !@ [, 1 0.0002 , 3 , ,4 ,]"),
+		$this->assertCompiled(
+			'field !@ [1, 0.0002, 3, 4]',
+			['builtin' => 'builtin'],
+			"{$numericField} NOT IN (:q1, :q2, :q3, :q4)",
+			['q1' => '1', 'q2' => '0.0002', 'q3' => '3', 'q4' => '4'],
 		);
 	}
 
 	public function testSimpleOrQuery(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
-
-		$this->assertSame(
-			"n.content @@ '$.field.value == 1' OR builtin = 2",
-			$compiler->compile('field=1 | builtin=2'),
+		$field = $this->fieldComparison('field.value', '=', '1', ':q1');
+		$this->assertCompiled(
+			'field=1 | builtin=2',
+			['builtin' => 'builtin'],
+			$field['sql'] . ' OR builtin = :q2',
+			array_merge($field['params'], ['q2' => '2']),
 		);
 	}
 
 	public function testNestedQuery1(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin']);
-
-		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (n.builtin = 2 OR n.builtin = 3)",
-			$compiler->compile('field=1 & (builtin=2|builtin=3)'),
+		$field = $this->fieldComparison('field.value', '=', '1', ':q1');
+		$this->assertCompiled(
+			'field=1 & (builtin=2|builtin=3)',
+			['builtin' => 'n.builtin'],
+			$field['sql'] . ' AND (n.builtin = :q2 OR n.builtin = :q3)',
+			array_merge($field['params'], ['q2' => '2', 'q3' => '3']),
 		);
 	}
 
 	public function testNestedQuery2(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin', 'another' => 't.another']);
-
-		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
-			$compiler->compile("field=1 & (another='test'|(builtin>2 & builtin<5))"),
+		$field = $this->fieldComparison('field.value', '=', '1', ':q1');
+		$this->assertCompiled(
+			"field=1 & (another='test'|(builtin>2 & builtin<5))",
+			['builtin' => 'n.builtin', 'another' => 't.another'],
+			$field['sql'] . ' AND (t.another = :q2 OR (n.builtin > :q3 AND n.builtin < :q4))',
+			array_merge($field['params'], ['q2' => 'test', 'q3' => '2', 'q4' => '5']),
 		);
 	}
 
 	public function testNestedQuery3(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin', 'another' => 't.another']);
-
-		$this->assertSame(
-			"(n.builtin = 1 OR n.content @@ '$.field.value == 1')" .
-				' AND ' .
-				"(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
-			$compiler->compile("(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))"),
+		$field = $this->fieldComparison('field.value', '=', '1', ':q2');
+		$this->assertCompiled(
+			"(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))",
+			['builtin' => 'n.builtin', 'another' => 't.another'],
+			'(n.builtin = :q1 OR ' . $field['sql'] . ') AND (t.another = :q3 OR (n.builtin > :q4 AND n.builtin < :q5))',
+			[
+				'q1' => '1',
+				...$field['params'],
+				'q3' => 'test',
+				'q4' => '2',
+				'q5' => '5',
+			],
 		);
 	}
 
 	public function testNullQuery(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin']);
-
-		$this->assertSame('n.builtin IS NULL', $compiler->compile('builtin = null'));
+		$this->assertCompiled(
+			'builtin = null',
+			['builtin' => 'n.builtin'],
+			'n.builtin IS NULL',
+			[],
+		);
 	}
 
 	public function testNotNullQuery(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin']);
-
-		$this->assertSame('n.builtin IS NOT NULL', $compiler->compile('builtin != null'));
+		$this->assertCompiled(
+			'builtin != null',
+			['builtin' => 'n.builtin'],
+			'n.builtin IS NOT NULL',
+			[],
+		);
 	}
 
 	public function testNullQueryWrongPosition(): void
@@ -153,5 +182,59 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin']);
 
 		$compiler->compile('builtin ~ null');
+	}
+
+	public function testSqlInjectionBecomesBoundValue(): void
+	{
+		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+
+		$compiled = $compiler->compile("builtin = \"value' OR 1=1 --\"");
+
+		$this->assertSame('builtin = :q1', $compiled->sql);
+		$this->assertSame(['q1' => "value' OR 1=1 --"], $compiled->params);
+		$this->assertStringNotContainsString('OR 1=1', $compiled->sql);
+	}
+
+	private function assertCompiled(
+		string $query,
+		array $builtins,
+		string $expectedSql,
+		array $expectedParams,
+	): void {
+		$compiler = new QueryCompiler($this->context, $builtins);
+		$compiled = $compiler->compile($query);
+
+		$this->assertSame($expectedSql, $compiled->sql);
+		$this->assertSame($expectedParams, $compiled->params);
+	}
+
+	private function dialect(): SqlDialect
+	{
+		return SqlDialectFactory::fromDriver($this->context->db->getPdoDriver());
+	}
+
+	private function fieldExpr(string $path): string
+	{
+		return $this->dialect()->jsonExtract('n.content', $path);
+	}
+
+	private function numericFieldExpr(string $path): string
+	{
+		$field = $this->fieldExpr($path);
+
+		return $this->dialect()->driver() === 'sqlite'
+			? "CAST({$field} AS NUMERIC)"
+			: $field;
+	}
+
+	private function fieldComparison(string $path, string $operator, string $value, string $placeholder): array
+	{
+		$result = $this->dialect()->jsonFieldCompare('n.content', $path, $operator, $value, $placeholder);
+		$paramName = ltrim($placeholder, ':');
+
+		return [
+			'sql' => $result['sql'],
+			'params' => [$paramName => $result['paramValue']],
+		];
 	}
 }

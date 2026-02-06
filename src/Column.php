@@ -94,13 +94,13 @@ final class Column
 				return $node::className();
 			case 'meta.editor':
 				return escape(
-					$node->meta('editor_data')['name'] ??
-					$node->meta('editor_username'),
+					$node->meta('editor_data')['name']
+					?? $node->meta('editor_username'),
 				) ?? $node->meta('editor_email');
 			case 'meta.creator':
 				return escape(
-					$node->meta('creator_data')['name'] ??
-					$node->meta('creator_username'),
+					$node->meta('creator_data')['name']
+					?? $node->meta('creator_username'),
 				) ?? $node->meta('creator_email');
 			default:
 				return (string) $node->getValue($field);

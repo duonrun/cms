@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenGroup;
 use Duon\Cms\Finder\Input\TokenType;
@@ -35,6 +36,7 @@ final class QueryParser
 	 */
 	public function __construct(
 		private readonly Context $context,
+		private readonly SqlDialect $dialect,
 		private readonly array $builtins = [],
 	) {}
 
@@ -119,7 +121,6 @@ final class QueryParser
 					$currentListPos,
 					$currentList,
 					$token->position - $currentListPos,
-					$this->context->db,
 				);
 				$currentList = [];
 				$currentListPos = null;
@@ -200,14 +201,14 @@ final class QueryParser
 		}
 
 		if ($right->type === TokenType::Null) {
-			return new NullComparison($left, $operator, $right, $this->context, $this->builtins);
+			return new NullComparison($left, $operator, $right, $this->context, $this->dialect, $this->builtins);
 		}
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
-			return new UrlPath($left, $operator, $right);
+			return new UrlPath($left, $operator, $right, $this->dialect);
 		}
 
-		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
+		return new Comparison($left, $operator, $right, $this->context, $this->dialect, $this->builtins);
 	}
 
 	private function getExistsCondition(Token $token): Exists
@@ -215,15 +216,15 @@ final class QueryParser
 		if ($token->type !== TokenType::Field) {
 			$this->error(
 				$token,
-				'Conditions of type `field exists` must consist of ' .
-				'a single operand of type Field.',
+				'Conditions of type `field exists` must consist of '
+				. 'a single operand of type Field.',
 			);
 		}
 
 		$this->readyForCondition = false;
 		$this->pos++;
 
-		return new Exists($token);
+		return new Exists($token, $this->dialect);
 	}
 
 	/**
@@ -234,8 +235,8 @@ final class QueryParser
 		if ($this->readyForCondition) {
 			$this->error(
 				$token,
-				'Invalid position for a boolean operator. ' .
-					'Maybe you used && instead of & or || instead of |',
+				'Invalid position for a boolean operator. '
+					. 'Maybe you used && instead of & or || instead of |',
 			);
 		}
 
@@ -303,10 +304,10 @@ final class QueryParser
 		}
 
 		throw new ParserException(
-			"Parse error at position {$position}. {$msg}\n\n" .
-				"Query: `{$this->query}`\n" .
-				str_repeat(' ', $start) .
-				str_repeat('^', $len) . "\n\n",
+			"Parse error at position {$position}. {$msg}\n\n"
+				. "Query: `{$this->query}`\n"
+				. str_repeat(' ', $start)
+				. str_repeat('^', $len) . "\n\n",
 		);
 	}
 }

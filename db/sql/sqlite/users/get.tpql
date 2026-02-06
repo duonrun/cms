@@ -1,0 +1,69 @@
+SELECT
+	u.usr,
+	u.uid,
+	u.username,
+	u.email,
+	u.pwhash,
+	u.userrole AS role,
+	u.active,
+	u.data,
+	COALESCE(json_extract(c.data, '$.name'), c.username, c.email) AS creator,
+	COALESCE(json_extract(e.data, '$.name'), e.username, e.email) AS editor,
+<?php if (isset($sessionhash)) : ?>
+	s.expires,
+<?php endif ?>
+	u.created,
+	u.changed,
+	u.deleted
+FROM
+	cms_users u
+INNER JOIN
+	cms_users c ON
+		u.creator = c.usr
+INNER JOIN
+	cms_users e ON
+		u.editor = e.usr
+
+<?php if (isset($token)): ?>
+INNER JOIN
+	cms_authtokens at ON
+		at.usr = u.usr
+<?php endif ?>
+
+<?php if (isset($onetimetoken)): ?>
+INNER JOIN
+	cms_onetimetokens ott ON
+		ott.usr = u.usr
+<?php endif ?>
+
+<?php if (isset($sessionhash)) : ?>
+INNER JOIN
+	 cms_loginsessions s ON
+	 	s.usr = u.usr
+<?php endif ?>
+
+WHERE
+
+<?php if (isset($login)) : ?>
+	(u.email = :login OR u.username = :login)
+<?php elseif (isset($sessionhash)): ?>
+	s.hash = :sessionhash
+<?php elseif (isset($usr)): ?>
+	u.usr = :usr
+<?php elseif (isset($token)): ?>
+	at.token = :token
+<?php elseif (isset($onetimetoken)): ?>
+	ott.token = :onetimetoken
+<?php else: ?>
+	u.uid = :uid
+<?php endif ?>
+
+	AND u.userrole != 'system'
+
+<?php if (!isset($deletedAlso) || $deletedAlso === false) : ?>
+	AND u.deleted IS NULL
+<?php endif ?>
+
+<?php if (!isset($inactiveAlso) || $inactiveAlso === false) : ?>
+	AND u.active = 1
+<?php endif ?>

@@ -184,4 +184,17 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertEquals('Testhomepage', $content['title']['value']['de']);
 		$this->assertEquals('Test Homepage', $content['title']['value']['en']);
 	}
+
+	public function testFinderWildcardLocaleFilter(): void
+	{
+		$finder = $this->createFinder();
+		$nodes = iterator_to_array(
+			$finder->nodes
+				->filter('title.* = "Test Homepage"')
+				->types('test-home'),
+		);
+
+		$this->assertCount(1, $nodes);
+		$this->assertEquals('test-homepage', $nodes[0]->uid());
+	}
 }

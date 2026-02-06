@@ -11,10 +11,26 @@ use Duon\I18n\Source;
 use Duon\Quma\Commands as QumaCommands;
 use Duon\Quma\Connection;
 
+$sql = [
+	'pgsql' => __DIR__ . '/db/sql/pgsql',
+	'sqlite' => __DIR__ . '/db/sql/sqlite',
+];
+
+$migrations = [
+	'install' => [
+		'pgsql' => __DIR__ . '/db/migrations/install/pgsql',
+		'sqlite' => __DIR__ . '/db/migrations/install/sqlite',
+	],
+	'default' => [
+		'pgsql' => __DIR__ . '/db/migrations/update/pgsql',
+		'sqlite' => __DIR__ . '/db/migrations/update/sqlite',
+	],
+];
+
 $connection = new Connection(
 	'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-	__DIR__ . '/db/sql',
-	__DIR__ . '/db/migrations/install',
+	$sql,
+	$migrations,
 	fetchMode: PDO::FETCH_ASSOC,
 	print: false,
 );
@@ -36,4 +52,3 @@ $runner = new Runner($commands);
 exit($runner->run());
 
 // vim: ft=php
-

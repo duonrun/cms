@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Duon\Cms\Finder;
 
 use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 
 final class OrderCompiler
 {
 	use CompilesField;
 
-	public function __construct(private readonly array $builtins = []) {}
+	public function __construct(
+		private readonly SqlDialect $dialect,
+		private readonly array $builtins = [],
+	) {}
 
 	public function compile(string $statement): string
 	{
@@ -31,7 +35,7 @@ final class OrderCompiler
 			$expression = $this->builtins[$fieldName] ?? null;
 
 			if (!$expression) {
-				$expression = $this->compileField($fieldName, 'n.content', asIs: true);
+				$expression = $this->compileField($fieldName, 'n.content', $this->dialect, asIs: true);
 			}
 
 			$expressions[] = $expression . ' ' . $field['direction'];

@@ -6,8 +6,13 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\CompiledQuery;
+use Duon\Cms\Finder\Dialect\SqlDialect;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\QueryCompiler;
 use Duon\Cms\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 
 final class ComparisonTest extends TestCase
 {
@@ -24,122 +29,238 @@ final class ComparisonTest extends TestCase
 		);
 	}
 
-	public function testJsonStringQuoting(): void
+	#[DataProvider('jsonStringValues')]
+	public function testJsonStringQuoting(string $value): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
+		$encoded = $this->jsonString($value);
+		$query = 'field = ' . $encoded;
+		$expectedPath = '$.field.value == ' . $encoded;
 
-		$this->assertSame('n.content @@ \'$.field.value == " \"\" \'\' "\'', $compiler->compile('field = " \"\" \' "'));
+		$this->assertJsonPathQuery($query, 'n.content @@ :q1', $expectedPath);
+	}
 
-		$this->assertSame('n.content @@ \'$.field.value == "\"\"\""\'', $compiler->compile("field = '\"\"\"'"));
-
-		$this->assertSame('n.content @@ \'$.field.value == "test\'\' \" \" "\'', $compiler->compile("field = 'test\\' \" \\\" '"));
-
-		$this->assertSame('n.content @@ \'$.field.value == "test\'\' \"\" \"\" \"\" \"\""\'', $compiler->compile('field = \'test\\\' \\"\\" "" "\\" \\""\''));
+	public static function jsonStringValues(): array
+	{
+		return [
+			'double quotes' => ['""'],
+			'single quote' => ["'"],
+			'mixed quotes' => ['He said "hi" and it\'s ok'],
+		];
 	}
 
 	public function testNumberOperand(): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
-
-		$this->assertSame("n.content @@ '$.field.value == 13'", $compiler->compile('field = 13'));
-		$this->assertSame("n.content @@ '$.field.value.de == 13'", $compiler->compile('field.value.de = 13'));
-		$this->assertSame("n.content @@ '$.field.value == 13.73'", $compiler->compile('field = 13.73'));
-		$this->assertSame("n.content @@ '$.field.value.de == 13.73'", $compiler->compile('field.value.de = 13.73'));
+		$this->assertJsonPathQuery('field = 13', 'n.content @@ :q1', '$.field.value == 13');
+		$this->assertJsonPathQuery('field.value.de = 13', 'n.content @@ :q1', '$.field.value.de == 13');
+		$this->assertJsonPathQuery('field = 13.73', 'n.content @@ :q1', '$.field.value == 13.73');
+		$this->assertJsonPathQuery('field.value.de = 13.73', 'n.content @@ :q1', '$.field.value.de == 13.73');
 	}
 
 	public function testStringOperand(): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
+		$encoded = $this->jsonString('string');
 
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field = "string"'));
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile("field = 'string'"));
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field = /string/'));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile("field.value.de = 'string'"));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile('field.value.de = "string"'));
-		$this->assertSame('n.content @@ \'$.field.value.de == "string"\'', $compiler->compile('field.value.de = /string/'));
+		$this->assertJsonPathQuery('field = "string"', 'n.content @@ :q1', '$.field.value == ' . $encoded);
+		$this->assertJsonPathQuery("field = 'string'", 'n.content @@ :q1', '$.field.value == ' . $encoded);
+		$this->assertJsonPathQuery('field = /string/', 'n.content @@ :q1', '$.field.value == ' . $encoded);
+		$this->assertJsonPathQuery("field.value.de = 'string'", 'n.content @@ :q1', '$.field.value.de == ' . $encoded);
+		$this->assertJsonPathQuery('field.value.de = "string"', 'n.content @@ :q1', '$.field.value.de == ' . $encoded);
+		$this->assertJsonPathQuery('field.value.de = /string/', 'n.content @@ :q1', '$.field.value.de == ' . $encoded);
 	}
 
 	public function testBooleanOperand(): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
-
-		$this->assertSame("n.content @@ '$.field.value == false'", $compiler->compile('field = false'));
-		$this->assertSame("n.content @@ '$.field.value == true'", $compiler->compile('field = true'));
-		$this->assertSame("n.content @@ '$.field.value.de == false'", $compiler->compile('field.value.de = false'));
-		$this->assertSame("n.content @@ '$.field.value.de == true'", $compiler->compile('field.value.de = true'));
+		$this->assertJsonPathQuery('field = false', 'n.content @@ :q1', '$.field.value == false');
+		$this->assertJsonPathQuery('field = true', 'n.content @@ :q1', '$.field.value == true');
+		$this->assertJsonPathQuery('field.value.de = false', 'n.content @@ :q1', '$.field.value.de == false');
+		$this->assertJsonPathQuery('field.value.de = true', 'n.content @@ :q1', '$.field.value.de == true');
 	}
 
 	public function testOperatorRegexOperandPattern(): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
+		$pattern = $this->jsonString('^test$');
 
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $compiler->compile('field ~ /^test$/'));
-		$this->assertSame("n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $compiler->compile('field ~* /^test$/'));
-
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\")'", $compiler->compile('field !~ /^test$/'));
-		$this->assertSame("NOT n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'", $compiler->compile('field !~* /^test$/'));
+		$this->assertJsonPathQuery(
+			'field ~ /^test$/',
+			'jsonb_path_exists(n.content, :q1)',
+			'$.field.value ? (@ like_regex ' . $pattern . ')',
+		);
+		$this->assertJsonPathQuery(
+			'field ~* /^test$/',
+			'jsonb_path_exists(n.content, :q1)',
+			'$.field.value ? (@ like_regex ' . $pattern . ' flag "i")',
+		);
+		$this->assertJsonPathQuery(
+			'field !~ /^test$/',
+			'NOT jsonb_path_exists(n.content, :q1)',
+			'$.field.value ? (@ like_regex ' . $pattern . ')',
+		);
+		$this->assertJsonPathQuery(
+			'field !~* /^test$/',
+			'NOT jsonb_path_exists(n.content, :q1)',
+			'$.field.value ? (@ like_regex ' . $pattern . ' flag "i")',
+		);
 	}
 
 	public function testOperatorLikeAndIlike(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+		$dialect = $this->dialect();
+		$fieldExpr = $this->fieldExpr('field');
+		$this->assertCompiled(
+			'builtin ~~ "%like\"%"',
+			['builtin' => 'builtin'],
+			$dialect->like('builtin', ':q1'),
+			['q1' => '%like"%'],
+		);
+		$this->assertCompiled(
+			'builtin ~~* /%ilike%/',
+			['builtin' => 'builtin'],
+			$dialect->ilike('builtin', ':q1'),
+			['q1' => '%ilike%'],
+		);
+		$this->assertCompiled(
+			'builtin !~~ /%unlike/',
+			['builtin' => 'builtin'],
+			$dialect->unlike('builtin', ':q1'),
+			['q1' => '%unlike'],
+		);
+		$this->assertCompiled(
+			'builtin !~~* /%iunlike/',
+			['builtin' => 'builtin'],
+			$dialect->iunlike('builtin', ':q1'),
+			['q1' => '%iunlike'],
+		);
 
-		$this->assertSame("builtin LIKE '%like\"%'", $compiler->compile('builtin ~~ "%like\"%"'));
-		$this->assertSame("builtin ILIKE '%ilike%'", $compiler->compile('builtin ~~* /%ilike%/'));
-		$this->assertSame("builtin NOT LIKE '%unlike'", $compiler->compile('builtin !~~ /%unlike/'));
-		$this->assertSame("builtin NOT ILIKE '%iunlike'", $compiler->compile('builtin !~~* /%iunlike/'));
+		$this->assertCompiled(
+			'field ~~ "%like\"%"',
+			['builtin' => 'builtin'],
+			$dialect->like($fieldExpr, ':q1'),
+			['q1' => '%like"%'],
+		);
+		$this->assertCompiled(
+			'field ~~* /%ilike%/',
+			['builtin' => 'builtin'],
+			$dialect->ilike($fieldExpr, ':q1'),
+			['q1' => '%ilike%'],
+		);
+		$this->assertCompiled(
+			'field !~~ /%unlike/',
+			['builtin' => 'builtin'],
+			$dialect->unlike($fieldExpr, ':q1'),
+			['q1' => '%unlike'],
+		);
+		$this->assertCompiled(
+			'field !~~* /%iunlike/',
+			['builtin' => 'builtin'],
+			$dialect->iunlike($fieldExpr, ':q1'),
+			['q1' => '%iunlike'],
+		);
 
-		$this->assertSame("n.content->'field'->>'value' LIKE '%like\"%'", $compiler->compile('field ~~ "%like\"%"'));
-		$this->assertSame("n.content->'field'->>'value' ILIKE '%ilike%'", $compiler->compile('field ~~* /%ilike%/'));
-		$this->assertSame("n.content->'field'->>'value' NOT LIKE '%unlike'", $compiler->compile('field !~~ /%unlike/'));
-		$this->assertSame("n.content->'field'->>'value' NOT ILIKE '%iunlike'", $compiler->compile('field !~~* /%iunlike/'));
-
-		$this->assertSame("builtin LIKE n.content->'field'->>'value'", $compiler->compile('builtin ~~ field'));
-		$this->assertSame("n.content->'field'->>'value' LIKE builtin", $compiler->compile('field ~~ builtin'));
+		$this->assertCompiled(
+			'builtin ~~ field',
+			['builtin' => 'builtin'],
+			$dialect->like('builtin', $fieldExpr),
+			[],
+		);
+		$this->assertCompiled(
+			'field ~~ builtin',
+			['builtin' => 'builtin'],
+			$dialect->like($fieldExpr, 'builtin'),
+			[],
+		);
 	}
 
 	public function testRemainingOperators(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
+		$this->assertCompiled(
+			'builtin="string"',
+			['builtin' => 'builtin'],
+			'builtin = :q1',
+			['q1' => 'string'],
+		);
+		$this->assertCompiled(
+			'builtin!="string"',
+			['builtin' => 'builtin'],
+			'builtin != :q1',
+			['q1' => 'string'],
+		);
+		$this->assertCompiled(
+			'builtin>23',
+			['builtin' => 'builtin'],
+			'builtin > :q1',
+			['q1' => '23'],
+		);
+		$this->assertCompiled(
+			'builtin>=23',
+			['builtin' => 'builtin'],
+			'builtin >= :q1',
+			['q1' => '23'],
+		);
+		$this->assertCompiled(
+			'builtin<23',
+			['builtin' => 'builtin'],
+			'builtin < :q1',
+			['q1' => '23'],
+		);
+		$this->assertCompiled(
+			'builtin<=23',
+			['builtin' => 'builtin'],
+			'builtin <= :q1',
+			['q1' => '23'],
+		);
 
-		$this->assertSame("builtin = 'string'", $compiler->compile('builtin="string"'));
-		$this->assertSame("builtin != 'string'", $compiler->compile('builtin!="string"'));
-		$this->assertSame('builtin > 23', $compiler->compile('builtin>23'));
-		$this->assertSame('builtin >= 23', $compiler->compile('builtin>=23'));
-		$this->assertSame('builtin < 23', $compiler->compile('builtin<23'));
-		$this->assertSame('builtin <= 23', $compiler->compile('builtin<=23'));
+		$encoded = $this->jsonString('string');
+		$this->assertJsonPathQuery('field="string"', 'n.content @@ :q1', '$.field.value == ' . $encoded);
+		$this->assertJsonPathQuery('field!="string"', 'n.content @@ :q1', '$.field.value != ' . $encoded);
+		$this->assertJsonPathQuery('field>23', 'n.content @@ :q1', '$.field.value > 23');
+		$this->assertJsonPathQuery('field>=23', 'n.content @@ :q1', '$.field.value >= 23');
+		$this->assertJsonPathQuery('field<23', 'n.content @@ :q1', '$.field.value < 23');
+		$this->assertJsonPathQuery('field<=23', 'n.content @@ :q1', '$.field.value <= 23');
 
-		$this->assertSame('n.content @@ \'$.field.value == "string"\'', $compiler->compile('field="string"'));
-		$this->assertSame('n.content @@ \'$.field.value != "string"\'', $compiler->compile('field!="string"'));
-		$this->assertSame('n.content @@ \'$.field.value > 23\'', $compiler->compile('field>23'));
-		$this->assertSame('n.content @@ \'$.field.value >= 23\'', $compiler->compile('field>=23'));
-		$this->assertSame('n.content @@ \'$.field.value < 23\'', $compiler->compile('field<23'));
-		$this->assertSame('n.content @@ \'$.field.value <= 23\'', $compiler->compile('field<=23'));
-
-		$this->assertSame("builtin > n.content->'field'->>'value'", $compiler->compile('builtin>field'));
-		$this->assertSame("n.content->'field'->>'value' <= builtin", $compiler->compile('field<=builtin'));
-		$this->assertSame("n.content->'field'->>'value' = n.content->'field2'->>'value'", $compiler->compile('field=field2'));
+		$this->assertCompiled(
+			'builtin>field',
+			['builtin' => 'builtin'],
+			"builtin > {$this->fieldExpr('field')}",
+			[],
+		);
+		$this->assertCompiled(
+			'field<=builtin',
+			['builtin' => 'builtin'],
+			"{$this->fieldExpr('field')} <= builtin",
+			[],
+		);
+		$this->assertCompiled(
+			'field=field2',
+			['builtin' => 'builtin'],
+			$this->fieldExpr('field') . ' = ' . $this->fieldExpr('field2'),
+			[],
+		);
 	}
 
 	public function testMultilangFieldOperand(): void
 	{
-		$compiler = new QueryCompiler($this->context, []);
-
-		$this->assertSame("n.content @@ '$.field.value.* == \"test\"'", $compiler->compile('field.* = "test"'));
+		$encoded = $this->jsonString('test');
+		$this->assertJsonPathQuery('field.* = "test"', 'n.content @@ :q1', '$.field.value.* == ' . $encoded);
 	}
 
 	public function testBuiltinOperand(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['test' => 'table.test']);
-
-		$this->assertSame('table.test = 1', $compiler->compile('test = 1'));
+		$this->assertCompiled(
+			'test = 1',
+			['test' => 'table.test'],
+			'table.test = :q1',
+			['q1' => '1'],
+		);
 	}
 
 	public function testKeywordNow(): void
 	{
-		$compiler = new QueryCompiler($this->context, ['test' => 'test']);
-
-		$this->assertSame('test = NOW()', $compiler->compile('test = now'));
+		$this->assertCompiled(
+			'test = now',
+			['test' => 'test'],
+			'test = ' . $this->dialect()->now(),
+			[],
+		);
 	}
 
 	public function testRejectLiteralOnLeftSide(): void
@@ -149,5 +270,166 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$compiler->compile('"string" = 1');
+	}
+
+	private function assertCompiled(
+		string $query,
+		array $builtins,
+		string $expectedSql,
+		array $expectedParams,
+	): void {
+		$compiled = $this->compile($query, $builtins);
+
+		$this->assertSame($expectedSql, $compiled->sql);
+		$this->assertSame($expectedParams, $compiled->params);
+	}
+
+	private function assertJsonPathQuery(string $query, string $expectedSql, string $expectedPath): void
+	{
+		$compiled = $this->compile($query);
+
+		if ($this->driver() !== 'sqlite') {
+			$this->assertSame($expectedSql, $compiled->sql);
+			$this->assertSame(['q1' => $expectedPath], $compiled->params);
+
+			return;
+		}
+
+		$expected = $this->sqliteExpectation($expectedPath, $expectedSql);
+
+		$this->assertSame($expected['sql'], $compiled->sql);
+		$this->assertSame(['q1' => $expected['param']], $compiled->params);
+	}
+
+	private function compile(string $query, array $builtins = []): CompiledQuery
+	{
+		$compiler = new QueryCompiler($this->context, $builtins);
+
+		return $compiler->compile($query);
+	}
+
+	private function jsonString(string $value): string
+	{
+		$encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+		return $encoded === false ? '""' : $encoded;
+	}
+
+	private function driver(): string
+	{
+		return $this->context->db->getPdoDriver();
+	}
+
+	private function dialect(): SqlDialect
+	{
+		return SqlDialectFactory::fromDriver($this->driver());
+	}
+
+	private function fieldExpr(string $path): string
+	{
+		return $this->dialect()->jsonExtract('n.content', $path);
+	}
+
+	private function sqliteExpectation(string $expectedPath, string $expectedSql): array
+	{
+		$regexMatch = preg_match(
+			'/^\$\.(.+?) \? \(@ like_regex (.+?)( flag "i")?\)$/',
+			$expectedPath,
+			$regexMatches,
+		);
+
+		if ($regexMatch === 1) {
+			$path = $regexMatches[1];
+			$pattern = $this->decodeJsonValue($regexMatches[2]);
+			$ignoreCase = !empty($regexMatches[3]);
+			$negate = str_starts_with($expectedSql, 'NOT ');
+			$isWildcard = str_ends_with($path, '.*');
+			$basePath = $isWildcard ? substr($path, 0, -2) : $path;
+
+			if ($isWildcard) {
+				$source = "json_each(n.content, '\$.{$basePath}')";
+				$expr = $ignoreCase ? 'regexp_i(value, :q1)' : 'value REGEXP :q1';
+				$condition = $negate ? "NOT ({$expr})" : $expr;
+
+				return [
+					'sql' => "EXISTS (SELECT 1 FROM {$source} WHERE {$condition})",
+					'param' => $pattern,
+				];
+			}
+
+			$field = "json_extract(n.content, '\$.{$basePath}')";
+			$expr = $ignoreCase ? "regexp_i({$field}, :q1)" : "{$field} REGEXP :q1";
+			$sql = $negate ? "NOT ({$expr})" : $expr;
+
+			return [
+				'sql' => $sql,
+				'param' => $pattern,
+			];
+		}
+
+		$compareMatch = preg_match(
+			'/^\$\.(.+?)\s+(==|!=|>=|<=|>|<)\s+(.+)$/',
+			$expectedPath,
+			$matches,
+		);
+
+		if ($compareMatch !== 1) {
+			throw new RuntimeException('Unsupported JSON path expression for sqlite');
+		}
+
+		$path = $matches[1];
+		$operator = match ($matches[2]) {
+			'==' => '=',
+			default => $matches[2],
+		};
+		$value = $this->decodeJsonValue($matches[3]);
+		$isWildcard = str_ends_with($path, '.*');
+		$basePath = $isWildcard ? substr($path, 0, -2) : $path;
+		$needsNumericCast = is_string($value) && is_numeric($value) && in_array($operator, ['>', '>=', '<', '<='], true);
+
+		if ($isWildcard) {
+			$source = "json_each(n.content, '\$.{$basePath}')";
+			$left = $needsNumericCast ? 'CAST(value AS NUMERIC)' : 'value';
+
+			return [
+				'sql' => "EXISTS (SELECT 1 FROM {$source} WHERE {$left} {$operator} :q1)",
+				'param' => $value,
+			];
+		}
+
+		$field = "json_extract(n.content, '\$.{$basePath}')";
+		if ($needsNumericCast) {
+			$field = "CAST({$field} AS NUMERIC)";
+		}
+
+		return [
+			'sql' => "{$field} {$operator} :q1",
+			'param' => $value,
+		];
+	}
+
+	private function decodeJsonValue(string $value): string|bool|null
+	{
+		$value = trim($value);
+
+		if ($value === 'true') {
+			return true;
+		}
+
+		if ($value === 'false') {
+			return false;
+		}
+
+		if ($value === 'null') {
+			return null;
+		}
+
+		if (str_starts_with($value, '"')) {
+			$decoded = json_decode($value, true);
+
+			return is_string($decoded) ? $decoded : '';
+		}
+
+		return $value;
 	}
 }

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests;
 
+use Duon\Cms\CmsDatabase;
 use Duon\Cms\Context;
+use Duon\Cms\Finder\Dialect\SqlDialect;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\Finder;
+use Duon\Cms\Tests\Support\TestDbConfig;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
@@ -41,16 +45,20 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
-		// Create shared connection for migration check
-		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
-			self::root() . '/db/migrations',
-			fetchMode: PDO::FETCH_ASSOC,
-			print: false,
-		);
+		$driver = TestDbConfig::driver();
 
+		if ($driver === 'sqlite') {
+			TestDbConfig::initSqliteFile();
+		}
+
+		self::$sharedConnection = TestDbConfig::connection();
 		$db = new Database(self::$sharedConnection);
+
+		if ($driver === 'sqlite') {
+			self::applySqliteMigrations($db);
+
+			return;
+		}
 
 		// Check if migrations table exists
 		$tableExists = $db->execute(
@@ -62,10 +70,11 @@ class IntegrationTestCase extends TestCase
 		)->one()['exists'] ?? false;
 
 		if (!$tableExists) {
-			echo "\n⚠ Test database not initialized. Run: ./run recreate-db && ./run migrate --apply\n\n";
+			$diagnostics = self::databaseDiagnostics();
+			echo "\n⚠ Test database not initialized.\n{$diagnostics}\nRun: ./run recreate-db && ./run migrate --apply\n\n";
 
 			throw new RuntimeException(
-				'Test database not initialized. Run: ./run recreate-db && ./run migrate --apply',
+				"Test database not initialized. {$diagnostics}Run: ./run recreate-db && ./run migrate --apply",
 			);
 		}
 
@@ -78,12 +87,79 @@ class IntegrationTestCase extends TestCase
 		)->one()['exists'] ?? false;
 
 		if (!$schemaExists) {
-			echo "\n⚠ Migrations not applied. Run: ./run migrate --apply\n\n";
+			$diagnostics = self::databaseDiagnostics();
+			echo "\n⚠ Migrations not applied.\n{$diagnostics}\nRun: ./run migrate --apply\n\n";
 
 			throw new RuntimeException(
-				'Migrations not applied to test database. Run: ./run migrate --apply',
+				"Migrations not applied to test database. {$diagnostics}Run: ./run migrate --apply",
 			);
 		}
+	}
+
+	private static function applySqliteMigrations(Database $db): void
+	{
+		$installDirs = TestDbConfig::migrationDirsForDriver('install');
+		$updateDirs = TestDbConfig::migrationDirsForDriver('default');
+
+		self::runSqlMigrations($db, $installDirs);
+		self::runSqlMigrations($db, $updateDirs);
+	}
+
+	private static function runSqlMigrations(Database $db, array $dirs): void
+	{
+		foreach (self::collectMigrationFiles($dirs) as $migration) {
+			$script = file_get_contents($migration);
+
+			if ($script === false) {
+				throw new RuntimeException("Migration file not readable: {$migration}");
+			}
+
+			if (trim($script) === '') {
+				continue;
+			}
+
+			$result = $db->getConn()->exec($script);
+
+			if ($result === false) {
+				throw new RuntimeException("Migration failed: {$migration}");
+			}
+		}
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private static function collectMigrationFiles(array $dirs): array
+	{
+		$files = [];
+
+		foreach ($dirs as $dir) {
+			foreach (glob(rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.sql') as $file) {
+				if (is_string($file) && is_file($file)) {
+					$files[] = $file;
+				}
+			}
+		}
+
+		usort($files, fn(string $a, string $b): int => strcmp(basename($a), basename($b)));
+
+		return $files;
+	}
+
+	private static function databaseDiagnostics(): string
+	{
+		$driver = TestDbConfig::driver();
+		$dsn = TestDbConfig::sanitizedDsn();
+		$installDirs = TestDbConfig::migrationDirsForDriver('install');
+		$updateDirs = TestDbConfig::migrationDirsForDriver('default');
+
+		return sprintf(
+			"Driver: %s\nDSN: %s\nInstall migrations: %s\nUpdate migrations: %s\n",
+			$driver,
+			$dsn,
+			implode(', ', $installDirs),
+			implode(', ', $updateDirs),
+		);
 	}
 
 	protected function setUp(): void
@@ -92,7 +168,7 @@ class IntegrationTestCase extends TestCase
 
 		// Begin transaction if this test uses them
 		if ($this->useTransactions) {
-			$this->testDb = new Database($this->conn());
+			$this->testDb = new CmsDatabase($this->conn(), $this->config());
 			$this->testDb->begin();
 		}
 	}
@@ -110,13 +186,7 @@ class IntegrationTestCase extends TestCase
 
 	public function conn(): Connection
 	{
-		return new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
-			self::root() . '/db/migrations',
-			fetchMode: PDO::FETCH_ASSOC,
-			print: false,
-		);
+		return TestDbConfig::connection();
 	}
 
 	public function db(): Database
@@ -126,7 +196,7 @@ class IntegrationTestCase extends TestCase
 			return $this->testDb;
 		}
 
-		return new Database($this->conn());
+		return new CmsDatabase($this->conn(), $this->config());
 	}
 
 	public function registry(): Registry
@@ -170,6 +240,8 @@ class IntegrationTestCase extends TestCase
 			->add('update-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 		$registry->tag(\Duon\Cms\Node\Node::class)
 			->add('delete-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+		$registry->tag(\Duon\Cms\Node\Node::class)
+			->add('dsl-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 
 		return $registry;
 	}
@@ -182,16 +254,29 @@ class IntegrationTestCase extends TestCase
 	protected function loadFixtures(string ...$fixtures): void
 	{
 		$db = $this->db();
+		$driver = TestDbConfig::driver();
 
 		foreach ($fixtures as $fixture) {
-			$path = self::root() . "/tests/Fixtures/data/{$fixture}.sql";
+			$driverPath = self::root() . "/tests/Fixtures/data/{$driver}/{$fixture}.sql";
+			$path = is_file($driverPath)
+				? $driverPath
+				: self::root() . "/tests/Fixtures/data/{$fixture}.sql";
 
 			if (!file_exists($path)) {
 				throw new RuntimeException("Fixture file not found: {$path}");
 			}
 
 			$sql = file_get_contents($path);
-			$db->execute($sql)->run();
+
+			if ($driver === 'sqlite') {
+				$result = $db->getConn()->exec($sql);
+
+				if ($result === false) {
+					throw new RuntimeException("Failed to apply sqlite fixture: {$path}");
+				}
+			} else {
+				$db->execute($sql)->run();
+			}
 		}
 	}
 
@@ -202,7 +287,8 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestType(string $handle, string $kind = 'page'): int
 	{
-		$sql = "INSERT INTO cms.types (handle, kind)
+		$table = $this->table('types');
+		$sql = "INSERT INTO {$table} (handle, kind)
 				VALUES (:handle, :kind)
 				RETURNING type";
 
@@ -228,8 +314,8 @@ class IntegrationTestCase extends TestCase
 			'locked' => false,
 			'creator' => 1, // System user
 			'editor' => 1,
-			'created' => 'now()',
-			'changed' => 'now()',
+			'created' => null,
+			'changed' => null,
 			'content' => '{}',
 		];
 
@@ -240,8 +326,12 @@ class IntegrationTestCase extends TestCase
 			$data['content'] = json_encode($data['content']);
 		}
 
-		$sql = "INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
+		$table = $this->table('nodes');
+		$jsonCast = $this->jsonCast();
+		$now = $this->now();
+		$sql = "INSERT INTO {$table} (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
+				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor,
+					COALESCE(:created, {$now}), COALESCE(:changed, {$now}), :content{$jsonCast})
 				RETURNING node";
 
 		return $this->db()->execute($sql, $data)->one()['node'];
@@ -273,8 +363,10 @@ class IntegrationTestCase extends TestCase
 			$data['data'] = json_encode($data['data']);
 		}
 
-		$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data::jsonb, :creator, :editor)
+		$table = $this->table('users');
+		$jsonCast = $this->jsonCast();
+		$sql = "INSERT INTO {$table} (uid, username, email, pwhash, userrole, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data{$jsonCast}, :creator, :editor)
 				RETURNING usr";
 
 		return $this->db()->execute($sql, $data)->one()['usr'];
@@ -289,7 +381,8 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestPath(int $nodeId, string $path, string $locale = 'en'): void
 	{
-		$sql = "INSERT INTO cms.urlpaths (node, path, locale, creator, editor)
+		$table = $this->table('urlpaths');
+		$sql = "INSERT INTO {$table} (node, path, locale, creator, editor)
 				VALUES (:node, :path, :locale, 1, 1)";
 
 		$this->db()->execute($sql, [
@@ -313,5 +406,46 @@ class IntegrationTestCase extends TestCase
 	protected function createFinder(): Finder
 	{
 		return new Finder($this->createContext());
+	}
+
+	protected function dialect(): SqlDialect
+	{
+		return SqlDialectFactory::fromDriver($this->db()->getPdoDriver());
+	}
+
+	protected function table(string $name): string
+	{
+		return $this->dialect()->table($name);
+	}
+
+	protected function jsonCast(): string
+	{
+		return $this->dialect()->driver() === 'pgsql' ? '::jsonb' : '';
+	}
+
+	protected function now(): string
+	{
+		return $this->dialect()->now();
+	}
+
+	protected function tableExists(string $table): bool
+	{
+		$driver = $this->dialect()->driver();
+
+		if ($driver === 'sqlite') {
+			$result = $this->db()->execute(
+				"SELECT name FROM sqlite_master WHERE type = 'table' AND name = :name",
+				['name' => $table],
+			)->one();
+
+			return !empty($result);
+		}
+
+		$result = $this->db()->execute(
+			"SELECT to_regclass(:name) AS name",
+			['name' => $table],
+		)->one();
+
+		return !empty($result['name']);
 	}
 }

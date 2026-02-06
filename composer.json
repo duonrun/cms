@@ -12,7 +12,7 @@
 	"homepage": "https://duon.run/cms",
 	"require": {
 		"php": "^8.5",
-		"ext-pgsql": "*",
+		"ext-pdo": "*",
 		"ext-gd": "*",
 		"ext-intl": "*",
 		"ext-curl": "*",
@@ -33,6 +33,10 @@
 		"duon/dev": "^2.5",
 		"laminas/laminas-diactoros": "^3"
 	},
+	"suggest": {
+		"ext-pdo_pgsql": "Required for PostgreSQL support",
+		"ext-pdo_sqlite": "Required for SQLite support"
+	},
 	"autoload": {
 		"psr-4": {
 			"Duon\\Cms\\": "src"
@@ -48,7 +52,13 @@
 		}
 	},
 	"scripts": {
-		"test": "./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test": "composer test:sqlite",
+		"test:pgsql": "CMS_TEST_DRIVER=pgsql ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test:sqlite": "CMS_TEST_DRIVER=sqlite ./vendor/bin/phpunit --testdox --no-coverage --colors=always",
+		"test:all": [
+			"composer test:pgsql",
+			"composer test:sqlite"
+		],
 		"mdlint": "markdownlint-cli2 README.md CHANGELOG.md LICENSE.md",
 		"coverage": [
 			"./vendor/bin/phpunit --testdox --path-coverage --coverage-text --coverage-php=coverage/cover.php --colors=always",

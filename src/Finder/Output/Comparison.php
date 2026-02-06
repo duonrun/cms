@@ -6,8 +6,10 @@ namespace Duon\Cms\Finder\Output;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Dialect\SqlDialect;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenType;
+use Duon\Cms\Finder\QueryParams;
 
 final readonly class Comparison extends Expression implements Output
 {
@@ -16,11 +18,16 @@ final readonly class Comparison extends Expression implements Output
 		private Token $operator,
 		private Token $right,
 		private Context $context,
+		private SqlDialect $dialect,
 		private array $builtins,
 	) {}
 
-	public function get(): string
+	public function get(QueryParams $params): string
 	{
+		if ($this->left->type === TokenType::Builtin && $this->left->lexeme === 'fulltext') {
+			return $this->getFulltextExpression($params);
+		}
+
 		switch ($this->operator->type) {
 			case TokenType::Like:
 			case TokenType::Unlike:
@@ -28,7 +35,7 @@ final readonly class Comparison extends Expression implements Output
 			case TokenType::IUnlike:
 			case TokenType::In:
 			case TokenType::NotIn:
-				return $this->getSqlExpression();
+				return $this->getSqlExpression($params);
 		}
 
 		if ($this->left->type === TokenType::Field) {
@@ -36,14 +43,18 @@ final readonly class Comparison extends Expression implements Output
 				$this->right->type === TokenType::Builtin
 				|| $this->right->type === TokenType::Field
 			) {
-				return $this->getSqlExpression();
+				return $this->getSqlExpression($params);
 			}
 
-			return $this->getJsonPathExpression();
+			if ($this->isRegexOperator()) {
+				return $this->getJsonFieldRegexExpression($params);
+			}
+
+			return $this->getJsonFieldCompareExpression($params);
 		}
 
 		if ($this->left->type === TokenType::Builtin) {
-			return $this->getSqlExpression();
+			return $this->getSqlExpression($params);
 		}
 
 		throw new ParserOutputException(
@@ -52,46 +63,158 @@ final readonly class Comparison extends Expression implements Output
 		);
 	}
 
-	private function getJsonPathExpression(): string
+	private function getFulltextExpression(QueryParams $params): string
 	{
-		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
-			TokenType::Equal => ['@@', '==', $this->getRight(), false],
-			TokenType::Regex => ['@?', '?', $this->getRegex(false), false],
-			TokenType::IRegex => ['@?', '?', $this->getRegex(true), false],
-			TokenType::NotRegex => ['@?', '?', $this->getRegex(false), true],
-			TokenType::INotRegex => ['@?', '?', $this->getRegex(true), true],
-			TokenType::In => ['@@', 'in', $this->getRight(), false],
-			TokenType::NotIn => ['@@', 'nin', $this->getRight(), false],
-			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
-		};
+		$this->assertFulltextEnabled();
+		$this->assertFulltextOperator();
 
-		$left = $this->getField();
+		$query = $this->getFulltextQuery();
+		$placeholder = $params->placeholder();
+		$params->set($placeholder, $query);
 
-		return sprintf(
-			"%sn.content %s '$.%s %s %s'",
-			$negate ? 'NOT ' : '',
-			$operator,
-			$left,
-			$jsonOperator,
-			$right,
+		$table = $this->dialect->table('fulltext');
+		$predicate = $this->dialect->fulltext($table, $placeholder);
+		$sql = "EXISTS (SELECT 1 FROM {$table} WHERE {$table}.node = n.node AND {$predicate})";
+
+		if ($this->isFulltextNegated()) {
+			return "NOT ({$sql})";
+		}
+
+		return $sql;
+	}
+
+	private function assertFulltextEnabled(): void
+	{
+		if ($this->context->config->fulltextEnabled($this->dialect->driver())) {
+			return;
+		}
+
+		throw new ParserOutputException(
+			$this->left,
+			'Fulltext search is disabled for this database driver.',
 		);
 	}
 
-	private function getRegex(bool $ignoreCase): string
+	private function assertFulltextOperator(): void
 	{
-		if (!($this->right->type === TokenType::String)) {
+		if (in_array($this->operator->type, $this->fulltextOperators(), true)) {
+			return;
+		}
+
+		throw new ParserOutputException(
+			$this->operator,
+			'Fulltext queries only support =, !=, ~~, ~~*, !~~, and !~~* operators.',
+		);
+	}
+
+	private function getFulltextQuery(): string
+	{
+		if ($this->right->type !== TokenType::String) {
 			throw new ParserOutputException(
 				$this->right,
-				'Only strings are allowed on the right side of a regex expressions.',
+				'Fulltext queries require a string literal on the right side.',
 			);
 		}
 
-		$case = $ignoreCase ? ' flag "i"' : '';
+		return $this->right->lexeme;
+	}
 
-		// TODO: quote double quotes, check also in tests
-		$pattern = '"' . trim($this->context->db->quote($this->right->lexeme), "'") . '"';
+	/**
+	 * @return list<TokenType>
+	 */
+	private function fulltextOperators(): array
+	{
+		return [
+			TokenType::Equal,
+			TokenType::Unequal,
+			TokenType::Like,
+			TokenType::Unlike,
+			TokenType::ILike,
+			TokenType::IUnlike,
+		];
+	}
 
-		return sprintf('(@ like_regex %s%s)', $pattern, $case);
+	private function isFulltextNegated(): bool
+	{
+		return in_array(
+			$this->operator->type,
+			[TokenType::Unequal, TokenType::Unlike, TokenType::IUnlike],
+			true,
+		);
+	}
+
+	private function getJsonFieldCompareExpression(QueryParams $params): string
+	{
+		$field = $this->getField();
+		$operator = $this->mapOperator();
+		$value = $this->getRightValue();
+		$placeholder = $params->placeholder();
+
+		$result = $this->dialect->jsonFieldCompare('n.content', $field, $operator, $value, $placeholder);
+		$params->set($placeholder, $result['paramValue']);
+
+		return $result['sql'];
+	}
+
+	private function getJsonFieldRegexExpression(QueryParams $params): string
+	{
+		if ($this->right->type !== TokenType::String) {
+			throw new ParserOutputException(
+				$this->right,
+				'Only strings are allowed on the right side of a regex expression.',
+			);
+		}
+
+		$field = $this->getField();
+		$pattern = $this->right->lexeme;
+		$ignoreCase = in_array($this->operator->type, [TokenType::IRegex, TokenType::INotRegex], true);
+		$negate = in_array($this->operator->type, [TokenType::NotRegex, TokenType::INotRegex], true);
+		$placeholder = $params->placeholder();
+
+		$result = $this->dialect->jsonFieldRegex('n.content', $field, $pattern, $ignoreCase, $negate, $placeholder);
+		$params->set($placeholder, $result['paramValue']);
+
+		return $result['sql'];
+	}
+
+	private function isRegexOperator(): bool
+	{
+		return in_array($this->operator->type, [
+			TokenType::Regex,
+			TokenType::IRegex,
+			TokenType::NotRegex,
+			TokenType::INotRegex,
+		], true);
+	}
+
+	private function mapOperator(): string
+	{
+		return match ($this->operator->type) {
+			TokenType::Equal => '=',
+			TokenType::Unequal => '!=',
+			TokenType::Greater => '>',
+			TokenType::GreaterEqual => '>=',
+			TokenType::Less => '<',
+			TokenType::LessEqual => '<=',
+			default => throw new ParserOutputException(
+				$this->operator,
+				'Unsupported operator for JSON field comparison.',
+			),
+		};
+	}
+
+	private function getRightValue(): mixed
+	{
+		return match ($this->right->type) {
+			TokenType::String => $this->right->lexeme,
+			TokenType::Number => $this->right->lexeme,
+			TokenType::Boolean => strtolower($this->right->lexeme) === 'true',
+			TokenType::Null => null,
+			default => throw new ParserOutputException(
+				$this->right,
+				'The right hand side in a field expression must be a literal',
+			),
+		};
 	}
 
 	private function getField(): string
@@ -99,13 +222,13 @@ final readonly class Comparison extends Expression implements Output
 		$parts = explode('.', $this->left->lexeme);
 
 		return match (count($parts)) {
-			2 => $this->compileField($parts),
+			2 => $this->compileFieldPath($parts),
 			1 => $parts[0] . '.value',
 			default => $this->compileAccessor($parts),
 		};
 	}
 
-	private function compileField(array $segments): string
+	private function compileFieldPath(array $segments): string
 	{
 		return match ($segments[1]) {
 			'*' => $segments[0] . '.value.*',
@@ -133,42 +256,32 @@ final readonly class Comparison extends Expression implements Output
 		return $this->context->localeId();
 	}
 
-	private function getRight(): string
+	private function getSqlExpression(QueryParams $params): string
 	{
-		return match ($this->right->type) {
-			TokenType::String => $this->quote($this->right->lexeme),
-			TokenType::Number,
-			TokenType::Boolean,
-			TokenType::List,
-			TokenType::Null => $this->right->lexeme,
-			default => throw new ParserOutputException(
-				$this->right,
-				'The right hand side in a field expression must be a literal',
-			),
-		};
+		$left = $this->getOperand($this->left, $params, $this->builtins, $this->dialect);
+		$right = $this->getOperand($this->right, $params, $this->builtins, $this->dialect);
+
+		if (
+			$this->dialect->driver() === 'sqlite'
+			&& in_array($this->operator->type, [TokenType::In, TokenType::NotIn], true)
+			&& $this->left->type === TokenType::Field
+			&& $this->right->type === TokenType::List
+			&& $this->listIsNumeric($this->right)
+		) {
+			$left = "CAST({$left} AS NUMERIC)";
+		}
+
+		return $this->getOperatorExpression($this->operator->type, $this->dialect, $left, $right);
 	}
 
-	private function getSqlExpression(): string
+	private function listIsNumeric(Token $token): bool
 	{
-		return sprintf(
-			'%s %s %s',
-			$this->getOperand($this->left, $this->context->db, $this->builtins),
-			$this->getOperator($this->operator->type),
-			$this->getOperand($this->right, $this->context->db, $this->builtins),
-		);
-	}
+		$items = $token->items;
 
-	private function quote(string $string): string
-	{
-		return sprintf(
-			'"%s"',
-			// Escape all unescaped double quotes
-			// TODO: can prepended backslashes be exploited
-			preg_replace(
-				'/(?<!\\\\)(")/',
-				'\\"',
-				trim($this->context->db->quote($string), "'"),
-			),
-		);
+		if ($items === null || $items === []) {
+			return false;
+		}
+
+		return $items[0]->type === TokenType::Number;
 	}
 }
