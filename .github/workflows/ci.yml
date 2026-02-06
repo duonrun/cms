@@ -11,17 +11,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        db: [pgsql, sqlite]
     env:
       DUONCMS_DB_HOST: localhost
       DUONCMS_DB_NAME: duoncms
       DUONCMS_DB_USER: duoncms
       DUONCMS_DB_PASSWORD: duoncms
+      CMS_TEST_DRIVER: ${{ matrix.db }}
+      CMS_TEST_PGSQL_DSN: pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms
     steps:
       - name: Setup PHP extensions
         uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
         with:
           php-version: '8.5'
-          extensions: pcov, curl, xml, zip, mbstring, json, pgsql, gd, intl, dom
+          extensions: pcov, curl, xml, zip, mbstring, json, pgsql, pdo_pgsql, sqlite3, pdo_sqlite, gd, intl, dom
           coverage: pcov
 
       - name: Disable Xdebug
@@ -34,20 +39,28 @@ jobs:
         run: composer install
 
       - name: Start postgresql server and create test db
+        if: matrix.db == 'pgsql'
         run: |
           sudo systemctl start postgresql.service
           sudo -u postgres psql -c "CREATE USER ${{ env.DUONCMS_DB_USER }} WITH PASSWORD '${{ env.DUONCMS_DB_PASSWORD }}' CREATEDB;"
           sudo -u postgres createdb --owner ${{ env.DUONCMS_DB_USER }} ${{ env.DUONCMS_DB_NAME }}
 
       - name: Initialize database schema
+        if: matrix.db == 'pgsql'
         run: php ./run db:migrations --apply
 
-      - name: Run tests, static type checker and linter
+      - name: Run tests (pgsql)
+        if: matrix.db == 'pgsql'
         run: |
           php -d pcov.enabled=1 ./vendor/bin/phpunit --testdox --coverage-clover=clover.xml --coverage-text --coverage-php=coverage/cover.php --colors=always
           ./vendor/bin/coverlyzer coverage/cover.php
 
+      - name: Run tests (sqlite)
+        if: matrix.db == 'sqlite'
+        run: composer test:sqlite
+
       - name: Upload coverage report to Codacy
+        if: matrix.db == 'pgsql'
         continue-on-error: true
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
         with:
