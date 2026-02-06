@@ -89,12 +89,17 @@ END;
 
 CREATE TRIGGER nodes_trigger_03_audit AFTER UPDATE ON cms_nodes
 FOR EACH ROW BEGIN
-	INSERT OR IGNORE INTO audit_nodes (
+	INSERT INTO audit_nodes (
 		node, parent, changed, published, hidden, locked,
 		type, editor, deleted, content
-	) VALUES (
+	)
+	SELECT
 		OLD.node, OLD.parent, OLD.changed, OLD.published, OLD.hidden, OLD.locked,
 		OLD.type, OLD.editor, OLD.deleted, OLD.content
+	WHERE NOT EXISTS (
+		SELECT 1
+		FROM audit_nodes
+		WHERE node = OLD.node AND changed = OLD.changed
 	);
 END;
 

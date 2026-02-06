@@ -177,6 +177,27 @@ final readonly class Comparison extends Expression implements Output
 		$left = $this->getOperand($this->left, $params, $this->builtins, $this->dialect);
 		$right = $this->getOperand($this->right, $params, $this->builtins, $this->dialect);
 
+		if (
+			$this->dialect->driver() === 'sqlite'
+			&& in_array($this->operator->type, [TokenType::In, TokenType::NotIn], true)
+			&& $this->left->type === TokenType::Field
+			&& $this->right->type === TokenType::List
+			&& $this->listIsNumeric($this->right)
+		) {
+			$left = "CAST({$left} AS NUMERIC)";
+		}
+
 		return $this->getOperatorExpression($this->operator->type, $this->dialect, $left, $right);
+	}
+
+	private function listIsNumeric(Token $token): bool
+	{
+		$items = $token->items;
+
+		if ($items === null || $items === []) {
+			return false;
+		}
+
+		return $items[0]->type === TokenType::Number;
 	}
 }

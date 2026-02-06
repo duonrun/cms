@@ -7,9 +7,12 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserOutputException;
 use Duon\Cms\Finder\CompiledQuery;
+use Duon\Cms\Finder\Dialect\SqlDialect;
+use Duon\Cms\Finder\Dialect\SqlDialectFactory;
 use Duon\Cms\Finder\QueryCompiler;
 use Duon\Cms\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 
 final class ComparisonTest extends TestCase
 {
@@ -101,66 +104,68 @@ final class ComparisonTest extends TestCase
 
 	public function testOperatorLikeAndIlike(): void
 	{
+		$dialect = $this->dialect();
+		$fieldExpr = $this->fieldExpr('field');
 		$this->assertCompiled(
 			'builtin ~~ "%like\"%"',
 			['builtin' => 'builtin'],
-			'builtin LIKE :q1',
+			$dialect->like('builtin', ':q1'),
 			['q1' => '%like"%'],
 		);
 		$this->assertCompiled(
 			'builtin ~~* /%ilike%/',
 			['builtin' => 'builtin'],
-			'builtin ILIKE :q1',
+			$dialect->ilike('builtin', ':q1'),
 			['q1' => '%ilike%'],
 		);
 		$this->assertCompiled(
 			'builtin !~~ /%unlike/',
 			['builtin' => 'builtin'],
-			'builtin NOT LIKE :q1',
+			$dialect->unlike('builtin', ':q1'),
 			['q1' => '%unlike'],
 		);
 		$this->assertCompiled(
 			'builtin !~~* /%iunlike/',
 			['builtin' => 'builtin'],
-			'builtin NOT ILIKE :q1',
+			$dialect->iunlike('builtin', ':q1'),
 			['q1' => '%iunlike'],
 		);
 
 		$this->assertCompiled(
 			'field ~~ "%like\"%"',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' LIKE :q1",
+			$dialect->like($fieldExpr, ':q1'),
 			['q1' => '%like"%'],
 		);
 		$this->assertCompiled(
 			'field ~~* /%ilike%/',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' ILIKE :q1",
+			$dialect->ilike($fieldExpr, ':q1'),
 			['q1' => '%ilike%'],
 		);
 		$this->assertCompiled(
 			'field !~~ /%unlike/',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' NOT LIKE :q1",
+			$dialect->unlike($fieldExpr, ':q1'),
 			['q1' => '%unlike'],
 		);
 		$this->assertCompiled(
 			'field !~~* /%iunlike/',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' NOT ILIKE :q1",
+			$dialect->iunlike($fieldExpr, ':q1'),
 			['q1' => '%iunlike'],
 		);
 
 		$this->assertCompiled(
 			'builtin ~~ field',
 			['builtin' => 'builtin'],
-			"builtin LIKE n.content->'field'->>'value'",
+			$dialect->like('builtin', $fieldExpr),
 			[],
 		);
 		$this->assertCompiled(
 			'field ~~ builtin',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' LIKE builtin",
+			$dialect->like($fieldExpr, 'builtin'),
 			[],
 		);
 	}
@@ -215,19 +220,19 @@ final class ComparisonTest extends TestCase
 		$this->assertCompiled(
 			'builtin>field',
 			['builtin' => 'builtin'],
-			"builtin > n.content->'field'->>'value'",
+			"builtin > {$this->fieldExpr('field')}",
 			[],
 		);
 		$this->assertCompiled(
 			'field<=builtin',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' <= builtin",
+			"{$this->fieldExpr('field')} <= builtin",
 			[],
 		);
 		$this->assertCompiled(
 			'field=field2',
 			['builtin' => 'builtin'],
-			"n.content->'field'->>'value' = n.content->'field2'->>'value'",
+			$this->fieldExpr('field') . ' = ' . $this->fieldExpr('field2'),
 			[],
 		);
 	}
@@ -253,7 +258,7 @@ final class ComparisonTest extends TestCase
 		$this->assertCompiled(
 			'test = now',
 			['test' => 'test'],
-			'test = NOW()',
+			'test = ' . $this->dialect()->now(),
 			[],
 		);
 	}
@@ -283,8 +288,17 @@ final class ComparisonTest extends TestCase
 	{
 		$compiled = $this->compile($query);
 
-		$this->assertSame($expectedSql, $compiled->sql);
-		$this->assertSame(['q1' => $expectedPath], $compiled->params);
+		if ($this->driver() !== 'sqlite') {
+			$this->assertSame($expectedSql, $compiled->sql);
+			$this->assertSame(['q1' => $expectedPath], $compiled->params);
+
+			return;
+		}
+
+		$expected = $this->sqliteExpectation($expectedPath, $expectedSql);
+
+		$this->assertSame($expected['sql'], $compiled->sql);
+		$this->assertSame(['q1' => $expected['param']], $compiled->params);
 	}
 
 	private function compile(string $query, array $builtins = []): CompiledQuery
@@ -299,5 +313,123 @@ final class ComparisonTest extends TestCase
 		$encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 		return $encoded === false ? '""' : $encoded;
+	}
+
+	private function driver(): string
+	{
+		return $this->context->db->getPdoDriver();
+	}
+
+	private function dialect(): SqlDialect
+	{
+		return SqlDialectFactory::fromDriver($this->driver());
+	}
+
+	private function fieldExpr(string $path): string
+	{
+		return $this->dialect()->jsonExtract('n.content', $path);
+	}
+
+	private function sqliteExpectation(string $expectedPath, string $expectedSql): array
+	{
+		$regexMatch = preg_match(
+			'/^\$\.(.+?) \? \(@ like_regex (.+?)( flag "i")?\)$/',
+			$expectedPath,
+			$regexMatches,
+		);
+
+		if ($regexMatch === 1) {
+			$path = $regexMatches[1];
+			$pattern = $this->decodeJsonValue($regexMatches[2]);
+			$ignoreCase = !empty($regexMatches[3]);
+			$negate = str_starts_with($expectedSql, 'NOT ');
+			$isWildcard = str_ends_with($path, '.*');
+			$basePath = $isWildcard ? substr($path, 0, -2) : $path;
+
+			if ($isWildcard) {
+				$source = "json_each(n.content, '\$.{$basePath}')";
+				$expr = $ignoreCase ? 'regexp_i(value, :q1)' : 'value REGEXP :q1';
+				$condition = $negate ? "NOT ({$expr})" : $expr;
+
+				return [
+					'sql' => "EXISTS (SELECT 1 FROM {$source} WHERE {$condition})",
+					'param' => $pattern,
+				];
+			}
+
+			$field = "json_extract(n.content, '\$.{$basePath}')";
+			$expr = $ignoreCase ? "regexp_i({$field}, :q1)" : "{$field} REGEXP :q1";
+			$sql = $negate ? "NOT ({$expr})" : $expr;
+
+			return [
+				'sql' => $sql,
+				'param' => $pattern,
+			];
+		}
+
+		$compareMatch = preg_match(
+			'/^\$\.(.+?)\s+(==|!=|>=|<=|>|<)\s+(.+)$/',
+			$expectedPath,
+			$matches,
+		);
+
+		if ($compareMatch !== 1) {
+			throw new RuntimeException('Unsupported JSON path expression for sqlite');
+		}
+
+		$path = $matches[1];
+		$operator = match ($matches[2]) {
+			'==' => '=',
+			default => $matches[2],
+		};
+		$value = $this->decodeJsonValue($matches[3]);
+		$isWildcard = str_ends_with($path, '.*');
+		$basePath = $isWildcard ? substr($path, 0, -2) : $path;
+		$needsNumericCast = is_string($value) && is_numeric($value) && in_array($operator, ['>', '>=', '<', '<='], true);
+
+		if ($isWildcard) {
+			$source = "json_each(n.content, '\$.{$basePath}')";
+			$left = $needsNumericCast ? 'CAST(value AS NUMERIC)' : 'value';
+
+			return [
+				'sql' => "EXISTS (SELECT 1 FROM {$source} WHERE {$left} {$operator} :q1)",
+				'param' => $value,
+			];
+		}
+
+		$field = "json_extract(n.content, '\$.{$basePath}')";
+		if ($needsNumericCast) {
+			$field = "CAST({$field} AS NUMERIC)";
+		}
+
+		return [
+			'sql' => "{$field} {$operator} :q1",
+			'param' => $value,
+		];
+	}
+
+	private function decodeJsonValue(string $value): string|bool|null
+	{
+		$value = trim($value);
+
+		if ($value === 'true') {
+			return true;
+		}
+
+		if ($value === 'false') {
+			return false;
+		}
+
+		if ($value === 'null') {
+			return null;
+		}
+
+		if (str_starts_with($value, '"')) {
+			$decoded = json_decode($value, true);
+
+			return is_string($decoded) ? $decoded : '';
+		}
+
+		return $value;
 	}
 }

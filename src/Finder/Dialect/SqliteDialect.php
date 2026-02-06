@@ -55,6 +55,9 @@ final class SqliteDialect implements SqlDialect
 		}
 
 		$field = "json_extract({$column}, '\$.{$path}')";
+		if (is_string($value) && is_numeric($value) && in_array($operator, ['>', '>=', '<', '<='], true)) {
+			$field = "CAST({$field} AS NUMERIC)";
+		}
 
 		return [
 			'sql' => "{$field} {$operator} {$placeholder}",

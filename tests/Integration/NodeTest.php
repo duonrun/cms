@@ -37,8 +37,8 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertNotNull($node);
 		$this->assertEquals('integration-test-node-1', $node['uid']);
 		$this->assertEquals($typeId, $node['type']);
-		$this->assertTrue($node['published']);
-		$this->assertFalse($node['hidden']);
+		$this->assertTrue((bool) $node['published']);
+		$this->assertFalse((bool) $node['hidden']);
 
 		$contentData = json_decode($node['content'], true);
 		$this->assertEquals('Testseite', $contentData['title']['value']['de']);
@@ -60,9 +60,9 @@ final class NodeTest extends IntegrationTestCase
 		)->one();
 
 		$this->assertNotNull($node);
-		$this->assertTrue($node['published']); // Default is true
-		$this->assertFalse($node['hidden']); // Default is false
-		$this->assertFalse($node['locked']); // Default is false
+		$this->assertTrue((bool) $node['published']); // Default is true
+		$this->assertFalse((bool) $node['hidden']); // Default is false
+		$this->assertFalse((bool) $node['locked']); // Default is false
 		$this->assertEquals(1, $node['creator']); // System user
 		$this->assertEquals(1, $node['editor']); // System user
 	}
@@ -157,10 +157,10 @@ final class NodeTest extends IntegrationTestCase
 
 		$nodesTable = $this->table('nodes');
 		$exists = $this->db()->execute(
-			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as exists",
+			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as value",
 			['id' => $nodeId],
-		)->one()['exists'];
-		$this->assertTrue($exists);
+		)->one()['value'];
+		$this->assertTrue((bool) $exists);
 
 		$this->db()->execute(
 			"DELETE FROM {$nodesTable} WHERE node = :id",
@@ -168,10 +168,10 @@ final class NodeTest extends IntegrationTestCase
 		)->run();
 
 		$exists = $this->db()->execute(
-			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as exists",
+			"SELECT EXISTS(SELECT 1 FROM {$nodesTable} WHERE node = :id) as value",
 			['id' => $nodeId],
-		)->one()['exists'];
-		$this->assertFalse($exists);
+		)->one()['value'];
+		$this->assertFalse((bool) $exists);
 	}
 
 	public function testNodeJsonbQuerying(): void
@@ -239,7 +239,7 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertSame('integration-user', $user['username']);
 		$this->assertSame('integration-user@example.com', $user['email']);
 		$this->assertSame('admin', $user['userrole']);
-		$this->assertTrue($user['active']);
+		$this->assertTrue((bool) $user['active']);
 		$data = json_decode($user['data'], true);
 		$this->assertSame('Integration User', ($data['name'] ?? null));
 	}

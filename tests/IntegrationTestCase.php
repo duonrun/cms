@@ -118,7 +118,11 @@ class IntegrationTestCase extends TestCase
 				continue;
 			}
 
-			$db->execute($script)->run();
+			$result = $db->getConn()->exec($script);
+
+			if ($result === false) {
+				throw new RuntimeException("Migration failed: {$migration}");
+			}
 		}
 	}
 
@@ -164,7 +168,7 @@ class IntegrationTestCase extends TestCase
 
 		// Begin transaction if this test uses them
 		if ($this->useTransactions) {
-			$this->testDb = new Database($this->conn());
+			$this->testDb = new CmsDatabase($this->conn(), $this->config());
 			$this->testDb->begin();
 		}
 	}
@@ -263,7 +267,16 @@ class IntegrationTestCase extends TestCase
 			}
 
 			$sql = file_get_contents($path);
-			$db->execute($sql)->run();
+
+			if ($driver === 'sqlite') {
+				$result = $db->getConn()->exec($sql);
+
+				if ($result === false) {
+					throw new RuntimeException("Failed to apply sqlite fixture: {$path}");
+				}
+			} else {
+				$db->execute($sql)->run();
+			}
 		}
 	}
 
