@@ -1,5 +1,3 @@
-DELETE FROM cms.fulltext;
-
 INSERT INTO cms.fulltext (node, locale, document)
 SELECT
 	n.node,

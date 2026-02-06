@@ -115,6 +115,13 @@ CREATE TABLE cms_nodes (
 	CONSTRAINT ck_nodes_content_json CHECK (json_valid(content))
 );
 
+CREATE VIRTUAL TABLE cms_fulltext USING fts5 (
+	node UNINDEXED,
+	locale UNINDEXED,
+	document,
+	tokenize='unicode61'
+);
+
 CREATE TABLE cms_urlpaths (
 	node INTEGER NOT NULL,
 	path TEXT NOT NULL,

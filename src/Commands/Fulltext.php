@@ -22,11 +22,8 @@ class Fulltext extends Command
 		}
 
 		$db = $this->env->db;
-		if ($db->getPdoDriver() === 'pgsql') {
-			$db->fulltext->rebuild()->run();
-
-			return 0;
-		}
+		$db->fulltext->clear()->run();
+		$db->fulltext->rebuild()->run();
 
 		return 0;
 	}

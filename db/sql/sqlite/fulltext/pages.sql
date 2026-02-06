@@ -1,5 +1,4 @@
 -- SQLite fulltext: list indexable pages
--- Note: Full FTS5 implementation is in Step 7
 SELECT
 	n.content,
 	t.handle
