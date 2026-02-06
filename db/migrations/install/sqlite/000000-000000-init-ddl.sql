@@ -37,6 +37,10 @@ CREATE UNIQUE INDEX ux_users_username ON cms_users
 	(lower(username)) WHERE (deleted IS NULL AND username IS NOT NULL);
 CREATE UNIQUE INDEX ux_users_email ON cms_users
 	(lower(email)) WHERE (deleted IS NULL AND email IS NOT NULL);
+CREATE INDEX ix_users_login_username ON cms_users (username)
+	WHERE (deleted IS NULL AND active = 1 AND userrole != 'system' AND username IS NOT NULL);
+CREATE INDEX ix_users_login_email ON cms_users (email)
+	WHERE (deleted IS NULL AND active = 1 AND userrole != 'system' AND email IS NOT NULL);
 
 CREATE TABLE cms_authtokens (
 	token TEXT NOT NULL,
@@ -65,6 +69,7 @@ CREATE TABLE cms_onetimetokens (
 		REFERENCES cms_users (usr),
 	CONSTRAINT ck_onetimetokens_token CHECK (length(token) <= 512)
 );
+CREATE INDEX ix_onetimetokens_created ON cms_onetimetokens (created);
 
 CREATE TABLE cms_loginsessions (
 	hash TEXT NOT NULL,
@@ -114,6 +119,9 @@ CREATE TABLE cms_nodes (
 	CONSTRAINT ck_nodes_locked CHECK (locked IN (0, 1)),
 	CONSTRAINT ck_nodes_content_json CHECK (json_valid(content))
 );
+CREATE INDEX ix_nodes_type ON cms_nodes (type);
+CREATE INDEX ix_nodes_visibility ON cms_nodes (published, hidden, type)
+	WHERE (deleted IS NULL);
 
 CREATE VIRTUAL TABLE cms_fulltext USING fts5 (
 	node UNINDEXED,
