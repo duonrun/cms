@@ -31,6 +31,7 @@ class Config implements ConfigInterface
 			'db.migrations' => [],
 			'db.print' => false,
 			'db.options' => [],
+			'db.features.fulltext.enabled' => null,
 			'db.sqlite.pragmas.foreign_keys' => true,
 			'db.sqlite.pragmas.journal_mode' => 'WAL',
 			'db.sqlite.pragmas.synchronous' => 'NORMAL',
@@ -128,6 +129,31 @@ class Config implements ConfigInterface
 	public function apiPath(): ?string
 	{
 		return $this->get('path.api', null);
+	}
+
+	public function fulltextEnabled(string $driver): bool
+	{
+		$value = $this->get('db.features.fulltext.enabled', null);
+
+		if (is_bool($value)) {
+			return $value;
+		}
+
+		if (is_int($value)) {
+			return $value === 1;
+		}
+
+		if (is_string($value)) {
+			$normalized = strtolower($value);
+			if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+				return true;
+			}
+			if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
+				return false;
+			}
+		}
+
+		return strtolower($driver) !== 'sqlite';
 	}
 
 	public function env(): string

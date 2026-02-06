@@ -28,6 +28,11 @@ final class CmsDatabase extends Database
 		return $this;
 	}
 
+	public function fulltextEnabled(): bool
+	{
+		return $this->config->fulltextEnabled($this->getPdoDriver());
+	}
+
 	private function applySqlitePragmas(): void
 	{
 		if ($this->getPdoDriver() !== 'sqlite') {
