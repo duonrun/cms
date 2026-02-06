@@ -24,6 +24,10 @@ final readonly class Comparison extends Expression implements Output
 
 	public function get(QueryParams $params): string
 	{
+		if ($this->left->type === TokenType::Builtin && $this->left->lexeme === 'fulltext') {
+			return $this->getFulltextExpression($params);
+		}
+
 		switch ($this->operator->type) {
 			case TokenType::Like:
 			case TokenType::Unlike:
@@ -56,6 +60,86 @@ final readonly class Comparison extends Expression implements Output
 		throw new ParserOutputException(
 			$this->left,
 			'Only fields or `path` are allowed on the left side of an expression.',
+		);
+	}
+
+	private function getFulltextExpression(QueryParams $params): string
+	{
+		$this->assertFulltextEnabled();
+		$this->assertFulltextOperator();
+
+		$query = $this->getFulltextQuery();
+		$placeholder = $params->placeholder();
+		$params->set($placeholder, $query);
+
+		$table = $this->dialect->table('fulltext');
+		$predicate = $this->dialect->fulltext($table, $placeholder);
+		$sql = "EXISTS (SELECT 1 FROM {$table} WHERE {$table}.node = n.node AND {$predicate})";
+
+		if ($this->isFulltextNegated()) {
+			return "NOT ({$sql})";
+		}
+
+		return $sql;
+	}
+
+	private function assertFulltextEnabled(): void
+	{
+		if ($this->context->config->fulltextEnabled($this->dialect->driver())) {
+			return;
+		}
+
+		throw new ParserOutputException(
+			$this->left,
+			'Fulltext search is disabled for this database driver.',
+		);
+	}
+
+	private function assertFulltextOperator(): void
+	{
+		if (in_array($this->operator->type, $this->fulltextOperators(), true)) {
+			return;
+		}
+
+		throw new ParserOutputException(
+			$this->operator,
+			'Fulltext queries only support =, !=, ~~, ~~*, !~~, and !~~* operators.',
+		);
+	}
+
+	private function getFulltextQuery(): string
+	{
+		if ($this->right->type !== TokenType::String) {
+			throw new ParserOutputException(
+				$this->right,
+				'Fulltext queries require a string literal on the right side.',
+			);
+		}
+
+		return $this->right->lexeme;
+	}
+
+	/**
+	 * @return list<TokenType>
+	 */
+	private function fulltextOperators(): array
+	{
+		return [
+			TokenType::Equal,
+			TokenType::Unequal,
+			TokenType::Like,
+			TokenType::Unlike,
+			TokenType::ILike,
+			TokenType::IUnlike,
+		];
+	}
+
+	private function isFulltextNegated(): bool
+	{
+		return in_array(
+			$this->operator->type,
+			[TokenType::Unequal, TokenType::Unlike, TokenType::IUnlike],
+			true,
 		);
 	}
 

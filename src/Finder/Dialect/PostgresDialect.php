@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder\Dialect;
 
-use Duon\Cms\Exception\RuntimeException;
-
 final class PostgresDialect implements SqlDialect
 {
 	public function driver(): string
@@ -120,7 +118,7 @@ final class PostgresDialect implements SqlDialect
 
 	public function fulltext(string $document, string $query): string
 	{
-		throw new RuntimeException('Fulltext predicate not implemented for PostgreSQL dialect.');
+		return "{$document}.document @@ websearch_to_tsquery('simple', {$query})";
 	}
 
 	public function now(): string

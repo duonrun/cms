@@ -41,6 +41,7 @@ final class Nodes implements Iterator
 			'handle' => 't.handle',
 			'uid' => 'n.uid',
 			'kind' => 't.kind',
+			'fulltext' => 'fulltext',
 		];
 
 		$this->whereFields = new CompiledQuery('', []);

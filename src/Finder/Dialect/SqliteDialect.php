@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder\Dialect;
 
-use Duon\Cms\Exception\RuntimeException;
-
 final class SqliteDialect implements SqlDialect
 {
 	public function driver(): string
@@ -159,7 +157,7 @@ final class SqliteDialect implements SqlDialect
 
 	public function fulltext(string $document, string $query): string
 	{
-		throw new RuntimeException('Fulltext predicate not implemented for SQLite dialect.');
+		return "{$document} MATCH {$query}";
 	}
 
 	public function now(): string
