@@ -32,6 +32,31 @@ apt install php8.5-pgsql
 apt install php8.5-sqlite3
 ```
 
+Database configuration:
+
+```php
+// PostgreSQL
+'db.dsn' => 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+
+// SQLite (file path)
+'db.dsn' => 'sqlite:/var/lib/duon/duoncms.sqlite',
+```
+
+Fulltext:
+
+```php
+// Enable or disable fulltext search per driver.
+// Defaults: enabled on pgsql, disabled on sqlite until explicitly enabled.
+'db.features.fulltext.enabled' => true,
+```
+
+SQLite operational notes:
+
+- WAL mode is recommended for concurrency; the CMS sets this by default via PRAGMA.
+- Backups must copy the database file and the `-wal` and `-shm` files atomically.
+- Store the SQLite file outside the web root with strict permissions (e.g. 0600).
+- SQLite allows only a single writer at a time; design write-heavy workloads accordingly.
+
 For development
 
 ```bash
