@@ -23,4 +23,5 @@ INSERT INTO cms.users (
 );
 
 INSERT INTO public.migrations (migration, applied) VALUES
-	('000000-000002-named-checks.sql', now());
+	('000000-000002-named-checks.sql', now()),
+	('000000-000003-fix-authtokens-trigger.sql', now());
