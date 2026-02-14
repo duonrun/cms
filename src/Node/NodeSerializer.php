@@ -7,6 +7,7 @@ namespace Duon\Cms\Node;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Contract\HasTitle;
+use ReflectionMethod;
 
 use function Duon\Cms\Util\nanoid;
 
@@ -59,7 +60,7 @@ class NodeSerializer
 				'data' => $rawData['creator_data'],
 			],
 			'content' => $this->content($node, $rawData, $fieldNames),
-			'deletable' => NodeMeta::deletable($node::class),
+			'deletable' => $this->resolveDeletable($node),
 		];
 	}
 
@@ -91,7 +92,7 @@ class NodeSerializer
 			'published' => false,
 			'hidden' => false,
 			'locked' => false,
-			'deletable' => NodeMeta::deletable($class),
+			'deletable' => $this->resolveDeletable($node),
 			'content' => $content,
 			'type' => [
 				'handle' => NodeMeta::handle($class),
@@ -106,7 +107,7 @@ class NodeSerializer
 	public function fields(object $node, array $fieldNames): array
 	{
 		$fields = [];
-		$orderedFields = $this->order($node::class, $fieldNames);
+		$orderedFields = $this->order($node, $fieldNames);
 		$missingFields = array_diff($fieldNames, $orderedFields);
 		$allFields = array_merge($orderedFields, $missingFields);
 
@@ -152,8 +153,29 @@ class NodeSerializer
 	/**
 	 * @return string[]
 	 */
-	private function order(string $class, array $fieldNames): array
+	private function order(object $node, array $fieldNames): array
 	{
-		return NodeMeta::fieldOrder($class) ?? $fieldNames;
+		$metaOrder = NodeMeta::fieldOrder($node::class);
+
+		if ($metaOrder !== null) {
+			return $metaOrder;
+		}
+
+		if (method_exists($node, 'order')) {
+			return $node->order();
+		}
+
+		return $fieldNames;
+	}
+
+	private function resolveDeletable(object $node): bool
+	{
+		if (method_exists($node, 'deletable')) {
+			$method = new ReflectionMethod($node, 'deletable');
+
+			return $method->invoke($node);
+		}
+
+		return NodeMeta::deletable($node::class);
 	}
 }
