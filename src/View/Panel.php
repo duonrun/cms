@@ -12,6 +12,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Section;
+use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -172,28 +173,59 @@ class Panel
 		Finder $find,
 		Factory $factory,
 	): Response {
+		if ($this->request->header('Content-Type') !== 'application/json') {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$data = $this->request->json();
 		$class = $this->registry->tag(Node::class)->entry($type)->definition();
-		$obj = new $class($context, $find, $this->request->json());
-		$obj->create();
+		$obj = new $class($context, $find, $data);
+
+		$result = $obj->save($data);
 
 		return (new Response(
 			$factory
 				->response()
 				->withStatus(201)
 				->withHeader('Content-Type', 'application/json'),
-		))->body(json_encode(['success' => true]));
+		))->body(json_encode($result));
 	}
 
 	#[Permission('panel')]
-	public function node(Finder $find, string $uid): Response
+	public function node(Finder $find, Factory $factory, string $uid): Response
 	{
 		$node = $find->node->byUid($uid, published: null);
 
-		if ($node) {
-			return $node->jsonResponse();
+		if (!$node) {
+			throw new HttpNotFound($this->request);
 		}
 
-		throw new HttpNotFound($this->request);
+		$method = $this->request->method();
+
+		$result = match ($method) {
+			'GET' => $node->read(),
+			'PUT' => $this->saveNode($node),
+			'DELETE' => $node->delete(),
+			default => throw new HttpBadRequest($this->request),
+		};
+
+		$content = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+		return (new Response(
+			$factory
+				->response()
+				->withStatus($method === 'POST' ? 201 : 200)
+				->withHeader('Content-Type', 'application/json'),
+		))->body($content);
+	}
+
+	private function saveNode(Node $node): array
+	{
+		if ($this->request->header('Content-Type') !== 'application/json') {
+			throw new HttpBadRequest($this->request);
+		}
+
+		return $node->save($this->request->json());
 	}
 
 	protected function getPanelIndex(): string
