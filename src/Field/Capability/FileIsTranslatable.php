@@ -40,7 +40,7 @@ trait FileIsTranslatable
 
 		$result['files'] = [];
 
-		foreach ($this->node->context->locales() as $locale) {
+		foreach ($this->owner->locales() as $locale) {
 			$result['files'][$locale->id] = [];
 		}
 

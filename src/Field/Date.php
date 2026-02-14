@@ -11,7 +11,7 @@ class Date extends Field
 {
 	public function value(): DateValue
 	{
-		return new DateValue($this->node, $this, $this->valueContext);
+		return new DateValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array

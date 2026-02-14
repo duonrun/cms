@@ -18,17 +18,17 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 	{
 		if ($this->multiple) {
 			if ($this->translateFile) {
-				return new Value\TranslatedImages($this->node, $this, $this->valueContext);
+				return new Value\TranslatedImages($this->owner, $this, $this->valueContext);
 			}
 
-			return new Value\Images($this->node, $this, $this->valueContext);
+			return new Value\Images($this->owner, $this, $this->valueContext);
 		}
 
 		if ($this->translateFile) {
-			return new Value\TranslatedImage($this->node, $this, $this->valueContext);
+			return new Value\TranslatedImage($this->owner, $this, $this->valueContext);
 		}
 
-		return new Value\Image($this->node, $this, $this->valueContext);
+		return new Value\Image($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -53,7 +53,7 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 			$subSchema->add('alt', 'text');
 
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
 				$i18nSchema->add($locale->id, $subSchema);
@@ -65,7 +65,7 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 			$fileSchema = new Schema(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$titleSchema = new Schema(title: $this->label, keepUnknown: true);
 			$altSchema = new Schema(title: $this->label, keepUnknown: true);
 

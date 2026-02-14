@@ -10,7 +10,7 @@ use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Capability\FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Field\FieldOwner;
 
 /**
  * @property-read Field&AllowsMultiple&FileTranslatable&Translatable $field
@@ -18,12 +18,12 @@ use Duon\Cms\Node\Node;
 class File extends Value
 {
 	public function __construct(
-		Node $node,
+		FieldOwner $owner,
 		Field&AllowsMultiple&FileTranslatable&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 	}
 
 	public function __toString(): string

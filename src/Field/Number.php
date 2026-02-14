@@ -12,7 +12,7 @@ class Number extends Field
 {
 	public function value(): NumberValue
 	{
-		return new NumberValue($this->node, $this, $this->valueContext);
+		return new NumberValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array

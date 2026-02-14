@@ -13,6 +13,6 @@ class TranslatedFiles extends Files
 
 	public function get(int $index): TranslatedFile
 	{
-		return new TranslatedFile($this->node, $this->field, $this->context, $index);
+		return new TranslatedFile($this->owner, $this->field, $this->context, $index);
 	}
 }

@@ -7,8 +7,8 @@ namespace Duon\Cms\Value;
 use Duon\Cms\Assets\Assets;
 use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Locale;
-use Duon\Cms\Node\Node;
 
 abstract class Value
 {
@@ -19,12 +19,12 @@ abstract class Value
 	protected readonly array $data;
 
 	public function __construct(
-		protected readonly Node $node,
+		protected readonly FieldOwner $owner,
 		protected readonly Field $field,
 		protected readonly ValueContext $context,
 	) {
-		$this->locale = $node->request->get('locale');
-		$this->defaultLocale = $node->request->get('defaultLocale');
+		$this->locale = $owner->locale();
+		$this->defaultLocale = $owner->defaultLocale();
 		$this->data = $context->data;
 		$this->fieldName = $context->fieldName;
 		$this->fieldType = $field->type;
@@ -59,7 +59,7 @@ abstract class Value
 
 	protected function assetsPath(): string
 	{
-		return 'node/' . $this->node->uid() . '/';
+		return 'node/' . $this->owner->uid() . '/';
 	}
 
 	protected function getAssets(): Assets
@@ -67,7 +67,7 @@ abstract class Value
 		static $assets = null;
 
 		if (!$assets) {
-			$assets = new Assets($this->node->request, $this->node->config);
+			$assets = new Assets($this->owner->request(), $this->owner->config());
 		}
 
 		return $assets;

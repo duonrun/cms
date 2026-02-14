@@ -21,7 +21,7 @@ class Textarea extends Text implements Capability\Translatable
 		$schema->add('type', 'text', 'required', 'in:textarea');
 
 		if ($this->translate) {
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
 

@@ -14,7 +14,7 @@ class Iframe extends Field implements Capability\Translatable
 
 	public function value(): YoutubeValue
 	{
-		return new YoutubeValue($this->node, $this, $this->valueContext);
+		return new YoutubeValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -31,7 +31,7 @@ class Iframe extends Field implements Capability\Translatable
 		$schema->add('type', 'text', 'required', 'in:iframe');
 
 		if ($this->translate) {
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
 

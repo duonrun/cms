@@ -13,6 +13,6 @@ class TranslatedImages extends Images
 
 	public function get(int $index): TranslatedImage
 	{
-		return new TranslatedImage($this->node, $this->field, $this->context, $index);
+		return new TranslatedImage($this->owner, $this->field, $this->context, $index);
 	}
 }

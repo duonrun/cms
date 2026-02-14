@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Node\Node;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Schema;
@@ -36,7 +35,7 @@ abstract class Field implements
 
 	final public function __construct(
 		public readonly string $name,
-		public readonly Node $node,
+		public readonly FieldOwner $owner,
 		protected readonly ValueContext $valueContext,
 	) {
 		$this->type = $this::class;

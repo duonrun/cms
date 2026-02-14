@@ -11,7 +11,7 @@ class Radio extends Field
 {
 	public function value(): Str
 	{
-		return new Str($this->node, $this, $this->valueContext);
+		return new Str($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array

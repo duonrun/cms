@@ -8,7 +8,7 @@ use Duon\Cms\Assets\ResizeMode;
 use Duon\Cms\Assets\Size;
 use Duon\Cms\Field;
 use Duon\Cms\Field\Capability\Translatable;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Util\Html as HtmlUtil;
 use Generator;
 use Gumlet\ImageResize;
@@ -20,9 +20,9 @@ class Grid extends Value
 {
 	protected readonly ?Generator $preparedData;
 
-	public function __construct(Node $node, Field\Grid&Translatable $field, ValueContext $context)
+	public function __construct(FieldOwner $owner, Field\Grid&Translatable $field, ValueContext $context)
 	{
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 
 		$this->preparedData = $this->prepareData($this->data);
 	}
@@ -56,7 +56,7 @@ class Grid extends Value
 				if ($i === $index) {
 					return (new Field\Image(
 						$this->context->fieldName,
-						$this->node,
+						$this->owner,
 						new ValueContext($this->context->fieldName, $value->data),
 					))->value();
 				}
@@ -76,13 +76,13 @@ class Grid extends Value
 					if ($item->type === 'image') {
 						yield (new Field\Image(
 							$this->context->fieldName,
-							$this->node,
+							$this->owner,
 							new ValueContext($this->context->fieldName, $item->data),
 						))->value();
 					} elseif ($item->type === 'images') {
 						foreach ((new Field\Image(
 							$this->context->fieldName,
-							$this->node,
+							$this->owner,
 							new ValueContext($this->context->fieldName, $item->data),
 						))->multiple()->value() as $image) {
 							yield $image;
@@ -95,13 +95,13 @@ class Grid extends Value
 				if ($item->type === 'image') {
 					yield (new Field\Image(
 						$this->context->fieldName,
-						$this->node,
+						$this->owner,
 						new ValueContext($this->context->fieldName, $item->data),
 					))->value();
 				} elseif ($item->type === 'images') {
 					foreach ((new Field\Image(
 						$this->context->fieldName,
-						$this->node,
+						$this->owner,
 						new ValueContext($this->context->fieldName, $item->data),
 					))->multiple()->value() as $image) {
 						yield $image;
@@ -167,8 +167,8 @@ class Grid extends Value
 
 		$columns = $this->columns();
 
-		$out = '<' . $tag . ' class="' . $prefix . '-grid ' . $prefix .
-			'-grid-columns-' . $columns . $class . '">';
+		$out = '<' . $tag . ' class="' . $prefix . '-grid ' . $prefix
+			. '-grid-columns-' . $columns . $class . '">';
 
 		foreach ($this->preparedData as $value) {
 			$out .= $this->renderValue($prefix, $value, $args);
@@ -203,8 +203,8 @@ class Grid extends Value
 		$styleClass = $value->styleClass();
 		$class = $styleClass ? ' ' . $styleClass : '';
 
-		$out = '<div class="' . $prefix . '-' . $value->type .
-			' ' . $colspan . ' ' . $rowspan . $class . '">';
+		$out = '<div class="' . $prefix . '-' . $value->type
+			. ' ' . $colspan . ' ' . $rowspan . $class . '">';
 		$out .= match ($value->type) {
 			'html' => $value->data['value'],
 			'text' => $value->data['value'],
@@ -229,7 +229,7 @@ class Grid extends Value
 	{
 		return (new $class(
 			$this->context->fieldName,
-			$this->node,
+			$this->owner,
 			new ValueContext($this->context->fieldName, $item->data),
 		))->value();
 	}

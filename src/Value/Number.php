@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Field;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Field\FieldOwner;
 
 class Number extends Value
 {
 	public readonly ?int $value;
 
-	public function __construct(Node $node, Field $field, ValueContext $context)
+	public function __construct(FieldOwner $owner, Field $field, ValueContext $context)
 	{
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 
 		if (is_numeric($this->data['value'] ?? null)) {
 			$this->value = (int) $this->data['value'];

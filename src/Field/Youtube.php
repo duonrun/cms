@@ -15,7 +15,7 @@ class Youtube extends Field implements Capability\Translatable, Capability\Allow
 
 	public function value(): YoutubeValue
 	{
-		return new YoutubeValue($this->node, $this, $this->valueContext);
+		return new YoutubeValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -29,7 +29,7 @@ class Youtube extends Field implements Capability\Translatable, Capability\Allow
 		$schema->add('type', 'text', 'required', 'in:youtube');
 
 		if ($this->translate) {
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Field\Matrix;
-use Duon\Cms\Node\Node;
 use Generator;
 use IteratorAggregate;
 
@@ -18,11 +18,11 @@ class MatrixValue extends Value implements IteratorAggregate
 	protected array $items = [];
 
 	public function __construct(
-		Node $node,
+		FieldOwner $owner,
 		Matrix $field,
 		ValueContext $context,
 	) {
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 
 		$this->prepareItems();
 	}
@@ -102,7 +102,7 @@ class MatrixValue extends Value implements IteratorAggregate
 		foreach ($data as $itemData) {
 			if (is_array($itemData)) {
 				$this->items[] = new MatrixItem(
-					$this->node,
+					$this->owner,
 					$this->field,
 					new ValueContext($this->fieldName, $itemData),
 				);
