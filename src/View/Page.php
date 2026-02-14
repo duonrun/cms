@@ -9,7 +9,6 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
-use Duon\Cms\Node\Node;
 use Duon\Cms\Util\Path;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
@@ -69,7 +68,7 @@ class Page
 		return $page->render();
 	}
 
-	private function dispatch(Node $page, string $method, ?array $formBody): Response
+	private function dispatch(object $page, string $method, ?array $formBody): Response
 	{
 		return match ($method) {
 			'GET' => $page->render(),
@@ -78,7 +77,7 @@ class Page
 		};
 	}
 
-	private function jsonRead(Node $node): Response
+	private function jsonRead(object $node): Response
 	{
 		$content = json_encode(
 			$node->read(),
@@ -92,7 +91,7 @@ class Page
 		))->body($content);
 	}
 
-	private function handleFormPost(Node $node, ?array $formBody): Response
+	private function handleFormPost(object $node, ?array $formBody): Response
 	{
 		if ($node instanceof HandlesFormPost) {
 			return $node->formPost($formBody);

@@ -168,7 +168,6 @@ class Panel
 		$obj = $factory->blueprint($class, $context, $find);
 
 		$serializer = new NodeSerializer(
-			$this->registry,
 			$factory->hydrator(),
 		);
 
