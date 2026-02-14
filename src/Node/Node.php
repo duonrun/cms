@@ -32,6 +32,7 @@ abstract class Node implements FieldOwner
 	private readonly FieldHydrator $hydrator;
 	private readonly NodeSerializer $serializer;
 	private readonly NodeManager $manager;
+	protected readonly TemplateRenderer $templateRenderer;
 
 	final public function __construct(
 		public readonly Context $context,
@@ -41,6 +42,7 @@ abstract class Node implements FieldOwner
 		$this->hydrator = new FieldHydrator();
 		$this->serializer = new NodeSerializer($this->hydrator);
 		$this->manager = new NodeManager($context->db, new PathManager());
+		$this->templateRenderer = new TemplateRenderer($context->registry, $context->factory, $this->hydrator);
 		$this->fieldNames = $this->hydrator->hydrate($this, $this->data['content'] ?? [], $this);
 
 		$this->init();
