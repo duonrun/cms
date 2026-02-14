@@ -30,7 +30,7 @@ class GridItemSchema extends Schema
 					$fileSchema->add('title', 'text');
 					$fileSchema->add('alt', 'text');
 
-					if (!$fileSchema->validate($files)) {
+					if (!$fileSchema->validate($files)->isValid()) {
 						$this->addError('image', _('Grid Bild'), _('Attribute `file` nicht gefüllt.'));
 					}
 

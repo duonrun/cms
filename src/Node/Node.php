@@ -482,15 +482,16 @@ abstract class Node
 	{
 		$factory = new NodeSchemaFactory($this, $this->context->locales());
 		$schema = $factory->create();
+		$result = $schema->validate($data);
 
-		if (!$schema->validate($data)) {
+		if (!$result->isValid()) {
 			throw new HttpBadRequest($this->request, payload: [
 				'message' => _('Incomplete or invalid data'),
-				'errors' => $schema->errors(),
+				'errors' => $result->errors(),
 			]);
 		}
 
-		return $schema->values();
+		return $result->values();
 	}
 
 	protected function getRequestData(): array

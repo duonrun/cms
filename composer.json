@@ -22,7 +22,7 @@
 		"duon/error": "^0.1",
 		"duon/quma": "^0.1",
 		"duon/session": "^0.1",
-		"duon/sire": "^0.2",
+		"duon/sire": "dev-main",
 		"gumlet/php-image-resize": "2.0.*",
 		"hidehalo/nanoid-php": "^2",
 		"laminas/laminas-httphandlerrunner": "^2.4",

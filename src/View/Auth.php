@@ -30,9 +30,10 @@ class Auth
 	{
 		$schema = new Schema\Login();
 		$response = Response::create($this->factory);
+		$result = $schema->validate($request->json());
 
-		if ($schema->validate($request->json())) {
-			$values = $schema->values();
+		if ($result->isValid()) {
+			$values = $result->values();
 			$user = $this->auth->authenticate(
 				$values['login'],
 				$values['password'],
@@ -53,7 +54,7 @@ class Auth
 		$response->json(
 			array_merge(
 				['error' => _('Bitte Benutzernamen und Passwort eingeben'), 'loginType' => 'panel'],
-				$schema->pristineValues(),
+				$result->pristineValues(),
 			),
 			400,
 		);
@@ -65,9 +66,10 @@ class Auth
 	{
 		$schema = new Schema\TokenLogin();
 		$response = Response::create($this->factory);
+		$result = $schema->validate($request->json());
 
-		if ($schema->validate($request->json())) {
-			$values = $schema->values();
+		if ($result->isValid()) {
+			$values = $result->values();
 			$user = $this->auth->authenticateByOneTimeToken(
 				$values['token'],
 				true,
