@@ -9,22 +9,19 @@ use Duon\Cms\Context;
 use Duon\Cms\Exception\NoSuchField;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Cms\Schema\NodeSchemaFactory;
 use Duon\Cms\Value\Value;
-use Duon\Cms\Value\ValueContext;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
-use ReflectionClass;
-use ReflectionProperty;
-use ReflectionUnionType;
 use Throwable;
 
 use function Duon\Cms\Util\nanoid;
@@ -548,48 +545,10 @@ abstract class Node implements FieldOwner
 
 	protected function initFields(): void
 	{
-		$this->fieldNames = [];
-
-		$rc = new ReflectionClass(static::class);
-
-		foreach ($rc->getProperties() as $property) {
-			$name = $property->getName();
-
-			if (!$property->hasType()) {
-				continue;
-			}
-
-			$fieldType = $property->getType();
-
-			if ($fieldType::class === ReflectionUnionType::class) {
-				continue;
-			}
-
-			$fieldTypeName = $fieldType->getName();
-
-			if (is_subclass_of($fieldTypeName, Field::class)) {
-				if (isset($this->{$name})) {
-					continue;
-				}
-
-				$this->{$name} = $this->initField($property, $fieldTypeName);
-
-				$this->fieldNames[] = $name;
-			}
-		}
+		$hydrator = new FieldHydrator();
+		$this->fieldNames = $hydrator->hydrate($this, $this->data['content'] ?? [], $this);
 
 		$this->init();
-	}
-
-	protected function initField(ReflectionProperty $property, string $fieldType): Field
-	{
-		$fieldName = $property->getName();
-		$content = $this->data['content'][$fieldName] ?? [];
-		$field = new $fieldType($fieldName, $this, new ValueContext($fieldName, $content));
-
-		$field->initCapabilities($property);
-
-		return $field;
 	}
 
 	protected function deletable(): bool
