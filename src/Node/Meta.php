@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Node\Meta\Block as BlockAttr;
+use Duon\Cms\Node\Meta\Deletable;
+use Duon\Cms\Node\Meta\Document as DocumentAttr;
+use Duon\Cms\Node\Meta\FieldOrder;
 use Duon\Cms\Node\Meta\Handle;
 use Duon\Cms\Node\Meta\Name;
+use Duon\Cms\Node\Meta\Page as PageAttr;
 use Duon\Cms\Node\Meta\Permission;
 use Duon\Cms\Node\Meta\Render;
 use Duon\Cms\Node\Meta\Route;
+use Duon\Cms\Node\Meta\Title;
 use ReflectionClass;
 
 class Meta
@@ -18,6 +24,11 @@ class Meta
 	public readonly string $renderer;
 	public readonly string|array $route;
 	public readonly string|array $permission;
+	public readonly string $kind; // 'page', 'block', or 'document'
+	public readonly ?string $titleField; // Field name from #[Title], or null
+	/** @var string[]|null */
+	public readonly ?array $fieldOrder; // From #[FieldOrder], or null for declaration order
+	public readonly bool $deletable;
 
 	/**
 	 * @param class-string $nodeclass
@@ -30,6 +41,10 @@ class Meta
 		$this->renderer = $this->getRenderer($attributes[Render::class] ?? null, $attributes[Handle::class] ?? null);
 		$this->route = $this->getRoute($attributes[Route::class] ?? null);
 		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
+		$this->kind = $this->resolveKind($attributes);
+		$this->titleField = ($attributes[Title::class] ?? null)?->field;
+		$this->fieldOrder = ($attributes[FieldOrder::class] ?? null)?->fields;
+		$this->deletable = ($attributes[Deletable::class] ?? null)?->value ?? true;
 	}
 
 	private function initAttributes(): array
@@ -101,6 +116,29 @@ class Meta
 			'change' => 'authenticated',
 			'deeete' => 'authenticated',
 		];
+	}
+
+	private function resolveKind(array $attributes): string
+	{
+		if (isset($attributes[PageAttr::class])) {
+			return 'page';
+		}
+
+		if (isset($attributes[BlockAttr::class])) {
+			return 'block';
+		}
+
+		if (isset($attributes[DocumentAttr::class])) {
+			return 'document';
+		}
+
+		// Fallback: check class hierarchy for backward compatibility
+		return match (true) {
+			is_a($this->nodeClass, Page::class, true) => 'page',
+			is_a($this->nodeClass, Block::class, true) => 'block',
+			is_a($this->nodeClass, Document::class, true) => 'document',
+			default => 'document',
+		};
 	}
 
 	private function getClassName(): string
