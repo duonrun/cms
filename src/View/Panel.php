@@ -11,6 +11,8 @@ use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
@@ -160,10 +162,21 @@ class Panel
 			$content = json_decode($defaults, true);
 		}
 
+		$factory = $find->nodeFactory();
 		$class = $this->registry->tag(Node::class)->entry($type)->definition();
-		$obj = new $class($context, $find, []);
+		$obj = $factory->blueprint($class, $context, $find);
 
-		return $obj->blueprint($content);
+		$serializer = new NodeSerializer(
+			$this->registry,
+			$factory->hydrator(),
+		);
+
+		return $serializer->blueprint(
+			$obj,
+			NodeFactory::fieldNamesFor($obj),
+			$context->locales(),
+			$content,
+		);
 	}
 
 	#[Permission('panel')]
@@ -179,7 +192,7 @@ class Panel
 
 		$data = $this->request->json();
 		$class = $this->registry->tag(Node::class)->entry($type)->definition();
-		$obj = new $class($context, $find, $data);
+		$obj = $find->nodeFactory()->create($class, $context, $find, $data);
 
 		$result = $obj->save($data);
 
@@ -219,7 +232,7 @@ class Panel
 		))->body($content);
 	}
 
-	private function saveNode(Node $node): array
+	private function saveNode(object $node): array
 	{
 		if ($this->request->header('Content-Type') !== 'application/json') {
 			throw new HttpBadRequest($this->request);
