@@ -14,7 +14,6 @@ use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Cms\Value\Value;
-use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
@@ -185,41 +184,6 @@ abstract class Node implements FieldOwner
 		return $this->serializer->fields($this, $this->fieldNames);
 	}
 
-	public function response(): Response
-	{
-		$request = $this->request;
-
-		return match ($request->method()) {
-			'GET' => $this->render(),
-			'POST' => $this->formPost($request->form()),
-			default => throw new HttpBadRequest($request),
-		};
-	}
-
-	public function jsonResponse(): Response
-	{
-		$request = $this->request;
-		$method = $request->method();
-
-		$content = json_encode(match ($method) {
-			'GET' => $this->read(),
-			'POST' => $this->create(),
-			'PUT' => $this->change(),
-			'DELETE' => $this->delete(),
-			default => throw new HttpBadRequest($request),
-		}, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-		$response = (
-			new Response(
-				$this->factory
-					->response()
-					->withStatus($method === 'POST' ? 201 : 200)
-					->withHeader('Content-Type', 'application/json'),
-			)
-		)->body($content);
-
-		return $response;
-	}
-
 	public function render(array $context = []): Response
 	{
 		return (new Response($this->factory
@@ -240,54 +204,14 @@ abstract class Node implements FieldOwner
 		return $this->serializer->read($this, $this->data, $this->fieldNames);
 	}
 
-	/**
-	 * Called on PUT request.
-	 */
-	public function change(): array
-	{
-		return $this->save($this->getRequestData());
-	}
-
-	/**
-	 * Called on DELETE request.
-	 */
 	public function delete(): array
 	{
 		return $this->manager->delete($this, $this->request);
 	}
 
-	/**
-	 * Called on POST request.
-	 */
-	public function create(): array|Response
-	{
-		return $this->manager->create($this, $this->getRequestData(), $this->request, $this->context->locales());
-	}
-
-	/**
-	 * Validates the data and persists it in the database.
-	 */
 	public function save(array $data): array
 	{
 		return $this->manager->save($this, $data, $this->request, $this->context->locales());
-	}
-
-	protected function getRequestData(): array
-	{
-		if ($this->request->header('Content-Type') !== 'application/json') {
-			throw new HttpBadRequest($this->request);
-		}
-
-		return $this->request->json();
-	}
-
-	/**
-	 * Usually overwritten in the app. Used to handle form posts
-	 * from the frontend.
-	 */
-	protected function formPost(?array $body): Response
-	{
-		throw new HttpBadRequest($this->request);
 	}
 
 	public function locale(): Locale

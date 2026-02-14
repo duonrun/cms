@@ -227,31 +227,26 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testPagePathRequiresDefaultLocale(): void
 	{
+		$pathManager = new \Duon\Cms\Node\PathManager();
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$db = $this->testDb;
+		$locales = $context->locales();
 
-		$page = new \Duon\Cms\Tests\Fixtures\Node\TestPage(
-			$context,
-			$finder,
-			['content' => []],
-		);
+		$typeId = $this->createTestType('path-locale-test', 'page');
+		$nodeId = $this->createTestNode([
+			'uid' => 'path-missing-default',
+			'type' => $typeId,
+			'content' => [],
+		]);
 
 		$this->throws(
-			\Duon\Core\Exception\HttpBadRequest::class,
-			'Bad Request',
+			\Duon\Cms\Exception\RuntimeException::class,
+			'Hauptsprache',
 		);
 
-		$page->create([
-			'uid' => 'path-missing-default',
-			'published' => true,
-			'locked' => false,
-			'hidden' => false,
-			'paths' => [
-				'de' => '/nur-de',
-			],
-			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Title']],
-			],
-		]);
+		$pathManager->persist($db, [
+			'paths' => ['de' => '/nur-de'],
+			'generatedPaths' => [],
+		], 1, $nodeId, $locales);
 	}
 }
