@@ -26,7 +26,6 @@
       <directory>src</directory>
     </include>
     <exclude>
-      <directory suffix=".php">src/Server</directory>
       <directory suffix=".php">src/Commands</directory>
     </exclude>
   </source>
