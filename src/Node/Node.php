@@ -24,8 +24,6 @@ use Duon\Quma\Database;
 use Duon\Registry\Registry;
 use Throwable;
 
-use function Duon\Cms\Util\nanoid;
-
 abstract class Node implements FieldOwner
 {
 	public readonly Request $request;
@@ -34,13 +32,19 @@ abstract class Node implements FieldOwner
 	protected readonly Registry $registry;
 	protected readonly Factory $factory;
 	protected array $fieldNames = [];
+	private readonly FieldHydrator $hydrator;
+	private readonly NodeSerializer $serializer;
 
 	final public function __construct(
 		public readonly Context $context,
 		protected readonly Finder $find,
 		protected ?array $data = null,
 	) {
-		$this->initFields();
+		$this->hydrator = new FieldHydrator();
+		$this->serializer = new NodeSerializer($this->hydrator);
+		$this->fieldNames = $this->hydrator->hydrate($this, $this->data['content'] ?? [], $this);
+
+		$this->init();
 
 		$this->db = $context->db;
 		$this->request = $context->request;
@@ -88,7 +92,7 @@ abstract class Node implements FieldOwner
 	final public function setData(array $data): static
 	{
 		$this->data = $data;
-		$this->initFields();
+		$this->fieldNames = $this->hydrator->hydrate($this, $this->data['content'] ?? [], $this);
 
 		return $this;
 	}
@@ -123,93 +127,17 @@ abstract class Node implements FieldOwner
 
 	public function content(): array
 	{
-		$content = [];
-
-		// Fill the field's value with missing keys from the structure and fix type
-		foreach ($this->fieldNames as $fieldName) {
-			$field = $this->{$fieldName};
-			$structure = $field->structure();
-			$content[$fieldName] = array_merge($structure, $this->data['content'][$fieldName] ?? []);
-			$content[$fieldName]['type'] = $structure['type'];
-		}
-
-		return $content;
+		return $this->serializer->content($this, $this->data, $this->fieldNames);
 	}
 
 	public function data(): array
 	{
-		$data = $this->data;
-		$result = [
-			'uid' => $data['uid'],
-			'published' => $data['published'],
-			'hidden' => $data['hidden'],
-			'locked' => $data['locked'],
-			'created' => $data['created'],
-			'changed' => $data['changed'],
-			'deleted' => $data['deleted'],
-			'paths' => $data['paths'],
-			'type' => [
-				'handle' => $data['handle'],
-				'kind' => $data['kind'],
-				'class' => $this::class,
-			],
-			'editor' => [
-				'uid' => $data['editor_uid'],
-				'email' => $data['editor_email'],
-				'username' => $data['editor_username'],
-				'data' => $data['editor_data'],
-			],
-			'creator' => [
-				'uid' => $data['creator_uid'],
-				'email' => $data['creator_email'],
-				'username' => $data['creator_username'],
-				'data' => $data['creator_data'],
-			],
-			'content' => $this->content(),
-			'deletable' => $this->deletable(),
-		];
-
-		return $result;
+		return $this->serializer->data($this, $this->data, $this->fieldNames);
 	}
 
 	public function blueprint(array $values = []): array
 	{
-		$content = [];
-		$paths = [];
-
-		foreach ($this->fieldNames as $fieldName) {
-			$field = $this->{$fieldName};
-			$content[$fieldName] = $field->structure($values[$fieldName] ?? null);
-		}
-
-		$kind = NodeMeta::kind(static::class);
-
-		foreach ($this->context->locales() as $locale) {
-			$paths[$locale->id] = '';
-		}
-
-		return [
-			'title' => _('Neues Dokument:') . ' ' . NodeMeta::name(static::class),
-			'fields' => $this->fields(),
-			'uid' => $this->newUid(),
-			'published' => false,
-			'hidden' => false,
-			'locked' => false,
-			'deletable' => $this->deletable(),
-			'content' => $content,
-			'type' => [
-				'handle' => NodeMeta::handle(static::class),
-				'kind' => $kind,
-				'class' => static::class,
-			],
-			'paths' => $paths,
-			'generatedPaths' => [],
-		];
-	}
-
-	protected function newUid(): string
-	{
-		return nanoid();
+		return $this->serializer->blueprint($this, $this->fieldNames, $this->context->locales(), $values);
 	}
 
 	public function fillData(array $data): array
@@ -218,9 +146,9 @@ abstract class Node implements FieldOwner
 	}
 
 	/**
-	 * Is called after self::initFields.
+	 * Is called after field hydration during construction.
 	 *
-	 * Can be used to make adjustments the already initialized fields
+	 * Can be used to make adjustments to the already initialized fields.
 	 */
 	public function init(): void {}
 
@@ -253,16 +181,7 @@ abstract class Node implements FieldOwner
 
 	public function fields(): array
 	{
-		$fields = [];
-		$orderedFields = $this->order();
-		$missingFields = array_diff($this->fieldNames, $orderedFields);
-		$allFields = array_merge($orderedFields, $missingFields);
-
-		foreach ($allFields as $fieldName) {
-			$fields[] = $this->{$fieldName}->properties();
-		}
-
-		return $fields;
+		return $this->serializer->fields($this, $this->fieldNames);
 	}
 
 	public function response(): Response
@@ -317,13 +236,7 @@ abstract class Node implements FieldOwner
 	 */
 	public function read(): array
 	{
-		$data = $this->data();
-
-		return array_merge([
-			'title' => $this->title(),
-			'uid' => $this->meta('uid'),
-			'fields' => $this->fields(),
-		], $data);
+		return $this->serializer->read($this, $this->data, $this->fieldNames);
 	}
 
 	/**
@@ -513,14 +426,6 @@ abstract class Node implements FieldOwner
 		$factory = $this->registry->get(Factory::class);
 
 		return Response::create($factory);
-	}
-
-	protected function initFields(): void
-	{
-		$hydrator = new FieldHydrator();
-		$this->fieldNames = $hydrator->hydrate($this, $this->data['content'] ?? [], $this);
-
-		$this->init();
 	}
 
 	protected function deletable(): bool
