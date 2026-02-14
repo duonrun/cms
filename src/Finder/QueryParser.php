@@ -215,8 +215,8 @@ final class QueryParser
 		if ($token->type !== TokenType::Field) {
 			$this->error(
 				$token,
-				'Conditions of type `field exists` must consist of ' .
-				'a single operand of type Field.',
+				'Conditions of type `field exists` must consist of '
+				. 'a single operand of type Field.',
 			);
 		}
 
@@ -234,8 +234,8 @@ final class QueryParser
 		if ($this->readyForCondition) {
 			$this->error(
 				$token,
-				'Invalid position for a boolean operator. ' .
-					'Maybe you used && instead of & or || instead of |',
+				'Invalid position for a boolean operator. '
+					. 'Maybe you used && instead of & or || instead of |',
 			);
 		}
 
@@ -303,10 +303,10 @@ final class QueryParser
 		}
 
 		throw new ParserException(
-			"Parse error at position {$position}. {$msg}\n\n" .
-				"Query: `{$this->query}`\n" .
-				str_repeat(' ', $start) .
-				str_repeat('^', $len) . "\n\n",
+			"Parse error at position {$position}. {$msg}\n\n"
+				. "Query: `{$this->query}`\n"
+				. str_repeat(' ', $start)
+				. str_repeat('^', $len) . "\n\n",
 		);
 	}
 }

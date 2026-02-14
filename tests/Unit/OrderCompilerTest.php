@@ -67,8 +67,8 @@ final class OrderCompilerTest extends TestCase
 	{
 		$oc = new OrderCompiler(['field' => 'n.field', 'column' => 'uc.column']);
 		$s = ",\n    ";
-		$result = OB . "n.field DESC{$s}n.content->'test'->'value' ASC{$s}" .
-			"uc.column ASC{$s}n.content->'another'->'lang'->'en' DESC";
+		$result = OB . "n.field DESC{$s}n.content->'test'->'value' ASC{$s}"
+			. "uc.column ASC{$s}n.content->'another'->'lang'->'en' DESC";
 
 		$this->assertSame($result, $oc->compile('field DESC, test asc, column, another.lang.en Desc'));
 	}
