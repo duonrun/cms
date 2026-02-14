@@ -6,11 +6,12 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
+use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Block as BlockNode;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Renderer;
+use Duon\Cms\Node\TemplateRenderer;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
 
@@ -50,19 +51,20 @@ class Block
 	public function __toString(): string
 	{
 		try {
-			[$type, $id] = $this->block->renderer();
-			$renderer = $this->context->registry->tag(Renderer::class)->get($type);
+			$renderer = new TemplateRenderer(
+				$this->context->registry,
+				$this->context->factory,
+				new FieldHydrator(),
+			);
 
-			return $renderer->render($id, array_merge([
-				'block' => $this->block,
-				'find' => $this->find,
-				'locale' => $this->context->request->get('locale'),
-				'locales' => $this->context->request->get('locales'),
-				'request' => $this->context->request,
-				'registry' => $this->context->registry,
-				'debug' => $this->context->config->debug,
-				'env' => $this->context->config->env,
-			], $this->templateContext));
+			return $renderer->renderBlock(
+				$this->block,
+				$this->block->fieldNames(),
+				$this->find,
+				$this->context->request,
+				$this->context->config,
+				$this->templateContext,
+			);
 		} catch (Throwable $e) {
 			if ($this->context->config->debug()) {
 				throw $e;
