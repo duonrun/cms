@@ -13,7 +13,7 @@ class Html extends Field implements Capability\Translatable
 
 	public function value(): HtmlValue
 	{
-		return new HtmlValue($this->node, $this, $this->valueContext);
+		return new HtmlValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -27,7 +27,7 @@ class Html extends Field implements Capability\Translatable
 		$schema->add('type', 'text', 'required', 'in:html');
 
 		if ($this->translate) {
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
 

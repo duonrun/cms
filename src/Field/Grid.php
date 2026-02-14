@@ -22,7 +22,7 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 
 	public function value(): GridValue
 	{
-		return new GridValue($this->node, $this, $this->valueContext);
+		return new GridValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -36,7 +36,7 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		$result = ['type' => 'grid', 'columns' => $this->columns, 'minCellWidth' => $this->minCellWidth, 'value' => []];
 
 		if ($this->translate) {
-			foreach ($this->node->context->locales() as $locale) {
+			foreach ($this->owner->locales() as $locale) {
 				$result['value'][$locale->id] = [];
 			}
 		}
@@ -53,7 +53,7 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		$itemSchema = new GridItemSchema(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
 

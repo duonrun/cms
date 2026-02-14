@@ -18,10 +18,10 @@ class Picture extends Field implements Capability\Translatable, Capability\FileT
 	public function value(): Value\Picture
 	{
 		if ($this->translateFile) {
-			return new Value\TranslatedPicture($this->node, $this, $this->valueContext);
+			return new Value\TranslatedPicture($this->owner, $this, $this->valueContext);
 		}
 
-		return new Value\Picture($this->node, $this, $this->valueContext);
+		return new Value\Picture($this->owner, $this, $this->valueContext);
 	}
 
 	public function properties(): array
@@ -56,7 +56,7 @@ class Picture extends Field implements Capability\Translatable, Capability\FileT
 			$subSchema->add('alt', 'text');
 
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
 				$i18nSchema->add($locale->id, $subSchema);
@@ -68,7 +68,7 @@ class Picture extends Field implements Capability\Translatable, Capability\FileT
 			$fileSchema = new Schema(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$titleSchema = new Schema(title: $this->label, keepUnknown: true);
 			$altSchema = new Schema(title: $this->label, keepUnknown: true);
 

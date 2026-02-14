@@ -161,9 +161,9 @@ class Image extends File
 		$new = clone $this;
 		$new->size = new Assets\Size($width, $height, ['x' => $x, 'y' => $y]);
 		$new->resizeMode = Assets\ResizeMode::FreeCrop;
-		$new->queryString = "?resize=freecrop&w={$width}&h={$height}" .
-			($x ? "&x={$x}" : '') .
-			($y ? "&y={$y}" : '');
+		$new->queryString = "?resize=freecrop&w={$width}&h={$height}"
+			. ($x ? "&x={$x}" : '')
+			. ($y ? "&y={$y}" : '');
 
 		return $new;
 	}
@@ -188,16 +188,16 @@ class Image extends File
 
 	protected function getMediaPath(int $index): string
 	{
-		return $this->node->config->get('path.prefix') . '/media/image/' .
-			$this->assetsPath() .
-			$this->data['files'][$index]['file'] .
-			$this->queryString .
-			($this->quality ? "&quality={$this->quality}" : '');
+		return $this->owner->config()->get('path.prefix') . '/media/image/'
+			. $this->assetsPath()
+			. $this->data['files'][$index]['file']
+			. $this->queryString
+			. ($this->quality ? "&quality={$this->quality}" : '');
 	}
 
 	protected function getMediaUrl(int $index): string
 	{
-		return $this->node->request->origin() . $this->getMediaPath($index);
+		return $this->owner->request()->origin() . $this->getMediaPath($index);
 	}
 
 	protected function getImage(int $index): Assets\Image

@@ -16,7 +16,7 @@ class Option extends Field implements Capability\Selectable
 
 	public function value(): Value\Option
 	{
-		return new Value\Option($this->node, $this, $this->valueContext);
+		return new Value\Option($this->owner, $this, $this->valueContext);
 	}
 
 	public function properties(): array

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Field\Matrix;
-use Duon\Cms\Node\Node;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -19,11 +19,11 @@ class MatrixItem extends Value
 	protected array $subfields = [];
 
 	public function __construct(
-		Node $node,
+		FieldOwner $owner,
 		Matrix $field,
 		ValueContext $context,
 	) {
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 
 		$this->initSubfields();
 	}
@@ -99,7 +99,7 @@ class MatrixItem extends Value
 
 			$subfield = new $fieldClass(
 				$property->getName(),
-				$this->node,
+				$this->owner,
 				$subfieldContext,
 			);
 

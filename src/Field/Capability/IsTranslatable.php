@@ -40,7 +40,7 @@ trait IsTranslatable
 		if ($this->translate) {
 			$result['value'] = [];
 
-			foreach ($this->node->context->locales() as $locale) {
+			foreach ($this->owner->locales() as $locale) {
 				$result['value'][$locale->id] = null;
 			}
 		} else {

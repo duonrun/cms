@@ -11,7 +11,7 @@ class Checkbox extends Field
 {
 	public function value(): Boolean
 	{
-		return new Boolean($this->node, $this, $this->valueContext);
+		return new Boolean($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array

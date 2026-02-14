@@ -8,7 +8,7 @@ use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Capability\FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Field\FieldOwner;
 use Iterator;
 
 class Files extends Value implements Iterator
@@ -16,12 +16,12 @@ class Files extends Value implements Iterator
 	protected int $pointer = 0;
 
 	public function __construct(
-		Node $node,
+		FieldOwner $owner,
 		Field&AllowsMultiple&FileTranslatable&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 	}
 
 	public function __toString(): string
@@ -61,12 +61,12 @@ class Files extends Value implements Iterator
 
 	public function get(int $index): File
 	{
-		return new File($this->node, $this->field, $this->context, $index);
+		return new File($this->owner, $this->field, $this->context, $index);
 	}
 
 	public function first(): File
 	{
-		return new File($this->node, $this->field, $this->context, 0);
+		return new File($this->owner, $this->field, $this->context, 0);
 	}
 
 	public function unwrap(): array

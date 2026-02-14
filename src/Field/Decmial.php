@@ -12,7 +12,7 @@ class Decimal extends Field
 {
 	public function value(): DecimalValue
 	{
-		return new DecimalValue($this->node, $this, $this->valueContext);
+		return new DecimalValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array

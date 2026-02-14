@@ -24,11 +24,11 @@ class Images extends Files
 
 	public function get(int $index): Image
 	{
-		return new Image($this->node, $this->field, $this->context, $index);
+		return new Image($this->owner, $this->field, $this->context, $index);
 	}
 
 	public function first(): Image
 	{
-		return new Image($this->node, $this->field, $this->context, 0);
+		return new Image($this->owner, $this->field, $this->context, 0);
 	}
 }

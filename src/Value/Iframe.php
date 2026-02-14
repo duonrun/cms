@@ -6,7 +6,7 @@ namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Field\FieldOwner;
 
 use function Duon\Cms\Util\escape;
 
@@ -18,12 +18,12 @@ class Iframe extends Value
 	protected string $value;
 
 	public function __construct(
-		Node $node,
+		FieldOwner $owner,
 		Field&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {
-		parent::__construct($node, $field, $context);
+		parent::__construct($owner, $field, $context);
 	}
 
 	public function __toString(): string
@@ -57,8 +57,8 @@ class Iframe extends Value
 			return '';
 		}
 
-		$this->value = isset($this->data['value']) ?
-			$this->data['value'] : '';
+		$this->value = isset($this->data['value'])
+			? $this->data['value'] : '';
 
 		return $this->value;
 	}

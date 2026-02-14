@@ -17,10 +17,10 @@ class Video extends Field implements Capability\Translatable, Capability\FileTra
 	public function value(): Value\Video
 	{
 		if ($this->translateFile) {
-			return new Value\Video($this->node, $this, $this->valueContext);
+			return new Value\Video($this->owner, $this, $this->valueContext);
 		}
 
-		return new Value\Video($this->node, $this, $this->valueContext);
+		return new Value\Video($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -44,7 +44,7 @@ class Video extends Field implements Capability\Translatable, Capability\FileTra
 			$subSchema->add('title', 'text');
 
 			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
 				$i18nSchema->add($locale->id, $subSchema);
@@ -56,7 +56,7 @@ class Video extends Field implements Capability\Translatable, Capability\FileTra
 			$fileSchema = new Schema(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 
-			$locales = $this->node->context->locales();
+			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$titleSchema = new Schema(title: $this->label, keepUnknown: true);
 

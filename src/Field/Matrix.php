@@ -23,7 +23,7 @@ class Matrix extends Field implements Capability\AllowsMultiple
 	{
 		$this->initSubfields();
 
-		return new MatrixValue($this->node, $this, $this->valueContext);
+		return new MatrixValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -123,7 +123,7 @@ class Matrix extends Field implements Capability\AllowsMultiple
 
 			$subfield = new $fieldClass(
 				$property->getName(),
-				$this->node,
+				$this->owner,
 				new ValueContext($property->getName(), []),
 			);
 

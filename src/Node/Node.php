@@ -585,8 +585,7 @@ abstract class Node implements FieldOwner
 	{
 		$fieldName = $property->getName();
 		$content = $this->data['content'][$fieldName] ?? [];
-		$node = $this instanceof Node ? $this : $this->node;
-		$field = new $fieldType($fieldName, $node, new ValueContext($fieldName, $content));
+		$field = new $fieldType($fieldName, $this, new ValueContext($fieldName, $content));
 
 		$field->initCapabilities($property);
 
