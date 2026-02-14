@@ -8,7 +8,7 @@ trait IsValidatable
 {
 	protected array $validators = [];
 
-	public function validate(string ...$validators): static
+	public function addValidators(string ...$validators): static
 	{
 		$this->validators = array_merge($this->validators, $validators);
 

@@ -24,7 +24,7 @@ class Validate implements Capability
 	public function set(Field $field): void
 	{
 		if ($field instanceof Validatable) {
-			$field->validate(...$this->validators);
+			$field->addValidators(...$this->validators);
 
 			return;
 		}
