@@ -201,12 +201,7 @@ abstract class Node implements FieldOwner
 			$content[$fieldName] = $field->structure($values[$fieldName] ?? null);
 		}
 
-		// TODO: Improve the node kind determination or get rid of it
-		$kind = match (true) {
-			is_subclass_of($this, Page::class) => 'page',
-			is_subclass_of($this, Block::class) => 'block',
-			default => 'document',
-		};
+		$kind = NodeMeta::kind(static::class);
 
 		foreach ($this->context->locales() as $locale) {
 			$paths[$locale->id] = '';
@@ -468,11 +463,7 @@ abstract class Node implements FieldOwner
 		if (!$type) {
 			$this->db->nodes->addType([
 				'handle' => $handle,
-				'kind' => match (true) {
-					is_a($class, Block::class, true) => 'block',
-					is_a($class, Page::class, true) => 'page',
-					is_a($class, Document::class, true) => 'document',
-				},
+				'kind' => NodeMeta::kind($class),
 			])->run();
 		}
 	}

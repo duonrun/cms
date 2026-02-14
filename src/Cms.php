@@ -6,10 +6,8 @@ namespace Duon\Cms;
 
 use Duon\Cms\Config;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Block;
-use Duon\Cms\Node\Document;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Page as PageNode;
+use Duon\Cms\Node\NodeMeta;
 use Duon\Core\App;
 use Duon\Core\Factory;
 use Duon\Core\Plugin;
@@ -167,11 +165,7 @@ class Cms implements Plugin
 			if (!in_array($handle, $types)) {
 				$this->db->nodes->addType([
 					'handle' => $handle,
-					'kind' => match (true) {
-						is_a($class, Block::class, true) => 'block',
-						is_a($class, PageNode::class, true) => 'page',
-						is_a($class, Document::class, true) => 'document',
-					},
+					'kind' => NodeMeta::kind($class),
 				])->run();
 			}
 		}

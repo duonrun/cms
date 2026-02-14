@@ -73,6 +73,14 @@ class NodeMeta
 		return self::forClass($class)->deletable;
 	}
 
+	/**
+	 * @param class-string $class
+	 */
+	public static function isNode(string $class): bool
+	{
+		return self::forClass($class)->hasKindAttribute || is_subclass_of($class, Node::class);
+	}
+
 	public static function clearCache(): void
 	{
 		self::$cache = [];

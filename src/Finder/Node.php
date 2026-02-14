@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node as CmsNode;
+use Duon\Cms\Node\NodeMeta;
 use Duon\Core\Exception\HttpBadRequest;
 
 class Node
@@ -61,7 +62,7 @@ class Node
 			->entry($data['handle'])
 			->definition();
 
-		if (is_subclass_of($class, CmsNode::class)) {
+		if (NodeMeta::isNode($class)) {
 			return new $class($this->context, $this->find, $data);
 		}
 
