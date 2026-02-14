@@ -25,6 +25,7 @@ class Meta
 	public readonly string|array $route;
 	public readonly string|array $permission;
 	public readonly string $kind; // 'page', 'block', or 'document'
+	public readonly bool $hasKindAttribute; // true if kind was resolved from an attribute
 	public readonly ?string $titleField; // Field name from #[Title], or null
 	/** @var string[]|null */
 	public readonly ?array $fieldOrder; // From #[FieldOrder], or null for declaration order
@@ -41,7 +42,7 @@ class Meta
 		$this->renderer = $this->getRenderer($attributes[Render::class] ?? null, $attributes[Handle::class] ?? null);
 		$this->route = $this->getRoute($attributes[Route::class] ?? null);
 		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
-		$this->kind = $this->resolveKind($attributes);
+		[$this->kind, $this->hasKindAttribute] = $this->resolveKind($attributes);
 		$this->titleField = ($attributes[Title::class] ?? null)?->field;
 		$this->fieldOrder = ($attributes[FieldOrder::class] ?? null)?->fields;
 		$this->deletable = ($attributes[Deletable::class] ?? null)?->value ?? true;
@@ -118,27 +119,30 @@ class Meta
 		];
 	}
 
-	private function resolveKind(array $attributes): string
+	private function resolveKind(array $attributes): array
 	{
 		if (isset($attributes[PageAttr::class])) {
-			return 'page';
+			return ['page', true];
 		}
 
 		if (isset($attributes[BlockAttr::class])) {
-			return 'block';
+			return ['block', true];
 		}
 
 		if (isset($attributes[DocumentAttr::class])) {
-			return 'document';
+			return ['document', true];
 		}
 
 		// Fallback: check class hierarchy for backward compatibility
-		return match (true) {
-			is_a($this->nodeClass, Page::class, true) => 'page',
-			is_a($this->nodeClass, Block::class, true) => 'block',
-			is_a($this->nodeClass, Document::class, true) => 'document',
-			default => 'document',
-		};
+		return [
+			match (true) {
+				is_a($this->nodeClass, Page::class, true) => 'page',
+				is_a($this->nodeClass, Block::class, true) => 'block',
+				is_a($this->nodeClass, Document::class, true) => 'document',
+				default => 'document',
+			},
+			false,
+		];
 	}
 
 	private function getClassName(): string

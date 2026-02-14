@@ -9,6 +9,7 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Block as BlockNode;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Renderer;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
@@ -38,7 +39,7 @@ class Block
 			->entry($data['handle'])
 			->definition();
 
-		if (!is_subclass_of($class, BlockNode::class)) {
+		if (NodeMeta::kind($class) !== 'block') {
 			throw new RuntimeException('Invalid block class' . $class);
 		}
 
