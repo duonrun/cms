@@ -9,8 +9,10 @@ use Duon\Cms\Context;
 use Duon\Cms\Exception\NoSuchField;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
+use Duon\Cms\Locales;
 use Duon\Cms\Schema\NodeSchemaFactory;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
@@ -27,7 +29,7 @@ use Throwable;
 
 use function Duon\Cms\Util\nanoid;
 
-abstract class Node
+abstract class Node implements FieldOwner
 {
 	public readonly Request $request;
 	public readonly Config $config;
@@ -512,9 +514,29 @@ abstract class Node
 		throw new HttpBadRequest($this->request);
 	}
 
-	protected function locale(): Locale
+	public function locale(): Locale
 	{
 		return $this->request->get('locale');
+	}
+
+	public function defaultLocale(): Locale
+	{
+		return $this->request->get('defaultLocale');
+	}
+
+	public function locales(): Locales
+	{
+		return $this->context->locales();
+	}
+
+	public function request(): Request
+	{
+		return $this->request;
+	}
+
+	public function config(): Config
+	{
+		return $this->config;
 	}
 
 	protected function getResponse(): Response
