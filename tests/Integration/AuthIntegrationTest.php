@@ -324,4 +324,35 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 		$this->assertFalse($exists);
 	}
+
+	public function testLogoutWithoutSessionDoesNothing(): void
+	{
+		$request = $this->psrRequest();
+		$auth = $this->createAuth($request, null);
+
+		// Should not throw, just return early
+		$auth->logout();
+
+		// No assertions needed - just verifying no exception
+		$this->assertTrue(true);
+	}
+
+	public function testUserViaSessionId(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'session-auth-user',
+			'email' => 'session@example.com',
+		]);
+
+		$request = $this->psrRequest();
+		$session = new Session('test_session', ['cache_expire' => 3600]);
+		$session->setUser($userId);
+
+		$auth = $this->createAuth($request, $session);
+
+		$user = $auth->user();
+
+		$this->assertInstanceOf(\Duon\Cms\User::class, $user);
+		$this->assertEquals($userId, $user->id);
+	}
 }
