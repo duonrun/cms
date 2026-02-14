@@ -48,25 +48,19 @@ final class SizeTest extends TestCase
 
 	public function testSizeThrowsOnZeroFirstDimension(): void
 	{
-		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('Assets error: width must be >= 1');
-
+		$this->throws(RuntimeException::class, 'Assets error: width must be >= 1');
 		new Size(0);
 	}
 
 	public function testSizeThrowsOnNegativeFirstDimension(): void
 	{
-		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('Assets error: width must be >= 1');
-
+		$this->throws(RuntimeException::class, 'Assets error: width must be >= 1');
 		new Size(-1);
 	}
 
 	public function testSizeThrowsOnNegativeSecondDimension(): void
 	{
-		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('Assets error: width must be >= 1');
-
+		$this->throws(RuntimeException::class, 'Assets error: width must be >= 1');
 		new Size(800, -1);
 	}
 }

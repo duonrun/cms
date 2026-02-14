@@ -40,15 +40,13 @@ final class NumberTest extends TestCase
 
 	public function testParseDecimalInvalid(): void
 	{
-		$this->expectException(Exception::class);
-		$this->expectExceptionMessage('This is not a valid number');
+		$this->throws(Exception::class, 'This is not a valid number');
 		Number::parseDecimal('abc');
 	}
 
 	public function testParseDecimalInvalidWithSymbols(): void
 	{
-		$this->expectException(Exception::class);
-		$this->expectExceptionMessage('This is not a valid number');
+		$this->throws(Exception::class, 'This is not a valid number');
 		Number::parseDecimal('123-456');
 	}
 }
