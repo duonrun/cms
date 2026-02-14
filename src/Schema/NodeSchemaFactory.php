@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Duon\Cms\Schema;
 
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeFactory;
 use Duon\Sire\Schema;
 
 class NodeSchemaFactory
@@ -14,8 +15,9 @@ class NodeSchemaFactory
 	protected readonly Schema $schema;
 
 	public function __construct(
-		protected readonly Node $node,
+		protected readonly object $node,
 		protected readonly Locales $locales,
+		private readonly FieldHydrator $hydrator = new FieldHydrator(),
 	) {
 		$this->schema = new Schema(keepUnknown: true);
 		$this->schema->add('uid', 'text', 'required', 'maxlen:64');
@@ -28,8 +30,8 @@ class NodeSchemaFactory
 	{
 		$contentSchema = new Schema(title: 'Content', keepUnknown: true);
 
-		foreach ($this->node->fieldNames() as $fieldName) {
-			$this->add($contentSchema, $fieldName, $this->node->getField($fieldName));
+		foreach (NodeFactory::fieldNamesFor($this->node) as $fieldName) {
+			$this->add($contentSchema, $fieldName, $this->hydrator->getField($this->node, $fieldName));
 		}
 
 		$this->schema->add('content', $contentSchema);
