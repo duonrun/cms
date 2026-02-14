@@ -7,6 +7,7 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeFactory;
 use Generator;
 use Iterator;
 
@@ -25,6 +26,7 @@ final class Nodes implements Iterator
 	public function __construct(
 		private readonly Context $context,
 		private readonly Finder $find,
+		private readonly NodeFactory $nodeFactory,
 	) {
 		$this->builtins = [
 			'changed' => 'n.changed',
@@ -109,7 +111,7 @@ final class Nodes implements Iterator
 		$this->result->rewind();
 	}
 
-	public function current(): Node
+	public function current(): object
 	{
 		if (!isset($this->result)) {
 			$this->fetchResult();
@@ -121,14 +123,13 @@ final class Nodes implements Iterator
 		$page['editor_data'] = json_decode($page['editor_data'], true);
 		$page['creator_data'] = json_decode($page['creator_data'], true);
 		$page['paths'] = json_decode($page['paths'], true);
-		$context = $this->context;
-		$class = $context
+		$class = $this->context
 			->registry
 			->tag(Node::class)
 			->entry($page['handle'])
 			->definition();
 
-		return new $class($context, $this->find, $page);
+		return $this->nodeFactory->create($class, $this->context, $this->find, $page);
 	}
 
 	public function key(): int

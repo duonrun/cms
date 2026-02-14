@@ -6,10 +6,9 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Finder\Finder;
-use Duon\Cms\Node\Block as BlockNode;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Core\Exception\HttpBadRequest;
@@ -17,11 +16,12 @@ use Throwable;
 
 class Block
 {
-	protected BlockNode $block;
+	protected object $block;
 
 	public function __construct(
 		private readonly Context $context,
 		private readonly Finder $find,
+		private readonly NodeFactory $nodeFactory,
 		string $uid,
 		private readonly array $templateContext = [],
 		?bool $deleted = false,
@@ -45,7 +45,7 @@ class Block
 		}
 
 		$data['content'] = json_decode($data['content'], true);
-		$this->block = new $class($context, $find, $data);
+		$this->block = $this->nodeFactory->create($class, $context, $find, $data);
 	}
 
 	public function __toString(): string
@@ -54,12 +54,12 @@ class Block
 			$renderer = new TemplateRenderer(
 				$this->context->registry,
 				$this->context->factory,
-				new FieldHydrator(),
+				$this->nodeFactory->hydrator(),
 			);
 
 			return $renderer->renderBlock(
 				$this->block,
-				$this->block->fieldNames(),
+				NodeFactory::fieldNamesFor($this->block),
 				$this->find,
 				$this->context->request,
 				$this->context->config,
