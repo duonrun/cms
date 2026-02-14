@@ -186,9 +186,9 @@ class Media
 				break;
 			default:
 				throw new RuntimeException(
-					'File server not supported: `' .
-					$fileServer .
-					'`. Supported values `nginx`, `apache`.',
+					'File server not supported: `'
+					. $fileServer
+					. '`. Supported values `nginx`, `apache`.',
 				);
 		}
 

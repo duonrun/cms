@@ -14,7 +14,7 @@ readonly class Token
 		public TokenType $type,
 		public int $position,
 		public string $lexeme,
-		private int|null $length = null,
+		private ?int $length = null,
 	) {}
 
 	public static function fromList(

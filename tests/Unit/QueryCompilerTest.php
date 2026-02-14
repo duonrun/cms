@@ -116,9 +116,9 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin', 'another' => 't.another']);
 
 		$this->assertSame(
-			"(n.builtin = 1 OR n.content @@ '$.field.value == 1')" .
-				' AND ' .
-				"(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
+			"(n.builtin = 1 OR n.content @@ '$.field.value == 1')"
+				. ' AND '
+				. "(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
 			$compiler->compile("(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))"),
 		);
 	}
