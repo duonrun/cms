@@ -91,7 +91,7 @@ class Cms implements Plugin
 
 	public function node(string $class): void
 	{
-		$handle = $class::handle();
+		$handle = NodeMeta::handle($class);
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);

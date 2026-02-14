@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Closure;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeMeta;
 
 use function Duon\Cms\Util\escape;
 
@@ -57,7 +58,7 @@ final class Column
 		return $this;
 	}
 
-	public function get(Node $node): array
+	public function get(object $node): array
 	{
 		return [
 			'value' => is_string($this->field)
@@ -71,13 +72,13 @@ final class Column
 		];
 	}
 
-	private function getValue(Node $node, string $field): mixed
+	private function getValue(object $node, string $field): mixed
 	{
 		switch ($field) {
 			case 'title':
 				return $node->title();
 			case 'meta.name':
-				return $node->name();
+				return NodeMeta::name($node::class);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
@@ -87,21 +88,21 @@ final class Column
 			case 'meta.deleted':
 			case 'meta.content':
 			case 'meta.handle':
-				return $node->meta(explode('.', $field)[1]);
+				return NodeFactory::meta($node, explode('.', $field)[1]);
 			case 'meta.class':
 				return $node::class;
 			case 'meta.classname':
-				return $node::className();
+				return basename(str_replace('\\', '/', $node::class));
 			case 'meta.editor':
 				return escape(
-					$node->meta('editor_data')['name']
-					?? $node->meta('editor_username'),
-				) ?? $node->meta('editor_email');
+					NodeFactory::meta($node, 'editor_data')['name']
+					?? NodeFactory::meta($node, 'editor_username'),
+				) ?? NodeFactory::meta($node, 'editor_email');
 			case 'meta.creator':
 				return escape(
-					$node->meta('creator_data')['name']
-					?? $node->meta('creator_username'),
-				) ?? $node->meta('creator_email');
+					NodeFactory::meta($node, 'creator_data')['name']
+					?? NodeFactory::meta($node, 'creator_username'),
+				) ?? NodeFactory::meta($node, 'creator_email');
 			default:
 				return (string) $node->getValue($field);
 		}

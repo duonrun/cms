@@ -12,6 +12,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
@@ -134,8 +135,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => $blueprint::handle(),
-				'name' => $blueprint::name(),
+				'slug' => NodeMeta::handle($blueprint),
+				'name' => NodeMeta::name($blueprint),
 			];
 		}
 

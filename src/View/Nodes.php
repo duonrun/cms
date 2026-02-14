@@ -8,6 +8,7 @@ use Duon\Cms\Config;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\NodeFactory;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -56,18 +57,18 @@ class Nodes
 				->order($query->order)
 				->deleted($query->deleted) as $node
 		) {
-			$uid = $node->meta('uid');
+			$uid = NodeFactory::meta($node, 'uid');
 			$n = [
 				'uid' => $uid,
 				'title' => $node->title(),
-				'handle' => $node->meta('handle'),
-				'published' => $node->meta('published'),
-				'hidden' => $node->meta('hidden'),
-				'locked' => $node->meta('locked'),
-				'created' => $node->meta('created'),
-				'changed' => $node->meta('changed'),
-				'deleted' => $node->meta('deleted'),
-				'paths' => $node->meta('paths'),
+				'handle' => NodeFactory::meta($node, 'handle'),
+				'published' => NodeFactory::meta($node, 'published'),
+				'hidden' => NodeFactory::meta($node, 'hidden'),
+				'locked' => NodeFactory::meta($node, 'locked'),
+				'created' => NodeFactory::meta($node, 'created'),
+				'changed' => NodeFactory::meta($node, 'changed'),
+				'deleted' => NodeFactory::meta($node, 'deleted'),
+				'paths' => NodeFactory::meta($node, 'paths'),
 			];
 
 			foreach ($query->fields as $field) {
