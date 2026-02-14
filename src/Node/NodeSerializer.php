@@ -85,7 +85,7 @@ class NodeSerializer
 			$paths[$locale->id] = '';
 		}
 
-		return [
+		$result = [
 			'title' => _('Neues Dokument:') . ' ' . NodeMeta::name($class),
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => nanoid(),
@@ -102,6 +102,12 @@ class NodeSerializer
 			'paths' => $paths,
 			'generatedPaths' => [],
 		];
+
+		if ($kind === 'page') {
+			$result['route'] = NodeMeta::route($class);
+		}
+
+		return $result;
 	}
 
 	public function fields(object $node, array $fieldNames): array
