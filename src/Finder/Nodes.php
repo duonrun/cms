@@ -8,6 +8,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeMeta;
 use Generator;
 use Iterator;
 
@@ -184,7 +185,7 @@ final class Nodes implements Iterator
 
 		foreach ($types as $type) {
 			if (class_exists($type)) {
-				$type = $type::handle();
+				$type = NodeMeta::handle($type);
 			}
 
 			$result[] = 't.handle = ' . $this->context->db->quote($type);
