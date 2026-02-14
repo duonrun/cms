@@ -36,7 +36,7 @@ abstract class Page extends Node
 	public function blueprint(array $values = []): array
 	{
 		$result = parent::blueprint($values);
-		$result['route'] = static::$nodeMeta[static::class]->route;
+		$result['route'] = NodeMeta::route(static::class);
 
 		return $result;
 	}

@@ -35,15 +35,11 @@ abstract class Node implements FieldOwner
 	protected readonly Factory $factory;
 	protected array $fieldNames = [];
 
-	/** @var array<class-string, Meta> */
-	protected static array $nodeMeta = [];
-
 	final public function __construct(
 		public readonly Context $context,
 		protected readonly Finder $find,
 		protected ?array $data = null,
 	) {
-		static::initMeta();
 		$this->initFields();
 
 		$this->db = $context->db;
@@ -53,39 +49,24 @@ abstract class Node implements FieldOwner
 		$this->factory = $context->factory;
 	}
 
-	protected static function initMeta()
-	{
-		if (!isset(self::$nodeMeta[static::class])) {
-			self::$nodeMeta[static::class] = new Meta(static::class);
-		}
-	}
-
 	public static function name(): string
 	{
-		static::initMeta();
-
-		return self::$nodeMeta[static::class]->name;
+		return NodeMeta::name(static::class);
 	}
 
 	public static function handle(): string
 	{
-		static::initMeta();
-
-		return self::$nodeMeta[static::class]->handle;
+		return NodeMeta::handle(static::class);
 	}
 
 	public static function permission(): array
 	{
-		static::initMeta();
-
-		return self::$nodeMeta[static::class]->permission;
+		return NodeMeta::forClass(static::class)->permission;
 	}
 
 	public static function route(): string
 	{
-		static::initMeta();
-
-		return self::$nodeMeta[static::class]->route;
+		return NodeMeta::route(static::class);
 	}
 
 	final public function __get(string $fieldName): ?Value
@@ -208,7 +189,7 @@ abstract class Node implements FieldOwner
 		}
 
 		return [
-			'title' => _('Neues Dokument:') . ' ' . static::$nodeMeta[static::class]->name,
+			'title' => _('Neues Dokument:') . ' ' . NodeMeta::name(static::class),
 			'fields' => $this->fields(),
 			'uid' => $this->newUid(),
 			'published' => false,
@@ -217,7 +198,7 @@ abstract class Node implements FieldOwner
 			'deletable' => $this->deletable(),
 			'content' => $content,
 			'type' => [
-				'handle' => static::$nodeMeta[static::class]->handle,
+				'handle' => NodeMeta::handle(static::class),
 				'kind' => $kind,
 				'class' => static::class,
 			],
@@ -442,7 +423,7 @@ abstract class Node implements FieldOwner
 
 	protected function persistNode(Database $db, array $data, int $editor): int
 	{
-		$handle = static::$nodeMeta[static::class]->handle;
+		$handle = NodeMeta::handle(static::class);
 		$this->ensureTypeExists(static::class, $handle);
 
 		return (int) $db->nodes->save([

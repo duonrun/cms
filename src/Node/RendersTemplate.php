@@ -12,9 +12,7 @@ trait RendersTemplate
 {
 	public static function renderer(): array
 	{
-		static::initMeta();
-
-		return ['template', self::$nodeMeta[static::class]->renderer];
+		return ['template', NodeMeta::forClass(static::class)->renderer];
 	}
 
 	public function render(array $context = []): Response
