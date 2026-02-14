@@ -8,12 +8,15 @@ use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\Contract\HandlesFormPost;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Util\Path;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
 use Duon\Core\Factory;
 use Duon\Core\Response;
 use Duon\Registry\Registry;
+use ReflectionMethod;
 
 class Page
 {
@@ -49,13 +52,13 @@ class Page
 
 		if ($request->get('isXhr', false)) {
 			if ($request->method() === 'GET') {
-				return $page->jsonResponse();
+				return $this->jsonRead($page);
 			}
 
 			throw new HttpBadRequest();
 		}
 
-		return $page->response();
+		return $this->dispatch($page, $request->method(), $request->form());
 	}
 
 	#[Permission('panel')]
@@ -63,7 +66,45 @@ class Page
 	{
 		$page = $find->node->byPath('/' . $slug);
 
-		return $page->response();
+		return $page->render();
+	}
+
+	private function dispatch(Node $page, string $method, ?array $formBody): Response
+	{
+		return match ($method) {
+			'GET' => $page->render(),
+			'POST' => $this->handleFormPost($page, $formBody),
+			default => throw new HttpBadRequest(),
+		};
+	}
+
+	private function jsonRead(Node $node): Response
+	{
+		$content = json_encode(
+			$node->read(),
+			JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
+		);
+
+		return (new Response(
+			$this->factory
+				->response()
+				->withHeader('Content-Type', 'application/json'),
+		))->body($content);
+	}
+
+	private function handleFormPost(Node $node, ?array $formBody): Response
+	{
+		if ($node instanceof HandlesFormPost) {
+			return $node->formPost($formBody);
+		}
+
+		if (method_exists($node, 'formPost')) {
+			$method = new ReflectionMethod($node, 'formPost');
+
+			return $method->invoke($node, $formBody);
+		}
+
+		throw new HttpBadRequest();
 	}
 
 	protected function redirectIfExists(Context $context, string $path): void
