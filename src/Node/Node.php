@@ -7,14 +7,12 @@ namespace Duon\Cms\Node;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\NoSuchField;
-use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Field;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Field\FieldOwner;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
-use Duon\Cms\Schema\NodeSchemaFactory;
 use Duon\Cms\Value\Value;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
@@ -22,7 +20,6 @@ use Duon\Core\Request;
 use Duon\Core\Response;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
-use Throwable;
 
 abstract class Node implements FieldOwner
 {
@@ -34,6 +31,7 @@ abstract class Node implements FieldOwner
 	protected array $fieldNames = [];
 	private readonly FieldHydrator $hydrator;
 	private readonly NodeSerializer $serializer;
+	private readonly NodeManager $manager;
 
 	final public function __construct(
 		public readonly Context $context,
@@ -42,6 +40,7 @@ abstract class Node implements FieldOwner
 	) {
 		$this->hydrator = new FieldHydrator();
 		$this->serializer = new NodeSerializer($this->hydrator);
+		$this->manager = new NodeManager($context->db, new PathManager());
 		$this->fieldNames = $this->hydrator->hydrate($this, $this->data['content'] ?? [], $this);
 
 		$this->init();
@@ -252,19 +251,7 @@ abstract class Node implements FieldOwner
 	 */
 	public function delete(): array
 	{
-		if ($this->request->header('Accept') !== 'application/json') {
-			throw new HttpBadRequest($this->request);
-		}
-
-		$this->db->nodes->delete([
-			'uid' => $this->uid(),
-			'editor' => $this->request->get('session')->authenticatedUserId(),
-		])->run();
-
-		return [
-			'success' => true,
-			'error' => false,
-		];
+		return $this->manager->delete($this, $this->request);
 	}
 
 	/**
@@ -272,16 +259,7 @@ abstract class Node implements FieldOwner
 	 */
 	public function create(): array|Response
 	{
-		$data = $this->getRequestData();
-		$node = $this->db->nodes->find(['uid' => $data['uid']])->one();
-
-		if ($node) {
-			throw new HttpBadRequest($this->request, payload: [
-				'message' => _('A node with the same uid already exists: ') . $data['uid'],
-			]);
-		}
-
-		return $this->save($data);
+		return $this->manager->create($this, $this->getRequestData(), $this->request, $this->context->locales());
 	}
 
 	/**
@@ -289,93 +267,7 @@ abstract class Node implements FieldOwner
 	 */
 	public function save(array $data): array
 	{
-		$data = $this->validate($data);
-
-		if ($data['locked']) {
-			throw new HttpBadRequest($this->request, payload: ['message' => _('This document is locked')]);
-		}
-
-		// TODO: check permissions
-		try {
-			$editor = $this->request->get('session')->authenticatedUserId();
-
-			if (!$editor) {
-				$editor = 1;
-			}
-		} catch (Throwable) {
-			$editor = 1; // The System user
-		}
-
-		try {
-			$db = $this->db;
-			$db->begin();
-
-			$this->persist($db, $data, $editor);
-
-			$db->commit();
-		} catch (Throwable $e) {
-			$db->rollback();
-
-			throw new RuntimeException(
-				_('Fehler beim Speichern: ') . $e->getMessage(),
-				(int) $e->getCode(),
-				previous: $e,
-			);
-		}
-
-		return [
-			'success' => true,
-			'uid' => $data['uid'],
-		];
-	}
-
-	protected function persist(Database $db, array $data, int $editor): void
-	{
-		$this->persistNode($db, $data, $editor);
-	}
-
-	protected function persistNode(Database $db, array $data, int $editor): int
-	{
-		$handle = NodeMeta::handle(static::class);
-		$this->ensureTypeExists(static::class, $handle);
-
-		return (int) $db->nodes->save([
-			'uid' => $data['uid'],
-			'hidden' => $data['hidden'],
-			'published' => $data['published'],
-			'locked' => $data['locked'],
-			'type' => $handle,
-			'content' => json_encode($data['content']),
-			'editor' => $editor,
-		])->one()['node'];
-	}
-
-	private function ensureTypeExists(string $class, string $handle): void
-	{
-		$type = $this->db->nodes->type(['handle' => $handle])->one();
-
-		if (!$type) {
-			$this->db->nodes->addType([
-				'handle' => $handle,
-				'kind' => NodeMeta::kind($class),
-			])->run();
-		}
-	}
-
-	protected function validate(array $data): array
-	{
-		$factory = new NodeSchemaFactory($this, $this->context->locales());
-		$schema = $factory->create();
-		$result = $schema->validate($data);
-
-		if (!$result->isValid()) {
-			throw new HttpBadRequest($this->request, payload: [
-				'message' => _('Incomplete or invalid data'),
-				'errors' => $result->errors(),
-			]);
-		}
-
-		return $result->values();
+		return $this->manager->save($this, $data, $this->request, $this->context->locales());
 	}
 
 	protected function getRequestData(): array
