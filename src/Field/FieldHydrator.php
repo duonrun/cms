@@ -38,11 +38,11 @@ class FieldHydrator
 			$typeName = $type->getName();
 
 			if (is_subclass_of($typeName, Field::class)) {
-				if (isset($target->{$name})) {
+				if ($property->isInitialized($target)) {
 					continue;
 				}
 
-				$target->{$name} = $this->initField($property, $typeName, $content, $owner);
+				$property->setValue($target, $this->initField($property, $typeName, $content, $owner));
 				$fieldNames[] = $name;
 			}
 		}
@@ -52,7 +52,9 @@ class FieldHydrator
 
 	public function getField(object $target, string $name): Field
 	{
-		return $target->{$name};
+		$rc = new ReflectionClass($target);
+
+		return $rc->getProperty($name)->getValue($target);
 	}
 
 	/**
@@ -60,10 +62,11 @@ class FieldHydrator
 	 */
 	public function getFields(object $target, array $fieldNames): array
 	{
+		$rc = new ReflectionClass($target);
 		$fields = [];
 
 		foreach ($fieldNames as $name) {
-			$fields[$name] = $target->{$name};
+			$fields[$name] = $rc->getProperty($name)->getValue($target);
 		}
 
 		return $fields;
