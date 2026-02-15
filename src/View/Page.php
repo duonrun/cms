@@ -9,6 +9,9 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Util\Path;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
@@ -51,36 +54,66 @@ class Page
 
 		if ($request->get('isXhr', false)) {
 			if ($request->method() === 'GET') {
-				return $this->jsonRead($page);
+				return $this->jsonRead($page, $find);
 			}
 
 			throw new HttpBadRequest();
 		}
 
-		return $this->dispatch($page, $request->method(), $request->form());
+		return $this->dispatch($page, $context, $find, $request->method(), $request->form());
 	}
 
 	#[Permission('panel')]
-	public function preview(Finder $find, string $slug): Response
+	public function preview(Context $context, Finder $find, string $slug): Response
 	{
 		$page = $find->node->byPath('/' . $slug);
 
-		return $page->render();
+		return $this->renderPage($page, $context, $find);
 	}
 
-	private function dispatch(object $page, string $method, ?array $formBody): Response
+	private function dispatch(object $page, Context $context, Finder $find, string $method, ?array $formBody): Response
 	{
 		return match ($method) {
-			'GET' => $page->render(),
+			'GET' => $this->renderPage($page, $context, $find),
 			'POST' => $this->handleFormPost($page, $formBody),
 			default => throw new HttpBadRequest(),
 		};
 	}
 
-	private function jsonRead(object $node): Response
+	private function renderPage(object $page, Context $context, Finder $find): Response
 	{
+		if (method_exists($page, 'render')) {
+			return $page->render();
+		}
+
+		$hydrator = $find->nodeFactory()->hydrator();
+		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator);
+
+		return $renderer->renderPage(
+			$page,
+			NodeFactory::fieldNamesFor($page),
+			$find,
+			$context->request,
+			$context->config,
+		);
+	}
+
+	private function jsonRead(object $node, Finder $find): Response
+	{
+		if (method_exists($node, 'read')) {
+			$data = $node->read();
+		} else {
+			$hydrator = $find->nodeFactory()->hydrator();
+			$serializer = new NodeSerializer($hydrator);
+			$data = $serializer->read(
+				$node,
+				NodeFactory::dataFor($node),
+				NodeFactory::fieldNamesFor($node),
+			);
+		}
+
 		$content = json_encode(
-			$node->read(),
+			$data,
 			JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
 		);
 
