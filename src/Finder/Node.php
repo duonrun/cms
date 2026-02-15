@@ -9,6 +9,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Node\NodeProxy;
 use Duon\Core\Exception\HttpBadRequest;
 
 class Node
@@ -23,7 +24,7 @@ class Node
 		string $path,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?object {
+	): ?NodeProxy {
 		return $this->get([
 			'path' => $path,
 			'published' => $published,
@@ -36,7 +37,7 @@ class Node
 		string $uid,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?object {
+	): ?NodeProxy {
 		return $this->get([
 			'uid' => $uid,
 			'published' => $published,
@@ -46,7 +47,7 @@ class Node
 
 	public function get(
 		array $params,
-	): ?object {
+	): ?NodeProxy {
 		$data = $this->context->db->nodes->find($params)->one();
 
 		if (!$data) {
@@ -65,7 +66,9 @@ class Node
 			->definition();
 
 		if (NodeMeta::isNode($class)) {
-			return $this->nodeFactory->create($class, $this->context, $this->find, $data);
+			$node = $this->nodeFactory->create($class, $this->context, $this->find, $data);
+
+			return $this->nodeFactory->proxy($node, $this->context->request);
 		}
 
 		throw new HttpBadRequest($this->context->request);

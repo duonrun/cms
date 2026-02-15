@@ -10,6 +10,7 @@ use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
 use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Util\Path;
@@ -82,16 +83,18 @@ class Page
 
 	private function renderPage(object $page, Context $context, Finder $find): Response
 	{
-		if (method_exists($page, 'render')) {
-			return $page->render();
+		$node = $page instanceof NodeProxy ? $page->node() : $page;
+
+		if (is_callable([$node, 'render'])) {
+			return $node->render();
 		}
 
 		$hydrator = $find->nodeFactory()->hydrator();
 		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator);
 
 		return $renderer->renderPage(
-			$page,
-			NodeFactory::fieldNamesFor($page),
+			$node,
+			NodeFactory::fieldNamesFor($node),
 			$find,
 			$context->request,
 			$context->config,
@@ -100,15 +103,17 @@ class Page
 
 	private function jsonRead(object $node, Finder $find): Response
 	{
-		if (method_exists($node, 'read')) {
-			$data = $node->read();
+		$inner = $node instanceof NodeProxy ? $node->node() : $node;
+
+		if (method_exists($inner, 'read')) {
+			$data = $inner->read();
 		} else {
 			$hydrator = $find->nodeFactory()->hydrator();
 			$serializer = new NodeSerializer($hydrator);
 			$data = $serializer->read(
-				$node,
-				NodeFactory::dataFor($node),
-				NodeFactory::fieldNamesFor($node),
+				$inner,
+				NodeFactory::dataFor($inner),
+				NodeFactory::fieldNamesFor($inner),
 			);
 		}
 
@@ -126,14 +131,16 @@ class Page
 
 	private function handleFormPost(object $node, ?array $formBody): Response
 	{
-		if ($node instanceof HandlesFormPost) {
-			return $node->formPost($formBody);
+		$inner = $node instanceof NodeProxy ? $node->node() : $node;
+
+		if ($inner instanceof HandlesFormPost) {
+			return $inner->formPost($formBody);
 		}
 
-		if (method_exists($node, 'formPost')) {
-			$method = new ReflectionMethod($node, 'formPost');
+		if (method_exists($inner, 'formPost')) {
+			$method = new ReflectionMethod($inner, 'formPost');
 
-			return $method->invoke($node, $formBody);
+			return $method->invoke($inner, $formBody);
 		}
 
 		throw new HttpBadRequest();

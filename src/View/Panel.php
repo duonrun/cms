@@ -14,6 +14,7 @@ use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeManager;
 use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;
 use Duon\Cms\Section;
@@ -210,12 +211,13 @@ class Panel
 	#[Permission('panel')]
 	public function node(Context $context, Finder $find, Factory $factory, string $uid): Response
 	{
-		$node = $find->node->byUid($uid, published: null);
+		$result = $find->node->byUid($uid, published: null);
 
-		if (!$node) {
+		if (!$result) {
 			throw new HttpNotFound($this->request);
 		}
 
+		$node = $result instanceof NodeProxy ? $result->node() : $result;
 		$nodeFactory = $find->nodeFactory();
 		$serializer = new NodeSerializer($nodeFactory->hydrator());
 		$manager = new NodeManager($context->db, new PathManager());
