@@ -37,7 +37,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): Response {
-		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator);
+		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator, $request);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -73,7 +73,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): string {
-		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator);
+		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator, $request);
 
 		$baseContext = array_merge([
 			'block' => $proxy,

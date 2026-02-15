@@ -81,6 +81,19 @@ class NodeFactory
 	}
 
 	/**
+	 * Wrap a node in a NodeProxy for template-friendly access.
+	 */
+	public function proxy(object $node, Request $request): NodeProxy
+	{
+		return new NodeProxy(
+			$node,
+			self::fieldNamesFor($node),
+			$this->hydrator,
+			$request,
+		);
+	}
+
+	/**
 	 * Create a blueprint (empty) node for admin panel schema generation.
 	 */
 	public function blueprint(string $class, Context $context, Finder $find): object
@@ -94,6 +107,7 @@ class NodeFactory
 	public static function dataFor(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();
+		$node = NodeProxy::unwrap($node);
 
 		return (self::$nodeState[$node] ?? [])['data'] ?? [];
 	}
@@ -104,6 +118,7 @@ class NodeFactory
 	public static function fieldNamesFor(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();
+		$node = NodeProxy::unwrap($node);
 
 		return (self::$nodeState[$node] ?? [])['fieldNames'] ?? [];
 	}

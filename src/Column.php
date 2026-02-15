@@ -9,6 +9,7 @@ use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Node\NodeProxy;
 
 use function Duon\Cms\Util\escape;
 
@@ -76,15 +77,17 @@ final class Column
 
 	private function getValue(object $node, string $field): mixed
 	{
+		$inner = NodeProxy::unwrap($node);
+
 		switch ($field) {
 			case 'title':
-				if ($node instanceof HasTitle) {
-					return $node->title();
+				if ($inner instanceof HasTitle) {
+					return $inner->title();
 				}
 
-				return method_exists($node, 'title') ? $node->title() : '';
+				return method_exists($inner, 'title') ? $inner->title() : '';
 			case 'meta.name':
-				return NodeMeta::name($node::class);
+				return NodeMeta::name($inner::class);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
@@ -96,9 +99,9 @@ final class Column
 			case 'meta.handle':
 				return NodeFactory::meta($node, explode('.', $field)[1]);
 			case 'meta.class':
-				return $node::class;
+				return $inner::class;
 			case 'meta.classname':
-				return basename(str_replace('\\', '/', $node::class));
+				return basename(str_replace('\\', '/', $inner::class));
 			case 'meta.editor':
 				return escape(
 					NodeFactory::meta($node, 'editor_data')['name']
@@ -111,7 +114,7 @@ final class Column
 				) ?? NodeFactory::meta($node, 'creator_email');
 			default:
 				$hydrator = new FieldHydrator();
-				$fieldObj = $hydrator->getField($node, $field);
+				$fieldObj = $hydrator->getField($inner, $field);
 				$value = $fieldObj->value();
 
 				return $value->isset() ? $value : null;

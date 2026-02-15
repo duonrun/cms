@@ -9,6 +9,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Node\NodeProxy;
 use Generator;
 use Iterator;
 
@@ -112,7 +113,7 @@ final class Nodes implements Iterator
 		$this->result->rewind();
 	}
 
-	public function current(): object
+	public function current(): NodeProxy
 	{
 		if (!isset($this->result)) {
 			$this->fetchResult();
@@ -130,7 +131,9 @@ final class Nodes implements Iterator
 			->entry($page['handle'])
 			->definition();
 
-		return $this->nodeFactory->create($class, $this->context, $this->find, $page);
+		$node = $this->nodeFactory->create($class, $this->context, $this->find, $page);
+
+		return $this->nodeFactory->proxy($node, $this->context->request);
 	}
 
 	public function key(): int
