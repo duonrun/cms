@@ -78,7 +78,7 @@ class NodeMeta
 	 */
 	public static function isNode(string $class): bool
 	{
-		return self::forClass($class)->hasKindAttribute || is_subclass_of($class, Node::class);
+		return self::forClass($class)->hasKindAttribute;
 	}
 
 	public static function clearCache(): void

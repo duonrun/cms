@@ -21,80 +21,43 @@ use Duon\Cms\Field\Meta\Validate;
 use Duon\Cms\Field\Meta\Width;
 use Duon\Cms\Field\Option;
 use Duon\Cms\Field\Text;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 
 final class FieldCapabilityPropertiesTest extends TestCase
 {
-	private function createContext(): \Duon\Cms\Context
+	private function createOwner(): NodeFieldOwner
 	{
-		return new \Duon\Cms\Context(
+		$context = new \Duon\Cms\Context(
 			$this->db(),
 			$this->request(),
 			$this->config(),
 			$this->registry(),
 			$this->factory(),
 		);
+
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	private function createTextField(string $name = 'test'): Text
 	{
-		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		return new Text($name, $nodeClass, new ValueContext($name, []));
+		return new Text($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	private function createImageField(string $name = 'image'): Image
 	{
-		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		return new Image($name, $nodeClass, new ValueContext($name, []));
+		return new Image($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	private function createGridField(string $name = 'grid'): Grid
 	{
-		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		return new Grid($name, $nodeClass, new ValueContext($name, []));
+		return new Grid($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	private function createOptionField(string $name = 'option'): Option
 	{
-		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		return new Option($name, $nodeClass, new ValueContext($name, []));
+		return new Option($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	public function testLabelCapabilityReturnsLabelProperty(): void

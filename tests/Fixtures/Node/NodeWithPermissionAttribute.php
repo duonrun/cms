@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Fixtures\Node;
 
+use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Meta\Page;
 use Duon\Cms\Node\Meta\Permission;
-use Duon\Cms\Node\Page;
 
+#[Page]
 #[Permission([
 	'read' => 'me',
 ])]
-class NodeWithPermissionAttribute extends Page
+class NodeWithPermissionAttribute implements HasTitle
 {
 	public function title(): string
 	{

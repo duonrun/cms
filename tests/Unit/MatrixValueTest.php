@@ -6,7 +6,7 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\NoSuchProperty;
-use Duon\Cms\Node\Document;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestMatrix;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\MatrixItem;
@@ -43,23 +43,16 @@ final class MatrixValueTest extends TestCase
 		);
 	}
 
-	private function createNode(Context $context): Document
+	private function createOwner(Context $context): NodeFieldOwner
 	{
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		return new class ($context, $finder, ['uid' => 'test-node', 'content' => []]) extends Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	private function createMatrixValue(array $data): MatrixValue
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestMatrix('matrix', $node, new ValueContext('matrix', $data));
+		$owner = $this->createOwner($context);
+		$field = new TestMatrix('matrix', $owner, new ValueContext('matrix', $data));
 
 		return $field->value();
 	}

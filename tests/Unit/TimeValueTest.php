@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Time;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 use IntlDateFormatter;
@@ -33,16 +34,9 @@ final class TimeValueTest extends TestCase
 		);
 	}
 
-	private function createNode(\Duon\Cms\Context $context): \Duon\Cms\Node\Document
+	private function createOwner(\Duon\Cms\Context $context): NodeFieldOwner
 	{
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		return new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	public function testTimeValueHasCorrectFormat(): void
@@ -53,8 +47,8 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueFormatsToExpectedString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Time('starttime', $node, new ValueContext('starttime', [
+		$owner = $this->createOwner($context);
+		$field = new Time('starttime', $owner, new ValueContext('starttime', [
 			'value' => '13:45',
 		]));
 
@@ -67,8 +61,8 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueLocalizeWithDefaultParams(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Time('time', $node, new ValueContext('time', [
+		$owner = $this->createOwner($context);
+		$field = new Time('time', $owner, new ValueContext('time', [
 			'value' => '09:30',
 		]));
 
@@ -83,8 +77,8 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueLocalizeWithMediumTime(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Time('time', $node, new ValueContext('time', [
+		$owner = $this->createOwner($context);
+		$field = new Time('time', $owner, new ValueContext('time', [
 			'value' => '14:30',
 		]));
 
@@ -97,8 +91,8 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueEmptyWhenNull(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Time('time', $node, new ValueContext('time', [
+		$owner = $this->createOwner($context);
+		$field = new Time('time', $owner, new ValueContext('time', [
 			'value' => null,
 		]));
 
@@ -111,8 +105,8 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueJsonReturnsString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Time('time', $node, new ValueContext('time', [
+		$owner = $this->createOwner($context);
+		$field = new Time('time', $owner, new ValueContext('time', [
 			'value' => '08:00',
 		]));
 
@@ -123,7 +117,7 @@ final class TimeValueTest extends TestCase
 	public function testTimeValueWithDifferentTimes(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 
 		$testTimes = [
 			'00:00', // Midnight
@@ -134,7 +128,7 @@ final class TimeValueTest extends TestCase
 		];
 
 		foreach ($testTimes as $timeStr) {
-			$field = new Time('time', $node, new ValueContext('time', ['value' => $timeStr]));
+			$field = new Time('time', $owner, new ValueContext('time', ['value' => $timeStr]));
 			$value = $field->value();
 			$this->assertSame($timeStr, $value->format('H:i'));
 		}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Matrix;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestMatrix;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\MatrixValue;
@@ -37,16 +38,9 @@ class MatrixTest extends TestCase
 	public function testMatrixFieldCreation(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		$matrix = new TestMatrix('test_matrix', $node, new \Duon\Cms\Value\ValueContext('test_matrix', []));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 
 		$this->assertInstanceOf(Matrix::class, $matrix);
 		$this->assertInstanceOf(MatrixValue::class, $matrix->value());
@@ -58,16 +52,9 @@ class MatrixTest extends TestCase
 	public function testMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		$matrix = new TestMatrix('test_matrix', $node, new \Duon\Cms\Value\ValueContext('test_matrix', []));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$structure = $matrix->structure();
 
 		$this->assertEquals('matrix', $structure['type']);
@@ -77,16 +64,9 @@ class MatrixTest extends TestCase
 	public function testMatrixSchema(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		$matrix = new TestMatrix('test_matrix', $node, new \Duon\Cms\Value\ValueContext('test_matrix', []));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$schema = $matrix->schema();
 
 		$this->assertInstanceOf(\Duon\Sire\Schema::class, $schema);
@@ -95,16 +75,9 @@ class MatrixTest extends TestCase
 	public function testMatrixSubfieldsHaveTranslateCapability(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		$matrix = new TestMatrix('test_matrix', $node, new \Duon\Cms\Value\ValueContext('test_matrix', []));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$subfields = $matrix->getSubfields();
 
 		// Check that title subfield has translate capability set
@@ -125,14 +98,7 @@ class MatrixTest extends TestCase
 	public function testMatrixStructureFromValueContext(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		$node = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		$owner = new NodeFieldOwner($context, 'test-node');
 
 		// Simulate data as it comes from the database (stored format)
 		$storedData = [
@@ -145,7 +111,7 @@ class MatrixTest extends TestCase
 			],
 		];
 
-		$matrix = new TestMatrix('test_matrix', $node, new \Duon\Cms\Value\ValueContext('test_matrix', $storedData));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', $storedData));
 
 		// Call structure() without arguments - this is how Node::content() calls it
 		$structure = $matrix->structure();

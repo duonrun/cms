@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Closure;
+use Duon\Cms\Field\FieldHydrator;
+use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 
@@ -76,7 +78,11 @@ final class Column
 	{
 		switch ($field) {
 			case 'title':
-				return $node->title();
+				if ($node instanceof HasTitle) {
+					return $node->title();
+				}
+
+				return method_exists($node, 'title') ? $node->title() : '';
 			case 'meta.name':
 				return NodeMeta::name($node::class);
 			case 'meta.uid':
@@ -104,7 +110,11 @@ final class Column
 					?? NodeFactory::meta($node, 'creator_username'),
 				) ?? NodeFactory::meta($node, 'creator_email');
 			default:
-				return (string) $node->getValue($field);
+				$hydrator = new FieldHydrator();
+				$fieldObj = $hydrator->getField($node, $field);
+				$value = $fieldObj->value();
+
+				return $value->isset() ? $value : null;
 		}
 	}
 }

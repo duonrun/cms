@@ -35,22 +35,11 @@ class NodeFactory
 	/**
 	 * Create a node instance from a class name and raw DB data.
 	 *
-	 * For classes extending Node: delegates to Node's own constructor.
-	 * For plain objects: uses Wire Creator for autowired construction,
+	 * Uses Wire Creator for autowired construction,
 	 * then FieldHydrator for field initialization.
 	 */
 	public function create(string $class, Context $context, Finder $find, array $data): object
 	{
-		if (is_subclass_of($class, Node::class)) {
-			$node = new $class($context, $find, $data);
-			self::$nodeState[$node] = [
-				'data' => $data,
-				'fieldNames' => $node->fieldNames(),
-			];
-
-			return $node;
-		}
-
 		$serializer = new NodeSerializer($this->hydrator);
 		$manager = new NodeManager($context->db, new PathManager());
 		$templateRenderer = new TemplateRenderer(
@@ -121,15 +110,9 @@ class NodeFactory
 
 	/**
 	 * Get a metadata value from the raw DB data for a node instance.
-	 *
-	 * Works for both Node subclasses and plain object nodes.
 	 */
 	public static function meta(object $node, string $key): mixed
 	{
-		if ($node instanceof Node) {
-			return $node->meta($key);
-		}
-
 		return self::dataFor($node)[$key] ?? null;
 	}
 

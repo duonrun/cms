@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Tests\IntegrationTestCase;
 
 final class FinderTest extends IntegrationTestCase
@@ -23,7 +25,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
-			$this->assertEquals('test-article', $node::handle());
+			$this->assertEquals('test-article', NodeMeta::handle($node::class));
 		}
 	}
 
@@ -37,7 +39,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(count($publishedNodes), count($allNodes));
 
 		foreach ($publishedNodes as $node) {
-			$this->assertTrue($node->data()['published']);
+			$this->assertTrue(NodeFactory::dataFor($node)['published']);
 		}
 	}
 
@@ -51,7 +53,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertNotEmpty($unpublishedNodes);
 
 		foreach ($unpublishedNodes as $node) {
-			$this->assertFalse($node->data()['published']);
+			$this->assertFalse(NodeFactory::dataFor($node)['published']);
 		}
 	}
 
@@ -66,7 +68,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeHandles = [];
 
 		foreach ($nodes as $node) {
-			$typeHandles[] = $node::handle();
+			$typeHandles[] = NodeMeta::handle($node::class);
 		}
 
 		$uniqueTypes = array_unique($typeHandles);
@@ -101,9 +103,9 @@ final class FinderTest extends IntegrationTestCase
 			->order('uid ASC'));
 
 		$this->assertCount(3, $nodes);
-		$this->assertEquals('ordered-a', $nodes[0]->uid());
-		$this->assertEquals('ordered-b', $nodes[1]->uid());
-		$this->assertEquals('ordered-c', $nodes[2]->uid());
+		$this->assertEquals('ordered-a', NodeFactory::meta($nodes[0], 'uid'));
+		$this->assertEquals('ordered-b', NodeFactory::meta($nodes[1], 'uid'));
+		$this->assertEquals('ordered-c', NodeFactory::meta($nodes[2], 'uid'));
 	}
 
 	public function testFinderLimitsResults(): void
@@ -147,7 +149,7 @@ final class FinderTest extends IntegrationTestCase
 			->hidden(false));
 
 		$this->assertCount(1, $visibleNodes);
-		$this->assertEquals('visible-node', $visibleNodes[0]->uid());
+		$this->assertEquals('visible-node', NodeFactory::meta($visibleNodes[0], 'uid'));
 	}
 
 	public function testFinderReturnsEmptyArrayWhenNoResults(): void
@@ -170,16 +172,16 @@ final class FinderTest extends IntegrationTestCase
 		$homepageNode = null;
 
 		foreach ($homepage as $node) {
-			if ($node->uid() === 'test-homepage') {
+			if (NodeFactory::meta($node, 'uid') === 'test-homepage') {
 				$homepageNode = $node;
 				break;
 			}
 		}
 
 		$this->assertNotNull($homepageNode, 'test-homepage node should exist');
-		$this->assertTrue($homepageNode->data()['published']);
+		$this->assertTrue(NodeFactory::dataFor($homepageNode)['published']);
 
-		$content = $homepageNode->data()['content'];
+		$content = NodeFactory::dataFor($homepageNode)['content'];
 		$this->assertArrayHasKey('title', $content);
 		$this->assertEquals('Testhomepage', $content['title']['value']['de']);
 		$this->assertEquals('Test Homepage', $content['title']['value']['en']);

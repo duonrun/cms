@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Duon\Cms\View;
 
 use Duon\Cms\Config;
+use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeSerializer;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -49,6 +51,9 @@ class Nodes
 			throw new HttpBadRequest($this->request);
 		}
 
+		$nodeFactory = $find->nodeFactory();
+		$hydrator = $nodeFactory->hydrator();
+		$serializer = new NodeSerializer($hydrator);
 		$result = [];
 
 		foreach (
@@ -60,7 +65,7 @@ class Nodes
 			$uid = NodeFactory::meta($node, 'uid');
 			$n = [
 				'uid' => $uid,
-				'title' => $node->title(),
+				'title' => $node instanceof \Duon\Cms\Node\Contract\HasTitle ? $node->title() : (method_exists($node, 'title') ? $node->title() : ''),
 				'handle' => NodeFactory::meta($node, 'handle'),
 				'published' => NodeFactory::meta($node, 'published'),
 				'hidden' => NodeFactory::meta($node, 'hidden'),
@@ -73,13 +78,15 @@ class Nodes
 
 			foreach ($query->fields as $field) {
 				if ($field) {
-					$value = $node->getValue(trim($field));
-					$n[$field] = is_object($value) ? $value->unwrap() : $value;
+					$fieldName = trim($field);
+					$fieldObj = $hydrator->getField($node, $fieldName);
+					$value = $fieldObj->value();
+					$n[$field] = $value->isset() ? $value->unwrap() : null;
 				}
 			}
 
 			if ($query->content) {
-				$n['content'] = $node->content();
+				$n['content'] = $serializer->content($node, NodeFactory::dataFor($node), NodeFactory::fieldNamesFor($node));
 			}
 
 			if ($query->map) {

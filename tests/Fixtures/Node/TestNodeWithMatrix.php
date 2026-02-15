@@ -8,11 +8,13 @@ use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Meta\Required;
 use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Field\Text;
+use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Node\Meta\Name;
-use Duon\Cms\Node\Page;
+use Duon\Cms\Node\Meta\Page;
 
+#[Page]
 #[Name('Test Node With Matrix')]
-class TestNodeWithMatrix extends Page
+class TestNodeWithMatrix implements HasTitle
 {
 	#[Label('Titel'), Required, Translate]
 	protected Text $title;
