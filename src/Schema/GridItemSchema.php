@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Schema;
 
 use Duon\Sire\Schema;
+use Duon\Sire\ValidationResult;
 
 class GridItemSchema extends Schema
 {
@@ -16,9 +17,33 @@ class GridItemSchema extends Schema
 		$this->add('colstart', 'int');
 	}
 
-	protected function review(): void
+	public function validate(array $data, int $level = 1): ValidationResult
 	{
-		foreach ($this->values() as $value) {
+		$result = parent::validate($data, $level);
+
+		if (!$result->isValid()) {
+			return $result;
+		}
+
+		$this->reviewItems($result->values());
+
+		if (count($this->errorList) > 0) {
+			return new ValidationResult(
+				$this->list,
+				null,
+				$this->errorMap,
+				$this->errorList,
+				$result->values(),
+				$result->pristineValues(),
+			);
+		}
+
+		return $result;
+	}
+
+	private function reviewItems(array $values): void
+	{
+		foreach ($values as $value) {
 			$type = $value['type'] ?? null;
 
 			if ($type === 'image' || $type === 'images' || $type === 'video') {
