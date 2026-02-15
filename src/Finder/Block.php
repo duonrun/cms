@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
-use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\TemplateRenderer;
@@ -36,7 +36,7 @@ class Block
 		$class = $this
 			->context
 			->registry
-			->tag(Node::class)
+			->tag(Cms::NODE_TAG)
 			->entry($data['handle'])
 			->definition();
 

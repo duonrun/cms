@@ -6,7 +6,6 @@ namespace Duon\Cms;
 
 use Duon\Cms\Config;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Core\App;
 use Duon\Core\Factory;
@@ -20,6 +19,8 @@ use PDO;
 
 class Cms implements Plugin
 {
+	public const string NODE_TAG = 'duon.cms.node';
+
 	protected readonly Config $config;
 	protected readonly Factory $factory;
 	protected readonly Registry $registry;
@@ -62,7 +63,7 @@ class Cms implements Plugin
 
 		foreach ($this->nodes as $name => $node) {
 			$this->registry
-				->tag(Node::class)
+				->tag(self::NODE_TAG)
 				->add($name, $node);
 		}
 

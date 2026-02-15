@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Duon\Cms\View;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Collection;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\NodeSerializer;
@@ -164,7 +164,7 @@ class Panel
 		}
 
 		$factory = $find->nodeFactory();
-		$class = $this->registry->tag(Node::class)->entry($type)->definition();
+		$class = $this->registry->tag(Cms::NODE_TAG)->entry($type)->definition();
 		$obj = $factory->blueprint($class, $context, $find);
 
 		$serializer = new NodeSerializer(
@@ -191,7 +191,7 @@ class Panel
 		}
 
 		$data = $this->request->json();
-		$class = $this->registry->tag(Node::class)->entry($type)->definition();
+		$class = $this->registry->tag(Cms::NODE_TAG)->entry($type)->definition();
 		$obj = $find->nodeFactory()->create($class, $context, $find, $data);
 
 		$result = $obj->save($data);

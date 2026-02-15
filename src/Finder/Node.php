@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
-use Duon\Cms\Node\Node as CmsNode;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Core\Exception\HttpBadRequest;
@@ -60,7 +60,7 @@ class Node
 		$class = $this
 			->context
 			->registry
-			->tag(CmsNode::class)
+			->tag(Cms::NODE_TAG)
 			->entry($data['handle'])
 			->definition();
 
