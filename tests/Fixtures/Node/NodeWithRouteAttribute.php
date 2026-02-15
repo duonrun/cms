@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Fixtures\Node;
 
+use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Meta\Page;
 use Duon\Cms\Node\Meta\Route;
-use Duon\Cms\Node\Page;
 
+#[Page]
 #[Route('/node-with-custom/{route}')]
-class NodeWithRouteAttribute extends Page
+class NodeWithRouteAttribute implements HasTitle
 {
 	public function title(): string
 	{

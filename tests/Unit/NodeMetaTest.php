@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithPermissionAttribute;
@@ -15,26 +16,26 @@ final class NodeMetaTest extends TestCase
 {
 	public function testNameAttributeSet(): void
 	{
-		$this->assertEquals('NodeWithHandleAttribute', NodeWithHandleAttribute::name());
-		$this->assertEquals('Node With Custom Name Attribute', NodeWithNameAttribute::name());
+		$this->assertEquals('NodeWithHandleAttribute', NodeMeta::name(NodeWithHandleAttribute::class));
+		$this->assertEquals('Node With Custom Name Attribute', NodeMeta::name(NodeWithNameAttribute::class));
 	}
 
 	public function testHandleAttributeSet(): void
 	{
-		$this->assertEquals('node-with-name-attribute', NodeWithNameAttribute::handle());
-		$this->assertEquals('node-with-custom-handle-attribute', NodeWithHandleAttribute::handle());
+		$this->assertEquals('node-with-name-attribute', NodeMeta::handle(NodeWithNameAttribute::class));
+		$this->assertEquals('node-with-custom-handle-attribute', NodeMeta::handle(NodeWithHandleAttribute::class));
 	}
 
 	public function testRouteAttributeSet(): void
 	{
-		$this->assertEquals('', NodeWithNameAttribute::route());
-		$this->assertEquals('/node-with-custom/{route}', NodeWithRouteAttribute::route());
+		$this->assertEquals('', NodeMeta::route(NodeWithNameAttribute::class));
+		$this->assertEquals('/node-with-custom/{route}', NodeMeta::route(NodeWithRouteAttribute::class));
 	}
 
 	public function testRenderAttributeSet(): void
 	{
-		$this->assertEquals(['template', 'node-with-name-attribute'], NodeWithNameAttribute::renderer());
-		$this->assertEquals(['template', 'template-defined-by-render-attribute'], NodeWithRenderAttribute::renderer());
+		$this->assertEquals('node-with-name-attribute', NodeMeta::forClass(NodeWithNameAttribute::class)->renderer);
+		$this->assertEquals('template-defined-by-render-attribute', NodeMeta::forClass(NodeWithRenderAttribute::class)->renderer);
 	}
 
 	public function testPermissionAttributeSet(): void
@@ -44,9 +45,9 @@ final class NodeMetaTest extends TestCase
 			'create' => 'authenticated',
 			'change' => 'authenticated',
 			'deeete' => 'authenticated',
-		], NodeWithNameAttribute::permission());
+		], NodeMeta::forClass(NodeWithNameAttribute::class)->permission);
 		$this->assertEquals([
 			'read' => 'me',
-		], NodeWithPermissionAttribute::permission());
+		], NodeMeta::forClass(NodeWithPermissionAttribute::class)->permission);
 	}
 }

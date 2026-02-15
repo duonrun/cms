@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
-use Duon\Cms\Node\Document;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestGrid;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\Grid as GridValue;
@@ -41,23 +41,16 @@ final class GridValueTest extends TestCase
 		);
 	}
 
-	private function createNode(Context $context): Document
+	private function createOwner(Context $context): NodeFieldOwner
 	{
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		return new class ($context, $finder, ['uid' => 'test-node', 'content' => []]) extends Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	private function createGridValue(array $data): GridValue
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestGrid('grid', $node, new ValueContext('grid', $data));
+		$owner = $this->createOwner($context);
+		$field = new TestGrid('grid', $owner, new ValueContext('grid', $data));
 
 		return $field->value();
 	}

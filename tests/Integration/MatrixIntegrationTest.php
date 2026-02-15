@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Node\TestMatrix;
 use Duon\Cms\Tests\Fixtures\Node\TestNodeWithMatrix;
 use Duon\Cms\Tests\TestCase;
@@ -37,8 +39,10 @@ class MatrixIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$nodeFactory = new NodeFactory($this->registry());
+		$hydrator = $nodeFactory->hydrator();
 
-		$node = new TestNodeWithMatrix($context, $finder, ['content' => [
+		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $finder, ['content' => [
 			'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
 			'matrix' => ['type' => 'matrix', 'value' => [
 				[
@@ -53,9 +57,9 @@ class MatrixIntegrationTest extends TestCase
 		]]);
 
 		// Test that matrix field exists and is accessible
-		$matrixField = $node->getField('matrix');
+		$matrixField = $hydrator->getField($node, 'matrix');
 		$this->assertInstanceOf(\Duon\Cms\Field\Matrix::class, $matrixField);
-		$matrixValue = $node->matrix;
+		$matrixValue = $matrixField->value();
 		$this->assertInstanceOf(\Duon\Cms\Value\MatrixValue::class, $matrixValue);
 
 		// Test matrix iteration
@@ -83,9 +87,9 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$matrix = new TestMatrix('test_matrix', new TestNodeWithMatrix($context, $finder, ['content' => []]), new \Duon\Cms\Value\ValueContext('test_matrix', []));
+		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 
 		// Call value() to initialize subfields
 		$matrixValue = $matrix->value();
@@ -104,12 +108,12 @@ class MatrixIntegrationTest extends TestCase
 	public function testMatrixSubfieldTranslateStructure(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
 		// Create matrix with one empty item
 		$matrix = new TestMatrix(
 			'test_matrix',
-			new TestNodeWithMatrix($context, $finder, ['content' => []]),
+			$owner,
 			new \Duon\Cms\Value\ValueContext('test_matrix', [
 				'type' => 'matrix',
 				'value' => [

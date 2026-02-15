@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestCheckbox;
 use Duon\Cms\Tests\Fixtures\Field\TestHtml;
 use Duon\Cms\Tests\Fixtures\Field\TestNumber;
@@ -42,23 +43,16 @@ final class PrimitiveValueTest extends TestCase
 		);
 	}
 
-	private function createNode(Context $context): \Duon\Cms\Node\Document
+	private function createOwner(Context $context): NodeFieldOwner
 	{
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		return new class ($context, $finder, ['uid' => 'test-node', 'content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	public function testTextValueFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestText('title', $node, new ValueContext('title', [
+		$owner = $this->createOwner($context);
+		$field = new TestText('title', $owner, new ValueContext('title', [
 			'value' => ['en' => 'Hello', 'de' => null],
 		]));
 		$field->translate();
@@ -74,8 +68,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTextValueReturnsEmptyWhenMissing(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestText('title', $node, new ValueContext('title', [
+		$owner = $this->createOwner($context);
+		$field = new TestText('title', $owner, new ValueContext('title', [
 			'value' => ['en' => null, 'de' => null],
 		]));
 		$field->translate();
@@ -91,8 +85,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testValueBaseExposesCustomAttributes(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestText('title', $node, new ValueContext('title', [
+		$owner = $this->createOwner($context);
+		$field = new TestText('title', $owner, new ValueContext('title', [
 			'value' => ['en' => 'Hello'],
 			'class' => 'hero',
 			'id' => 'section',
@@ -115,8 +109,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testHtmlValueUsesExcerptAndSanitizedOutput(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestHtml('body', $node, new ValueContext('body', [
+		$owner = $this->createOwner($context);
+		$field = new TestHtml('body', $owner, new ValueContext('body', [
 			'value' => ['en' => '<p>Hello <strong>World</strong></p>'],
 		]));
 		$field->translate();
@@ -129,8 +123,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testNumberValueCastsNumeric(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestNumber('count', $node, new ValueContext('count', [
+		$owner = $this->createOwner($context);
+		$field = new TestNumber('count', $owner, new ValueContext('count', [
 			'value' => '42',
 		]));
 
@@ -143,8 +137,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testNumberValueIsNullWhenInvalid(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestNumber('count', $node, new ValueContext('count', [
+		$owner = $this->createOwner($context);
+		$field = new TestNumber('count', $owner, new ValueContext('count', [
 			'value' => 'not-a-number',
 		]));
 
@@ -157,10 +151,10 @@ final class PrimitiveValueTest extends TestCase
 	public function testDecimalValueFormatsAndLocalizes(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('price', ['value' => '12.5']);
-		$field = new TestNumber('price', $node, $valueContext);
-		$value = new \Duon\Cms\Value\Decimal($node, $field, $valueContext);
+		$field = new TestNumber('price', $owner, $valueContext);
+		$value = new \Duon\Cms\Value\Decimal($owner, $field, $valueContext);
 		$this->assertSame(12.5, $value->unwrap());
 		$this->assertTrue($value->isset());
 		$this->assertSame('12.5', (string) $value->unwrap());
@@ -171,8 +165,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testCheckboxValueDefaultsFalse(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new TestCheckbox('flag', $node, new ValueContext('flag', [
+		$owner = $this->createOwner($context);
+		$field = new TestCheckbox('flag', $owner, new ValueContext('flag', [
 			'value' => null,
 		]));
 
@@ -185,14 +179,14 @@ final class PrimitiveValueTest extends TestCase
 	public function testFilesValueIteratesAndCounts(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('attachments', [
 			'files' => [
 				['file' => 'one.pdf'],
 				['file' => 'two.pdf'],
 			],
 		]);
-		$field = new \Duon\Cms\Field\File('attachments', $node, $valueContext);
+		$field = new \Duon\Cms\Field\File('attachments', $owner, $valueContext);
 		$field->multiple();
 		$value = $field->value();
 
@@ -212,8 +206,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedFileFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\File('attachment', $node, new ValueContext('attachment', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
 					['file' => 'manual.pdf', 'title' => 'Manual'],
@@ -235,8 +229,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedFileIsEmptyWhenMissing(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\File('attachment', $node, new ValueContext('attachment', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
 					['file' => null, 'title' => null],
@@ -258,8 +252,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedFilesReturnsTranslatedFileInstances(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\File('attachments', $node, new ValueContext('attachments', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('attachments', $owner, new ValueContext('attachments', [
 			'files' => [
 				'en' => [
 					['file' => 'spec.pdf', 'title' => 'Spec'],
@@ -283,8 +277,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testImageValueBuildsMediaPaths(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
@@ -301,8 +295,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testImageTagUsesMediaUrlAndAlt(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'file' => 'hero.jpg',
@@ -331,8 +325,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedImageFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				'en' => [
 					['file' => 'hero.jpg', 'alt' => 'Hero'],
@@ -356,8 +350,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testFileValueTitleFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\File('document', $node, new ValueContext('document', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('document', $owner, new ValueContext('document', [
 			'files' => [
 				[
 					'file' => 'manual.pdf',
@@ -380,8 +374,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testPictureValueUsesTranslatedAltAndTitle(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Picture('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'file' => 'hero.jpg',
@@ -408,7 +402,7 @@ final class PrimitiveValueTest extends TestCase
 	public function testPictureTagRendersSourcesAndFallback(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('hero', [
 			'files' => [
 				[
@@ -424,10 +418,10 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]);
-		$field = new \Duon\Cms\Field\Picture('hero', $node, $valueContext);
+		$field = new \Duon\Cms\Field\Picture('hero', $owner, $valueContext);
 		$field->translate();
 
-		$value = new class ($node, $field, $valueContext) extends \Duon\Cms\Value\Picture {
+		$value = new class ($owner, $field, $valueContext) extends \Duon\Cms\Value\Picture {
 			public function url(bool $bust = true, int $index = 0): string
 			{
 				return "https://cdn.example.com/hero-{$index}.jpg";
@@ -447,8 +441,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedPictureFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Picture('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'en' => [
@@ -479,15 +473,15 @@ final class PrimitiveValueTest extends TestCase
 	public function testVideoValueRendersSourceTag(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('clip', [
 			'files' => [
 				['file' => 'clip.mp4', 'title' => 'Clip'],
 			],
 		]);
-		$field = new \Duon\Cms\Field\Video('clip', $node, $valueContext);
+		$field = new \Duon\Cms\Field\Video('clip', $owner, $valueContext);
 
-		$value = new class ($node, $field, $valueContext) extends \Duon\Cms\Value\Video {
+		$value = new class ($owner, $field, $valueContext) extends \Duon\Cms\Value\Video {
 			public function url(bool $bust = false): string
 			{
 				return 'http://www.example.com/assets/clip.mp4';
@@ -508,8 +502,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTranslatedImagesReturnsTranslatedImageItems(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('gallery', $node, new ValueContext('gallery', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
 				'en' => [
 					['file' => 'hero.jpg', 'alt' => 'Hero'],
@@ -533,8 +527,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testImageValueResizeAddsQueryString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('hero', $node, new ValueContext('hero', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
@@ -552,8 +546,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testImagesValueIteratesOverImages(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Image('gallery', $node, new ValueContext('gallery', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
 				['file' => 'one.jpg', 'alt' => ['en' => 'One']],
 				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
@@ -575,8 +569,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Option('status', $node, new ValueContext('status', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Option('status', $owner, new ValueContext('status', [
 			'value' => 'draft',
 		]));
 
@@ -589,8 +583,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testRadioValueUsesStringValue(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => 'yes',
 		]));
 
@@ -603,8 +597,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testStrValueEscapesHtml(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => '<strong>Yes</strong>',
 		]));
 
@@ -619,8 +613,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testStrValueIsEmptyWhenMissing(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $node, new ValueContext('choice', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => '',
 		]));
 
@@ -635,8 +629,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testDateTimeValueFormatsToExpectedString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\DateTime('timestamp', $node, new ValueContext('timestamp', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\DateTime('timestamp', $owner, new ValueContext('timestamp', [
 			'value' => '2025-01-31 13:45:10',
 			'timezone' => 'UTC',
 		]));
@@ -650,8 +644,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testDateValueFormatsToExpectedString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Date('date', $node, new ValueContext('date', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Date('date', $owner, new ValueContext('date', [
 			'value' => '2025-01-31',
 		]));
 
@@ -664,8 +658,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testTimeValueFormatsToExpectedString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Time('time', $node, new ValueContext('time', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Time('time', $owner, new ValueContext('time', [
 			'value' => '13:45',
 		]));
 
@@ -678,12 +672,12 @@ final class PrimitiveValueTest extends TestCase
 	public function testIframeValueFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Iframe('embed', $node, new ValueContext('embed', []));
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
 		$context->request->set('locale', $context->locales()->get('de'));
-		$value = new \Duon\Cms\Value\Iframe($node, $field, new ValueContext('embed', [
+		$value = new \Duon\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => '<iframe></iframe>', 'de' => null],
 		]));
 
@@ -695,12 +689,12 @@ final class PrimitiveValueTest extends TestCase
 	public function testIframeValueIsEmptyWhenMissing(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Iframe('embed', $node, new ValueContext('embed', []));
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
 		$context->request->set('locale', $context->locales()->get('de'));
-		$value = new \Duon\Cms\Value\Iframe($node, $field, new ValueContext('embed', [
+		$value = new \Duon\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => null, 'de' => null],
 		]));
 
@@ -712,8 +706,8 @@ final class PrimitiveValueTest extends TestCase
 	public function testYoutubeValueUsesAspectRatio(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new \Duon\Cms\Field\Youtube('video', $node, new ValueContext('video', [
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\Youtube('video', $owner, new ValueContext('video', [
 			'value' => 'abc123',
 			'id' => 'abc123',
 			'aspectRatioX' => 16,

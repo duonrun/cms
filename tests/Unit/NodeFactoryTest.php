@@ -97,7 +97,7 @@ final class NodeFactoryTest extends TestCase
 		$this->assertInstanceOf(PlainBlock::class, $node);
 	}
 
-	public function testCreateNodeSubclass(): void
+	public function testCreateTestPage(): void
 	{
 		$node = $this->factory->create(TestPage::class, $this->context, $this->finder, [
 			'uid' => 'test-page-1',
@@ -105,7 +105,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$this->assertInstanceOf(TestPage::class, $node);
-		$this->assertInstanceOf(\Duon\Cms\Node\Node::class, $node);
+		$this->assertNotInstanceOf(\Duon\Cms\Node\Node::class, $node);
 	}
 
 	// -- Field hydration ------------------------------------------------------

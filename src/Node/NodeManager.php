@@ -78,7 +78,7 @@ class NodeManager
 			throw new HttpBadRequest($request);
 		}
 
-		$uid = method_exists($node, 'uid') ? $node->uid() : $node->data['uid'];
+		$uid = NodeFactory::meta($node, 'uid');
 
 		$this->db->nodes->delete([
 			'uid' => $uid,

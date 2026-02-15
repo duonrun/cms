@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Date;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 use IntlDateFormatter;
@@ -33,16 +34,9 @@ final class DateValueTest extends TestCase
 		);
 	}
 
-	private function createNode(\Duon\Cms\Context $context): \Duon\Cms\Node\Document
+	private function createOwner(\Duon\Cms\Context $context): NodeFieldOwner
 	{
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
-
-		return new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
+		return new NodeFieldOwner($context, 'test-node');
 	}
 
 	public function testDateValueHasCorrectFormat(): void
@@ -53,8 +47,8 @@ final class DateValueTest extends TestCase
 	public function testDateValueFormatsToExpectedString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Date('birthdate', $node, new ValueContext('birthdate', [
+		$owner = $this->createOwner($context);
+		$field = new Date('birthdate', $owner, new ValueContext('birthdate', [
 			'value' => '2025-01-31',
 		]));
 
@@ -67,8 +61,8 @@ final class DateValueTest extends TestCase
 	public function testDateValueLocalizeWithDefaultParams(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Date('date', $node, new ValueContext('date', [
+		$owner = $this->createOwner($context);
+		$field = new Date('date', $owner, new ValueContext('date', [
 			'value' => '2025-01-31',
 		]));
 
@@ -84,8 +78,8 @@ final class DateValueTest extends TestCase
 	public function testDateValueLocalizeWithLongFormat(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Date('date', $node, new ValueContext('date', [
+		$owner = $this->createOwner($context);
+		$field = new Date('date', $owner, new ValueContext('date', [
 			'value' => '2025-01-31',
 		]));
 
@@ -99,8 +93,8 @@ final class DateValueTest extends TestCase
 	public function testDateValueEmptyWhenNull(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Date('date', $node, new ValueContext('date', [
+		$owner = $this->createOwner($context);
+		$field = new Date('date', $owner, new ValueContext('date', [
 			'value' => null,
 		]));
 
@@ -113,8 +107,8 @@ final class DateValueTest extends TestCase
 	public function testDateValueJsonReturnsString(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
-		$field = new Date('date', $node, new ValueContext('date', [
+		$owner = $this->createOwner($context);
+		$field = new Date('date', $owner, new ValueContext('date', [
 			'value' => '2025-06-15',
 		]));
 
@@ -125,7 +119,7 @@ final class DateValueTest extends TestCase
 	public function testDateValueWithDifferentDates(): void
 	{
 		$context = $this->createContext();
-		$node = $this->createNode($context);
+		$owner = $this->createOwner($context);
 
 		$testDates = [
 			'2024-02-29', // Leap year
@@ -134,7 +128,7 @@ final class DateValueTest extends TestCase
 		];
 
 		foreach ($testDates as $dateStr) {
-			$field = new Date('date', $node, new ValueContext('date', ['value' => $dateStr]));
+			$field = new Date('date', $owner, new ValueContext('date', ['value' => $dateStr]));
 			$value = $field->value();
 			$this->assertSame($dateStr, $value->format('Y-m-d'));
 		}

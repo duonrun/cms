@@ -133,16 +133,7 @@ class Meta
 			return ['document', true];
 		}
 
-		// Fallback: check class hierarchy for backward compatibility
-		return [
-			match (true) {
-				is_a($this->nodeClass, Page::class, true) => 'page',
-				is_a($this->nodeClass, Block::class, true) => 'block',
-				is_a($this->nodeClass, Document::class, true) => 'document',
-				default => 'document',
-			},
-			false,
-		];
+		return ['document', false];
 	}
 
 	private function getClassName(): string

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Node\Node;
 use Duon\Cms\Value\MatrixValue;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Schema;

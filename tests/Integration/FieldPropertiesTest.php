@@ -4,20 +4,33 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Field\FieldHydrator;
+use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Tests\Fixtures\Node\TestDocument;
 use Duon\Cms\Tests\Fixtures\Node\TestMediaDocument;
 use Duon\Cms\Tests\IntegrationTestCase;
 
 final class FieldPropertiesTest extends IntegrationTestCase
 {
+	private NodeFactory $nodeFactory;
+	private FieldHydrator $hydrator;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->nodeFactory = new NodeFactory($this->registry());
+		$this->hydrator = $this->nodeFactory->hydrator();
+	}
+
 	public function testFieldPropertiesIncludesNameAndType(): void
 	{
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('title')->properties();
+		$properties = $this->hydrator->getField($node, 'title')->properties();
 
 		$this->assertArrayHasKey('name', $properties);
 		$this->assertArrayHasKey('type', $properties);
@@ -30,9 +43,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('title')->properties();
+		$properties = $this->hydrator->getField($node, 'title')->properties();
 
 		// From Label capability
 		$this->assertArrayHasKey('label', $properties);
@@ -53,9 +66,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('internalId')->properties();
+		$properties = $this->hydrator->getField($node, 'internalId')->properties();
 
 		$this->assertArrayHasKey('hidden', $properties);
 		$this->assertTrue($properties['hidden']);
@@ -69,9 +82,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('intro')->properties();
+		$properties = $this->hydrator->getField($node, 'intro')->properties();
 
 		$this->assertArrayHasKey('rows', $properties);
 		$this->assertEquals(5, $properties['rows']);
@@ -91,9 +104,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestMediaDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('contentGrid')->properties();
+		$properties = $this->hydrator->getField($node, 'contentGrid')->properties();
 
 		$this->assertArrayHasKey('columns', $properties);
 		$this->assertEquals(12, $properties['columns']);
@@ -110,9 +123,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestMediaDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('gallery')->properties();
+		$properties = $this->hydrator->getField($node, 'gallery')->properties();
 
 		$this->assertArrayHasKey('multiple', $properties);
 		$this->assertTrue($properties['multiple']);
@@ -126,9 +139,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestMediaDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
-		$properties = $node->getField('category')->properties();
+		$properties = $this->hydrator->getField($node, 'category')->properties();
 
 		$this->assertArrayHasKey('options', $properties);
 		$this->assertEquals(['news', 'blog', 'tutorial'], $properties['options']);
@@ -139,9 +152,11 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$finder = $this->createFinder();
 
-		$node = new TestDocument($context, $finder, ['content' => []]);
+		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
-		$fields = $node->fields();
+		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$serializer = new NodeSerializer($this->hydrator);
+		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertIsArray($fields);
 		$this->assertCount(3, $fields); // title, intro, internalId

@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Meta\Capability;
 use Duon\Cms\Field\Text;
+use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 
@@ -23,16 +24,9 @@ final class CapabilityFunctionsTest extends TestCase
 			$this->factory(),
 		);
 
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$owner = new NodeFieldOwner($context, 'test-node');
 
-		$nodeClass = new class ($context, $finder, ['content' => []]) extends \Duon\Cms\Node\Document {
-			public function title(): string
-			{
-				return 'Test';
-			}
-		};
-
-		return new Text($name, $nodeClass, new ValueContext($name, []));
+		return new Text($name, $owner, new ValueContext($name, []));
 	}
 
 	public function testCapabilityErrorMessage(): void
