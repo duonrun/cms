@@ -10,7 +10,7 @@ use Duon\Cms\Config;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
-use Duon\Cms\Node\Node;
+use Duon\Cms\Node\NodeProxy;
 use Duon\Core\App;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Plugin;
@@ -276,7 +276,7 @@ class End2EndTestCase extends IntegrationTestCase
 			dirs: self::root() . '/tests/Fixtures/templates',
 			autoescape: true,
 			whitelist: [
-				Node::class,
+				NodeProxy::class,
 				\Duon\Cms\Finder\Finder::class,
 				\Duon\Cms\Locales::class,
 				\Duon\Cms\Locale::class,
@@ -301,7 +301,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$handler->views('tests/Fixtures/templates');
 
 		$handler->whitelist([
-			Node::class,
+			NodeProxy::class,
 			Finder::class,
 			Locales::class,
 			Locale::class,
