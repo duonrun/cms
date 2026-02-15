@@ -51,6 +51,14 @@ class NodeFactory
 			return $node;
 		}
 
+		$serializer = new NodeSerializer($this->hydrator);
+		$manager = new NodeManager($context->db, new PathManager());
+		$templateRenderer = new TemplateRenderer(
+			$this->registry,
+			$context->factory,
+			$this->hydrator,
+		);
+
 		$creator = new Creator($this->registry);
 		$node = $creator->create($class, predefinedTypes: [
 			Context::class => $context,
@@ -60,6 +68,11 @@ class NodeFactory
 			Database::class => $context->db,
 			Registry::class => $context->registry,
 			Factory::class => $context->factory,
+			self::class => $this,
+			TemplateRenderer::class => $templateRenderer,
+			NodeSerializer::class => $serializer,
+			NodeManager::class => $manager,
+			FieldHydrator::class => $this->hydrator,
 		]);
 
 		$uid = $data['uid'] ?? nanoid();
