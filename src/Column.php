@@ -7,9 +7,9 @@ namespace Duon\Cms;
 use Closure;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 
 use function Duon\Cms\Util\escape;
 
@@ -77,7 +77,7 @@ final class Column
 
 	private function getValue(object $node, string $field): mixed
 	{
-		$inner = NodeProxy::unwrap($node);
+		$inner = Node::unwrap($node);
 
 		switch ($field) {
 			case 'title':

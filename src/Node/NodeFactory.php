@@ -81,11 +81,11 @@ class NodeFactory
 	}
 
 	/**
-	 * Wrap a node in a NodeProxy for template-friendly access.
+	 * Wrap a node for template-friendly access.
 	 */
-	public function proxy(object $node, Request $request): NodeProxy
+	public function proxy(object $node, Request $request): Node
 	{
-		return new NodeProxy(
+		return new Node(
 			$node,
 			self::fieldNamesFor($node),
 			$this->hydrator,
@@ -107,7 +107,7 @@ class NodeFactory
 	public static function dataFor(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();
-		$node = NodeProxy::unwrap($node);
+		$node = Node::unwrap($node);
 
 		return (self::$nodeState[$node] ?? [])['data'] ?? [];
 	}
@@ -118,7 +118,7 @@ class NodeFactory
 	public static function fieldNamesFor(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();
-		$node = NodeProxy::unwrap($node);
+		$node = Node::unwrap($node);
 
 		return (self::$nodeState[$node] ?? [])['fieldNames'] ?? [];
 	}

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Tests\IntegrationTestCase;
 
 final class FinderTest extends IntegrationTestCase
@@ -26,7 +26,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
-			$this->assertEquals('test-article', NodeMeta::handle(NodeProxy::unwrap($node)::class));
+			$this->assertEquals('test-article', NodeMeta::handle(Node::unwrap($node)::class));
 		}
 	}
 
@@ -69,7 +69,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeHandles = [];
 
 		foreach ($nodes as $node) {
-			$typeHandles[] = NodeMeta::handle(NodeProxy::unwrap($node)::class);
+			$typeHandles[] = NodeMeta::handle(Node::unwrap($node)::class);
 		}
 
 		$uniqueTypes = array_unique($typeHandles);

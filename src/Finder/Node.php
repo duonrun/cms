@@ -7,9 +7,9 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
+use Duon\Cms\Node\Node as NodeWrapper;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 use Duon\Core\Exception\HttpBadRequest;
 
 class Node
@@ -24,7 +24,7 @@ class Node
 		string $path,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?NodeProxy {
+	): ?NodeWrapper {
 		return $this->get([
 			'path' => $path,
 			'published' => $published,
@@ -37,7 +37,7 @@ class Node
 		string $uid,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?NodeProxy {
+	): ?NodeWrapper {
 		return $this->get([
 			'uid' => $uid,
 			'published' => $published,
@@ -47,7 +47,7 @@ class Node
 
 	public function get(
 		array $params,
-	): ?NodeProxy {
+	): ?NodeWrapper {
 		$data = $this->context->db->nodes->find($params)->one();
 
 		if (!$data) {

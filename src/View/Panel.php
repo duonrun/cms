@@ -11,10 +11,10 @@ use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeManager;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;
 use Duon\Cms\Section;
@@ -217,7 +217,7 @@ class Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$node = $result instanceof NodeProxy ? $result->node() : $result;
+		$node = Node::unwrap($result);
 		$nodeFactory = $find->nodeFactory();
 		$serializer = new NodeSerializer($nodeFactory->hydrator());
 		$manager = new NodeManager($context->db, new PathManager());

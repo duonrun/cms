@@ -10,7 +10,7 @@ use Duon\Cms\Locale;
 use Duon\Cms\Value\Value;
 use Duon\Core\Request;
 
-class NodeProxy
+class Node
 {
 	public function __construct(
 		private readonly object $node,
@@ -46,15 +46,7 @@ class NodeProxy
 	}
 
 	/**
-	 * Get the underlying plain node object.
-	 */
-	public function node(): object
-	{
-		return $this->node;
-	}
-
-	/**
-	 * Return the inner node if the given object is a NodeProxy,
+	 * Return the inner node if the given object is a Node wrapper,
 	 * otherwise return the object unchanged.
 	 */
 	public static function unwrap(object $object): object

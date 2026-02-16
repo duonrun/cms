@@ -7,9 +7,9 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
@@ -310,9 +310,9 @@ final class NodeFactoryTest extends TestCase
 		$this->assertFalse($blueprint['published']);
 	}
 
-	// -- NodeProxy with plain objects -----------------------------------------
+	// -- Node wrapper with plain objects --------------------------------------
 
-	public function testNodeProxyFieldAccess(): void
+	public function testNodeFieldAccess(): void
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
 			'uid' => 'proxy-1',
@@ -322,13 +322,13 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = NodeFactory::fieldNamesFor($node);
-		$proxy = new NodeProxy($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertTrue(isset($proxy->heading));
 		$this->assertEquals('Proxy Title', (string) $proxy->heading);
 	}
 
-	public function testNodeProxyMethodDelegation(): void
+	public function testNodeMethodDelegation(): void
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
 			'uid' => 'proxy-2',
@@ -338,12 +338,12 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = NodeFactory::fieldNamesFor($node);
-		$proxy = new NodeProxy($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertEquals('Method Test', $proxy->title());
 	}
 
-	public function testNodeProxyUnsetFieldReturnsNull(): void
+	public function testNodeUnsetFieldReturnsNull(): void
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
 			'uid' => 'proxy-3',
@@ -351,7 +351,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = NodeFactory::fieldNamesFor($node);
-		$proxy = new NodeProxy($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertNull($proxy->heading);
 		$this->assertFalse(isset($proxy->heading));

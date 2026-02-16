@@ -25,8 +25,8 @@ class TemplateRenderer
 	/**
 	 * Render a page node to an HTML response.
 	 *
-	 * The node is wrapped in a NodeProxy and passed to the template
-	 * as '$page'. If the node implements ProvidesRenderContext, its
+	 * The node is wrapped in a Node and passed to the template as
+	 * '$page'. If the node implements ProvidesRenderContext, its
 	 * extra context is merged in.
 	 */
 	public function renderPage(
@@ -37,7 +37,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): Response {
-		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator, $request);
+		$proxy = new Node($node, $fieldNames, $this->hydrator, $request);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -62,8 +62,8 @@ class TemplateRenderer
 	/**
 	 * Render a block node to an HTML string.
 	 *
-	 * The node is wrapped in a NodeProxy and passed to the template
-	 * as '$block'.
+	 * The node is wrapped in a Node and passed to the template as
+	 * '$block'.
 	 */
 	public function renderBlock(
 		object $node,
@@ -73,7 +73,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): string {
-		$proxy = new NodeProxy($node, $fieldNames, $this->hydrator, $request);
+		$proxy = new Node($node, $fieldNames, $this->hydrator, $request);
 
 		$baseContext = array_merge([
 			'block' => $proxy,

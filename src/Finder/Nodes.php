@@ -7,9 +7,9 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Finder\Finder;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeProxy;
 use Generator;
 use Iterator;
 
@@ -113,7 +113,7 @@ final class Nodes implements Iterator
 		$this->result->rewind();
 	}
 
-	public function current(): NodeProxy
+	public function current(): Node
 	{
 		if (!isset($this->result)) {
 			$this->fetchResult();

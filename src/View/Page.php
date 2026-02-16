@@ -9,8 +9,8 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
+use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeProxy;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Util\Path;
@@ -83,7 +83,7 @@ class Page
 
 	private function renderPage(object $page, Context $context, Finder $find): Response
 	{
-		$node = $page instanceof NodeProxy ? $page->node() : $page;
+		$node = Node::unwrap($page);
 
 		if (is_callable([$node, 'render'])) {
 			return $node->render();
@@ -103,7 +103,7 @@ class Page
 
 	private function jsonRead(object $node, Finder $find): Response
 	{
-		$inner = $node instanceof NodeProxy ? $node->node() : $node;
+		$inner = Node::unwrap($node);
 
 		if (method_exists($inner, 'read')) {
 			$data = $inner->read();
@@ -131,7 +131,7 @@ class Page
 
 	private function handleFormPost(object $node, ?array $formBody): Response
 	{
-		$inner = $node instanceof NodeProxy ? $node->node() : $node;
+		$inner = Node::unwrap($node);
 
 		if ($inner instanceof HandlesFormPost) {
 			return $inner->formPost($formBody);
