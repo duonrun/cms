@@ -32,10 +32,22 @@ final class NodeMetaTest extends TestCase
 		$this->assertEquals('/node-with-custom/{route}', NodeMeta::route(NodeWithRouteAttribute::class));
 	}
 
+	public function testRoutableIsDerivedFromRouteAttribute(): void
+	{
+		$this->assertFalse(NodeMeta::routable(NodeWithNameAttribute::class));
+		$this->assertTrue(NodeMeta::routable(NodeWithRouteAttribute::class));
+	}
+
 	public function testRenderAttributeSet(): void
 	{
 		$this->assertEquals('node-with-name-attribute', NodeMeta::forClass(NodeWithNameAttribute::class)->renderer);
 		$this->assertEquals('template-defined-by-render-attribute', NodeMeta::forClass(NodeWithRenderAttribute::class)->renderer);
+	}
+
+	public function testRenderableUsesRenderAttributeOrHandleFallback(): void
+	{
+		$this->assertTrue(NodeMeta::renderable(NodeWithNameAttribute::class));
+		$this->assertTrue(NodeMeta::renderable(NodeWithRenderAttribute::class));
 	}
 
 	public function testPermissionAttributeSet(): void

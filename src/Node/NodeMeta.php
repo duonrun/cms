@@ -52,6 +52,22 @@ class NodeMeta
 	/**
 	 * @param class-string $class
 	 */
+	public static function routable(string $class): bool
+	{
+		return self::forClass($class)->routable;
+	}
+
+	/**
+	 * @param class-string $class
+	 */
+	public static function renderable(string $class): bool
+	{
+		return self::forClass($class)->renderable;
+	}
+
+	/**
+	 * @param class-string $class
+	 */
 	public static function titleField(string $class): ?string
 	{
 		return self::forClass($class)->titleField;

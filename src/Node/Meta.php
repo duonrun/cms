@@ -22,6 +22,8 @@ class Meta
 	public readonly string $name; // The public name of the node type
 	public readonly string $handle; // Used also as slug to address the node type in the panel
 	public readonly string $renderer;
+	public readonly bool $routable;
+	public readonly bool $renderable;
 	public readonly string|array $route;
 	public readonly string|array $permission;
 	public readonly string $kind; // 'page', 'block', or 'document'
@@ -37,10 +39,16 @@ class Meta
 	public function __construct(private readonly string $nodeClass)
 	{
 		$attributes = $this->initAttributes();
+		$handle = $attributes[Handle::class] ?? null;
+		$render = $attributes[Render::class] ?? null;
+		$route = $attributes[Route::class] ?? null;
+
 		$this->name = $this->getName($attributes[Name::class] ?? null);
-		$this->handle = $this->getHandle($attributes[Handle::class] ?? null);
-		$this->renderer = $this->getRenderer($attributes[Render::class] ?? null, $attributes[Handle::class] ?? null);
-		$this->route = $this->getRoute($attributes[Route::class] ?? null);
+		$this->handle = $this->getHandle($handle);
+		$this->renderer = $this->getRenderer($render, $handle);
+		$this->route = $this->getRoute($route);
+		$this->routable = $route !== null;
+		$this->renderable = $render !== null || $this->renderer !== '';
 		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
 		[$this->kind, $this->hasKindAttribute] = $this->resolveKind($attributes);
 		$this->titleField = ($attributes[Title::class] ?? null)?->field;
