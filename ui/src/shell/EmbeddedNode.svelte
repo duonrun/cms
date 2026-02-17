@@ -105,7 +105,7 @@
 					class="tab">
 					{_('Inhalt')}
 				</button>
-				{#if node.type.kind !== 'document'}
+				{#if node.type.routable || node.type.renderable}
 					<button
 						onclick={changeTab('settings')}
 						class:active={activeTab === 'settings'}

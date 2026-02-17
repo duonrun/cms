@@ -47,7 +47,7 @@
 </script>
 
 <div class="p-4 sm:p-6 md:p-8">
-	{#if node.type.kind === 'page'}
+	{#if node.type.routable}
 		<div class="paths mb-8">
 			{#each $system.locales as locale (locale)}
 				<div class="path">
@@ -64,7 +64,7 @@
 			{/each}
 		</div>
 	{/if}
-	{#if node.type.kind !== 'document'}
+	{#if node.type.renderable}
 		<div class="max-w-xl">
 			<div class="mb-4">
 				<ToggleLine

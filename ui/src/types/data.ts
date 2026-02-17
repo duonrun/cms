@@ -160,7 +160,8 @@ export interface Collection {
 export interface Type {
 	handle: string;
 	class: string;
-	kind: string;
+	routable: boolean;
+	renderable: boolean;
 }
 
 export interface Editor {
