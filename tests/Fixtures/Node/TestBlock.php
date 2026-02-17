@@ -8,10 +8,8 @@ use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Block;
 use Duon\Cms\Node\Meta\Name;
 
-#[Block]
 #[Name('Test Block')]
 class TestBlock implements HasTitle
 {
