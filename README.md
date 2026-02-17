@@ -14,13 +14,12 @@ use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Meta\Required;
 use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Finder\Finder;
-use Duon\Cms\Node\Attribute\Name;
-use Duon\Cms\Node\Attribute\Page;
-use Duon\Cms\Node\Attribute\Route;
+use Duon\Cms\Node\Meta\Name;
+use Duon\Cms\Node\Meta\Route;
 use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Core\Request;
 
-#[Page, Name('Department'), Route('/{title}')]
+#[Name('Department'), Route('/{title}')]
 final class Department implements HasTitle
 {
     public function __construct(
@@ -44,13 +43,13 @@ final class Department implements HasTitle
 }
 ```
 
-### Node kind attributes
+### Derived behavior
 
-| Attribute | Kind |
-| --------- | ---- |
-| `#[Page]` | A routable page with a URL path |
-| `#[Block]` | A reusable content block (no URL) |
-| `#[Document]` | A data-only node (no URL, no template) |
+| Signal | Behavior |
+| ------ | -------- |
+| `#[Route('...')]` is present | Node is routable and has URL path settings |
+| `#[Render('...')]` is present | Explicit renderer id is used |
+| `#[Render]` is absent | Node handle is used as renderer id |
 
 ### Metadata attributes
 
@@ -58,7 +57,7 @@ final class Department implements HasTitle
 | --------- | ------- |
 | `#[Name('...')]` | Human-readable display name |
 | `#[Handle('...')]` | URL-safe identifier (auto-derived if omitted) |
-| `#[Route('...')]` | URL pattern for pages |
+| `#[Route('...')]` | URL pattern for routable nodes |
 | `#[Render('...')]` | Template name override |
 | `#[Title('...')]` | Field name to use as title |
 | `#[FieldOrder('...')]` | Admin panel field order |

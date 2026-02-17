@@ -7,13 +7,16 @@ Codename: Plain Objects
 ### Breaking changes
 
 This release removes the `Node` / `Page` / `Block` / `Document` inheritance
-hierarchy. Content types are now defined as plain PHP classes with attributes.
+hierarchy and dedicated node kind modeling. Content types are now plain PHP
+classes with metadata attributes, and behavior is derived from route/render
+conventions.
 
 - **Removed** abstract base classes `Node`, `Page`, `Block`, `Document`.
 - **Removed** the `RendersTemplate` trait.
 - **Removed** the dead `Fulltext` class.
-- **Changed** node kind declaration from `extends Page` / `extends Block` /
-  `extends Document` to `#[Page]` / `#[Block]` / `#[Document]` attributes.
+- **Removed** `#[Page]`, `#[Block]`, `#[Document]` metadata attributes.
+- **Changed** routability/rendering semantics to use `#[Route]` and `#[Render]`
+  conventions (renderer fallback remains node handle).
 - **Changed** all Field and Value classes to depend on the `FieldOwner`
   interface instead of the `Node` class.
 - **Changed** node type-hints throughout the framework from `Node` to `object`.
@@ -21,7 +24,6 @@ hierarchy. Content types are now defined as plain PHP classes with attributes.
 
 ### Added
 
-- `#[Page]`, `#[Block]`, `#[Document]` attributes for declaring node kind.
 - `#[Name]`, `#[Handle]`, `#[Route]`, `#[Render]`, `#[Title]`, `#[FieldOrder]`,
   `#[Deletable]`, `#[Permission]` attributes for node metadata.
 - `HasTitle`, `HasInit`, `HandlesFormPost`, `ProvidesRenderContext` interfaces
@@ -56,7 +58,7 @@ class Article extends Page
 }
 
 // After
-#[Page, Name('Article')]
+#[Name('Article'), Route('/{title}')]
 class Article implements HasTitle
 {
     #[Label('Title'), Translate]
@@ -72,7 +74,7 @@ class Article implements HasTitle
 Constructor dependencies are autowired from the Registry via `duon/wire`:
 
 ```php
-#[Page, Name('Department'), Route('/{title}')]
+#[Name('Department'), Route('/{title}')]
 final class Department implements HasTitle
 {
     public function __construct(
