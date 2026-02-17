@@ -7,16 +7,15 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
 
-class Block
+class Render
 {
-	protected object $block;
+	protected object $node;
 
 	public function __construct(
 		private readonly Context $context,
@@ -40,11 +39,11 @@ class Block
 			->definition();
 
 		if (!NodeMeta::renderable($class)) {
-			throw new RuntimeException('Invalid block class' . $class);
+			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 
 		$data['content'] = json_decode($data['content'], true);
-		$this->block = $this->nodeFactory->create($class, $context, $find, $data);
+		$this->node = $this->nodeFactory->create($class, $context, $find, $data);
 	}
 
 	public function __toString(): string
@@ -56,9 +55,9 @@ class Block
 				$this->nodeFactory->hydrator(),
 			);
 
-			return $renderer->renderBlock(
-				$this->block,
-				NodeFactory::fieldNamesFor($this->block),
+			return $renderer->renderNode(
+				$this->node,
+				NodeFactory::fieldNamesFor($this->node),
 				$this->find,
 				$this->context->request,
 				$this->context->config,
