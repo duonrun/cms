@@ -15,10 +15,8 @@ use Duon\Cms\Field\Meta\TranslateFile;
 use Duon\Cms\Field\Option;
 use Duon\Cms\Field\Video;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Document;
 use Duon\Cms\Node\Meta\Name;
 
-#[Document]
 #[Name('Test Media Document')]
 class TestMediaDocument implements HasTitle
 {

@@ -7,10 +7,8 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Block;
 use Duon\Cms\Node\Meta\Name;
 
-#[Block]
 #[Name('Test Widget')]
 class TestWidget implements HasTitle
 {

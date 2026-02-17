@@ -17,10 +17,8 @@ use Duon\Cms\Field\Meta\Width;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Field\Textarea;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Document;
 use Duon\Cms\Node\Meta\Name;
 
-#[Document]
 #[Name('Test Document')]
 class TestDocument implements HasTitle
 {
