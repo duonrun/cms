@@ -201,15 +201,14 @@ class IntegrationTestCase extends TestCase
 	 *
 	 * @return int The type ID
 	 */
-	protected function createTestType(string $handle, string $kind = 'page'): int
+	protected function createTestType(string $handle): int
 	{
-		$sql = "INSERT INTO cms.types (handle, kind)
-				VALUES (:handle, :kind)
+		$sql = "INSERT INTO cms.types (handle)
+				VALUES (:handle)
 				RETURNING type";
 
 		return $this->db()->execute($sql, [
 			'handle' => $handle,
-			'kind' => $kind,
 		])->one()['type'];
 	}
 

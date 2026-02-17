@@ -40,7 +40,7 @@ final class NodeCrudTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$typeId = $this->createTestType('crud-test-page', 'page');
+		$typeId = $this->createTestType('crud-test-page');
 		$nodePath = '/test/crud-test-node';
 		$this->createTestNode([
 			'uid' => 'crud-test-node',
@@ -63,7 +63,7 @@ final class NodeCrudTest extends End2EndTestCase
 
 	public function testGetSingleNodeRequiresAuthentication(): void
 	{
-		$typeId = $this->createTestType('crud-test-page', 'page');
+		$typeId = $this->createTestType('crud-test-page');
 		$nodePath = '/test/unauth-node';
 		$this->createTestNode([
 			'uid' => 'crud-test-unauth-node',
@@ -84,7 +84,7 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 
 		$uid = 'new-test-node-' . uniqid();
-		$this->createTestType('create-test-page', 'page');
+		$this->createTestType('create-test-page');
 		$nodePath = '/test/' . $uid;
 		$nodeData = [
 			'uid' => $uid,
@@ -116,7 +116,7 @@ final class NodeCrudTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$typeId = $this->createTestType('update-test-page', 'page');
+		$typeId = $this->createTestType('update-test-page');
 		$uid = 'update-test-node-' . uniqid();
 		$this->createTestNode([
 			'uid' => $uid,
@@ -157,7 +157,7 @@ final class NodeCrudTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$typeId = $this->createTestType('delete-test-page-' . uniqid(), 'page');
+		$typeId = $this->createTestType('delete-test-page-' . uniqid());
 		$uid = 'delete-test-node-' . uniqid();
 		$this->createTestNode([
 			'uid' => $uid,

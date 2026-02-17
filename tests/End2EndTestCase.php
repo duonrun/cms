@@ -142,9 +142,9 @@ class End2EndTestCase extends IntegrationTestCase
 	/**
 	 * @override Track created types for cleanup
 	 */
-	protected function createTestType(string $handle, string $kind = 'page'): int
+	protected function createTestType(string $handle): int
 	{
-		$typeId = parent::createTestType($handle, $kind);
+		$typeId = parent::createTestType($handle);
 		$this->createdTypeHandles[] = $handle;
 
 		return $typeId;

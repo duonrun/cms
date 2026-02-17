@@ -37,7 +37,7 @@ final class RoutingTest extends End2EndTestCase
 
 	public function testPagePathResolution(): void
 	{
-		$typeId = $this->createTestType('routing-test-page', 'page');
+		$typeId = $this->createTestType('routing-test-page');
 		$nodeId = $this->createTestNode([
 			'uid' => 'routing-test-page',
 			'type' => $typeId,
@@ -57,7 +57,7 @@ final class RoutingTest extends End2EndTestCase
 
 	public function testNestedPagePath(): void
 	{
-		$typeId = $this->createTestType('nested-test-page', 'page');
+		$typeId = $this->createTestType('nested-test-page');
 
 		$parentId = $this->createTestNode([
 			'uid' => 'parent-page',
@@ -137,7 +137,7 @@ final class RoutingTest extends End2EndTestCase
 
 	public function testHiddenNodesAreNotAccessible(): void
 	{
-		$typeId = $this->createTestType('hidden-test-page', 'page');
+		$typeId = $this->createTestType('hidden-test-page');
 		$nodeId = $this->createTestNode([
 			'uid' => 'hidden-page',
 			'type' => $typeId,
@@ -155,7 +155,7 @@ final class RoutingTest extends End2EndTestCase
 
 	public function testUnpublishedNodesAreNotAccessible(): void
 	{
-		$typeId = $this->createTestType('unpublished-test-page', 'page');
+		$typeId = $this->createTestType('unpublished-test-page');
 		$nodeId = $this->createTestNode([
 			'uid' => 'unpublished-page',
 			'type' => $typeId,
