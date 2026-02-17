@@ -17,6 +17,8 @@ conventions.
 - **Removed** `#[Page]`, `#[Block]`, `#[Document]` metadata attributes.
 - **Changed** routability/rendering semantics to use `#[Route]` and `#[Render]`
   conventions (renderer fallback remains node handle).
+- **Changed** template embedding API from `find->block(...)` to
+  `find->render(...)`.
 - **Changed** all Field and Value classes to depend on the `FieldOwner`
   interface instead of the `Node` class.
 - **Changed** node type-hints throughout the framework from `Node` to `object`.

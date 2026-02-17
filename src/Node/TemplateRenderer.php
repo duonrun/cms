@@ -60,12 +60,12 @@ class TemplateRenderer
 	}
 
 	/**
-	 * Render a block node to an HTML string.
+	 * Render a node to an HTML string.
 	 *
 	 * The node is wrapped in a Node and passed to the template as
-	 * '$block'.
+	 * '$node'.
 	 */
-	public function renderBlock(
+	public function renderNode(
 		object $node,
 		array $fieldNames,
 		Finder $find,
@@ -76,7 +76,7 @@ class TemplateRenderer
 		$proxy = new Node($node, $fieldNames, $this->hydrator, $request);
 
 		$baseContext = array_merge([
-			'block' => $proxy,
+			'node' => $proxy,
 			'find' => $find,
 			'locale' => $request->get('locale'),
 			'locales' => $request->get('locales'),

@@ -72,6 +72,14 @@ final class Department implements HasTitle
 | `HandlesFormPost` | `formPost(?array $body): Response` | Frontend form submission handling |
 | `ProvidesRenderContext` | `renderContext(): array` | Extra template variables |
 
+### Rendering by uid
+
+Render a node by uid from templates with the neutral finder API:
+
+```php
+<?= $find->render('some-node-uid') ?>
+```
+
 ## Settings
 
 ```text
