@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\View;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\NodeFactory;
@@ -28,7 +28,7 @@ class Nodes
 	) {}
 
 	#[Permission('panel')]
-	public function get(Finder $find, Factory $factory): Response
+	public function get(Cms $cms, Factory $factory): Response
 	{
 		if ($this->request->method() === 'GET') {
 			$query = new GetQuery($this->request);
@@ -37,7 +37,7 @@ class Nodes
 		}
 
 		if ($query->query) {
-			$nodes = $find->nodes($query->query);
+			$nodes = $cms->nodes($query->query);
 		} elseif (count($query->uids) > 0) {
 			if (count($query->uids) > 1) {
 				$quoted = implode(',', array_map(fn($uid) => "'{$uid}'", $query->uids));
@@ -46,12 +46,12 @@ class Nodes
 				$queryString = "uid = '{$query->uids[0]}'";
 			}
 
-			$nodes = $find->nodes($queryString);
+			$nodes = $cms->nodes($queryString);
 		} else {
 			throw new HttpBadRequest($this->request);
 		}
 
-		$nodeFactory = $find->nodeFactory();
+		$nodeFactory = $cms->nodeFactory();
 		$hydrator = $nodeFactory->hydrator();
 		$serializer = new NodeSerializer($hydrator);
 		$result = [];

@@ -8,7 +8,6 @@ use Duon\Cms\Cms;
 use Duon\Cms\Collection;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Node;
@@ -17,6 +16,7 @@ use Duon\Cms\Node\NodeManager;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;
+use Duon\Cms\Plugin;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
@@ -156,7 +156,7 @@ class Panel
 	}
 
 	#[Permission('panel')]
-	public function blueprint(string $type, Context $context, Finder $find): array
+	public function blueprint(string $type, Context $context, Cms $cms): array
 	{
 		$content = [];
 		$defaults = $this->request->param('content', null);
@@ -166,9 +166,9 @@ class Panel
 			$content = json_decode($defaults, true);
 		}
 
-		$factory = $find->nodeFactory();
-		$class = $this->registry->tag(Cms::NODE_TAG)->entry($type)->definition();
-		$obj = $factory->blueprint($class, $context, $find);
+		$factory = $cms->nodeFactory();
+		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
+		$obj = $factory->blueprint($class, $context, $cms);
 
 		$serializer = new NodeSerializer(
 			$factory->hydrator(),
@@ -186,7 +186,7 @@ class Panel
 	public function createNode(
 		string $type,
 		Context $context,
-		Finder $find,
+		Cms $cms,
 		Factory $factory,
 	): Response {
 		if ($this->request->header('Content-Type') !== 'application/json') {
@@ -194,8 +194,8 @@ class Panel
 		}
 
 		$data = $this->request->json();
-		$class = $this->registry->tag(Cms::NODE_TAG)->entry($type)->definition();
-		$obj = $find->nodeFactory()->create($class, $context, $find, $data);
+		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
+		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
 		$manager = new NodeManager($context->db, new PathManager());
 		$result = $manager->save($obj, $data, $this->request, $context->locales());
@@ -209,16 +209,16 @@ class Panel
 	}
 
 	#[Permission('panel')]
-	public function node(Context $context, Finder $find, Factory $factory, string $uid): Response
+	public function node(Context $context, Cms $cms, Factory $factory, string $uid): Response
 	{
-		$result = $find->node->byUid($uid, published: null);
+		$result = $cms->node->byUid($uid, published: null);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
 		}
 
 		$node = Node::unwrap($result);
-		$nodeFactory = $find->nodeFactory();
+		$nodeFactory = $cms->nodeFactory();
 		$serializer = new NodeSerializer($nodeFactory->hydrator());
 		$manager = new NodeManager($context->db, new PathManager());
 		$method = $this->request->method();

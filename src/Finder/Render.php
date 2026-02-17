@@ -10,6 +10,7 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\TemplateRenderer;
+use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
 
@@ -19,7 +20,7 @@ class Render
 
 	public function __construct(
 		private readonly Context $context,
-		private readonly Finder $find,
+		private readonly Cms $cms,
 		private readonly NodeFactory $nodeFactory,
 		string $uid,
 		private readonly array $templateContext = [],
@@ -34,7 +35,7 @@ class Render
 		$class = $this
 			->context
 			->registry
-			->tag(Cms::NODE_TAG)
+			->tag(Plugin::NODE_TAG)
 			->entry($data['handle'])
 			->definition();
 
@@ -43,7 +44,7 @@ class Render
 		}
 
 		$data['content'] = json_decode($data['content'], true);
-		$this->node = $this->nodeFactory->create($class, $context, $find, $data);
+		$this->node = $this->nodeFactory->create($class, $context, $cms, $data);
 	}
 
 	public function __toString(): string
@@ -58,7 +59,7 @@ class Render
 			return $renderer->renderNode(
 				$this->node,
 				NodeFactory::fieldNamesFor($this->node),
-				$this->find,
+				$this->cms,
 				$this->context->request,
 				$this->context->config,
 				$this->templateContext,

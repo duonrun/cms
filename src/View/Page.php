@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\View;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
 use Duon\Cms\Node\Node;
@@ -28,7 +28,7 @@ class Page
 		protected readonly Registry $registry,
 	) {}
 
-	public function catchall(Context $context, Finder $find): Response
+	public function catchall(Context $context, Cms $cms): Response
 	{
 		$request = $context->request;
 		$config = $context->config;
@@ -39,7 +39,7 @@ class Page
 			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path);
 		}
 
-		$page = $find->node->byPath($path === '' ? '/' : $path);
+		$page = $cms->node->byPath($path === '' ? '/' : $path);
 
 		if (!$page) {
 			try {
@@ -55,33 +55,33 @@ class Page
 
 		if ($request->get('isXhr', false)) {
 			if ($request->method() === 'GET') {
-				return $this->jsonRead($page, $find);
+				return $this->jsonRead($page, $cms);
 			}
 
 			throw new HttpBadRequest();
 		}
 
-		return $this->dispatch($page, $context, $find, $request->method(), $request->form());
+		return $this->dispatch($page, $context, $cms, $request->method(), $request->form());
 	}
 
 	#[Permission('panel')]
-	public function preview(Context $context, Finder $find, string $slug): Response
+	public function preview(Context $context, Cms $cms, string $slug): Response
 	{
-		$page = $find->node->byPath('/' . $slug);
+		$page = $cms->node->byPath('/' . $slug);
 
-		return $this->renderPage($page, $context, $find);
+		return $this->renderPage($page, $context, $cms);
 	}
 
-	private function dispatch(object $page, Context $context, Finder $find, string $method, ?array $formBody): Response
+	private function dispatch(object $page, Context $context, Cms $cms, string $method, ?array $formBody): Response
 	{
 		return match ($method) {
-			'GET' => $this->renderPage($page, $context, $find),
+			'GET' => $this->renderPage($page, $context, $cms),
 			'POST' => $this->handleFormPost($page, $formBody),
 			default => throw new HttpBadRequest(),
 		};
 	}
 
-	private function renderPage(object $page, Context $context, Finder $find): Response
+	private function renderPage(object $page, Context $context, Cms $cms): Response
 	{
 		$node = Node::unwrap($page);
 
@@ -89,26 +89,26 @@ class Page
 			return $node->render();
 		}
 
-		$hydrator = $find->nodeFactory()->hydrator();
+		$hydrator = $cms->nodeFactory()->hydrator();
 		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator);
 
 		return $renderer->renderPage(
 			$node,
 			NodeFactory::fieldNamesFor($node),
-			$find,
+			$cms,
 			$context->request,
 			$context->config,
 		);
 	}
 
-	private function jsonRead(object $node, Finder $find): Response
+	private function jsonRead(object $node, Cms $cms): Response
 	{
 		$inner = Node::unwrap($node);
 
 		if (method_exists($inner, 'read')) {
 			$data = $inner->read();
 		} else {
-			$hydrator = $find->nodeFactory()->hydrator();
+			$hydrator = $cms->nodeFactory()->hydrator();
 			$serializer = new NodeSerializer($hydrator);
 			$data = $serializer->read(
 				$inner,

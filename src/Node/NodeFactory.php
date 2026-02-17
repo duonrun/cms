@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Contract\HasInit;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -38,7 +38,7 @@ class NodeFactory
 	 * Uses Wire Creator for autowired construction,
 	 * then FieldHydrator for field initialization.
 	 */
-	public function create(string $class, Context $context, Finder $find, array $data): object
+	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
 		$serializer = new NodeSerializer($this->hydrator);
 		$manager = new NodeManager($context->db, new PathManager());
@@ -51,7 +51,7 @@ class NodeFactory
 		$creator = new Creator($this->registry);
 		$node = $creator->create($class, predefinedTypes: [
 			Context::class => $context,
-			Finder::class => $find,
+			Cms::class => $cms,
 			Request::class => $context->request,
 			Config::class => $context->config,
 			Database::class => $context->db,
@@ -96,9 +96,9 @@ class NodeFactory
 	/**
 	 * Create a blueprint (empty) node for admin panel schema generation.
 	 */
-	public function blueprint(string $class, Context $context, Finder $find): object
+	public function blueprint(string $class, Context $context, Cms $cms): object
 	{
-		return $this->create($class, $context, $find, []);
+		return $this->create($class, $context, $cms, []);
 	}
 
 	/**

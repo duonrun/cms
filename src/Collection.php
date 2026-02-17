@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms;
 
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Finder\Nodes;
 use Duon\Cms\Node\NodeFactory;
 
@@ -17,7 +16,7 @@ abstract class Collection
 	protected static bool $showHidden = false;
 
 	public function __construct(
-		public readonly Finder $find,
+		public readonly Cms $cms,
 	) {}
 
 	abstract public function entries(): Nodes;
