@@ -17,12 +17,15 @@ conventions.
 - **Removed** `#[Page]`, `#[Block]`, `#[Document]` metadata attributes.
 - **Changed** routability/rendering semantics to use `#[Route]` and `#[Render]`
   conventions (renderer fallback remains node handle).
+- **Changed** finder facade class from `Duon\Cms\Finder\Finder` to
+  `Duon\Cms\Cms`.
+- **Changed** plugin class from `Duon\Cms\Cms` to `Duon\Cms\Plugin`.
 - **Changed** template embedding API from `find->block(...)` to
-  `find->render(...)`.
+  `cms->render(...)`.
 - **Changed** all Field and Value classes to depend on the `FieldOwner`
   interface instead of the `Node` class.
 - **Changed** node type-hints throughout the framework from `Node` to `object`.
-- **Changed** the `Node::class` registry tag to `Cms::NODE_TAG` constant.
+- **Changed** the `Node::class` registry tag to `Plugin::NODE_TAG` constant.
 
 ### Added
 
@@ -41,7 +44,7 @@ conventions.
 - `NodeProxy` for template-friendly access to node fields and methods.
 - `NodeMeta` caching facade and `Meta` reflection reader for node metadata.
 - `NodeFieldOwner` adapter bridging `FieldOwner` with `Context` and uid.
-- `Cms::NODE_TAG` constant replacing the old `Node::class` registry tag.
+- `Plugin::NODE_TAG` constant replacing the old `Node::class` registry tag.
 
 ### Migration guide
 
@@ -81,7 +84,7 @@ final class Department implements HasTitle
 {
     public function __construct(
         protected readonly Request $request,
-        protected readonly Finder $find,
+        protected readonly Cms $cms,
     ) {}
 
     #[Label('Title'), Required, Translate]
