@@ -27,7 +27,7 @@ use stdClass;
 final class NodeFactoryTest extends TestCase
 {
 	private Context $context;
-	private \Duon\Cms\Finder\Finder $finder;
+	private \Duon\Cms\Cms $cms;
 	private NodeFactory $factory;
 
 	protected function setUp(): void
@@ -36,7 +36,7 @@ final class NodeFactoryTest extends TestCase
 		NodeMeta::clearCache();
 
 		$this->context = $this->createContext();
-		$this->finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
 		$this->factory = new NodeFactory($this->registry());
 	}
 
@@ -81,14 +81,14 @@ final class NodeFactoryTest extends TestCase
 			],
 		];
 
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, $data);
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, $data);
 
 		$this->assertInstanceOf(PlainPage::class, $node);
 	}
 
 	public function testCreatePlainBlock(): void
 	{
-		$node = $this->factory->create(PlainBlock::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainBlock::class, $this->context, $this->cms, [
 			'uid' => 'plain-block-1',
 			'content' => [],
 		]);
@@ -98,7 +98,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testCreateTestPage(): void
 	{
-		$node = $this->factory->create(TestPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(TestPage::class, $this->context, $this->cms, [
 			'uid' => 'test-page-1',
 			'content' => [],
 		]);
@@ -110,7 +110,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testPlainPageFieldsAreHydrated(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'hydrated-1',
 			'content' => [
 				'heading' => ['value' => ['en' => 'Test Heading']],
@@ -125,7 +125,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testPlainPageTitleResolution(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'titled-1',
 			'content' => [
 				'heading' => ['value' => ['en' => 'My Title']],
@@ -139,7 +139,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testPlainPageTitleReturnsEmptyWhenNoContent(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'untitled-1',
 			'content' => [],
 		]);
@@ -159,7 +159,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => ['heading' => ['value' => ['en' => 'Hello']]],
 		];
 
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, $data);
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, $data);
 		$stored = NodeFactory::dataFor($node);
 
 		$this->assertEquals('data-1', $stored['uid']);
@@ -168,7 +168,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testFieldNamesForReturnsFieldNames(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'fields-1',
 			'content' => [],
 		]);
@@ -179,7 +179,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testMetaReturnsDataValue(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'meta-1',
 			'handle' => 'plain-page',
 			'published' => true,
@@ -203,7 +203,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testHasInitIsCalledForPlainObject(): void
 	{
-		$node = $this->factory->create(PlainPageWithInit::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPageWithInit::class, $this->context, $this->cms, [
 			'uid' => 'init-1',
 			'content' => [],
 		]);
@@ -216,7 +216,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testBlueprintCreatesEmptyPlainNode(): void
 	{
-		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->finder);
+		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
 
 		$this->assertInstanceOf(PlainPage::class, $node);
 		$fieldNames = NodeFactory::fieldNamesFor($node);
@@ -274,7 +274,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testSerializerFieldsForPlainPage(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'ser-1',
 			'content' => [],
 		]);
@@ -290,7 +290,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testSerializerBlueprintForPlainPage(): void
 	{
-		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->finder);
+		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
 		$fieldNames = NodeFactory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
@@ -313,7 +313,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeFieldAccess(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'proxy-1',
 			'content' => [
 				'heading' => ['value' => ['en' => 'Proxy Title']],
@@ -329,7 +329,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMethodDelegation(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'proxy-2',
 			'content' => [
 				'heading' => ['value' => ['en' => 'Method Test']],
@@ -344,7 +344,7 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeUnsetFieldReturnsNull(): void
 	{
-		$node = $this->factory->create(PlainPage::class, $this->context, $this->finder, [
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'proxy-3',
 			'content' => [],
 		]);

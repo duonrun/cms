@@ -38,11 +38,11 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixIntegration(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createStub(\Duon\Cms\Finder\Finder::class);
+		$cms = $this->createStub(\Duon\Cms\Cms::class);
 		$nodeFactory = new NodeFactory($this->registry());
 		$hydrator = $nodeFactory->hydrator();
 
-		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $finder, ['content' => [
+		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $cms, ['content' => [
 			'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
 			'matrix' => ['type' => 'matrix', 'value' => [
 				[
