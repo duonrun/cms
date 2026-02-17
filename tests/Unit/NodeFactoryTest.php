@@ -156,7 +156,6 @@ final class NodeFactoryTest extends TestCase
 		$data = [
 			'uid' => 'data-1',
 			'handle' => 'plain-page',
-			'kind' => 'page',
 			'content' => ['heading' => ['value' => ['en' => 'Hello']]],
 		];
 
@@ -165,7 +164,6 @@ final class NodeFactoryTest extends TestCase
 
 		$this->assertEquals('data-1', $stored['uid']);
 		$this->assertEquals('plain-page', $stored['handle']);
-		$this->assertEquals('page', $stored['kind']);
 	}
 
 	public function testFieldNamesForReturnsFieldNames(): void

@@ -5,9 +5,6 @@ CREATE EXTENSION unaccent;
 CREATE SCHEMA cms;
 CREATE SCHEMA audit;
 
-CREATE TYPE cms.contenttype AS ENUM ('page', 'block', 'document');
-
-
 CREATE FUNCTION cms.update_changed_column()
 	RETURNS TRIGGER AS $$
 BEGIN
@@ -126,7 +123,6 @@ CREATE TABLE cms.loginsessions (
 CREATE TABLE cms.types (
 	type integer GENERATED ALWAYS AS IDENTITY,
 	handle text NOT NULL,
-	kind cms.contenttype NOT NULL,
 	CONSTRAINT pk_types PRIMARY KEY (type),
 	CONSTRAINT uc_types_handle UNIQUE (handle),
 	CONSTRAINT ck_types_handle CHECK (char_length(handle) <= 256)
