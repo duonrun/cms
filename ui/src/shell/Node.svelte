@@ -79,7 +79,7 @@
 		bind:uid={node.uid}
 		collectionPath="collection/{collection.slug}"
 		deletable={node.deletable}
-		preview={node.type.kind === 'page' ? preview : null}
+		preview={node.type.routable && node.type.renderable ? preview : null}
 		{save} />
 	<Document>
 		<Breadcrumbs
@@ -87,7 +87,7 @@
 			name={collection.name} />
 		<Headline
 			published={node.published}
-			showPublished={node.type.kind !== 'document'}>
+			showPublished={node.type.renderable}>
 			{@html node.title}
 		</Headline>
 		<Tabs>
@@ -97,7 +97,7 @@
 				class="tab">
 				{_('Inhalt')}
 			</button>
-			{#if node.type.kind !== 'document'}
+			{#if node.type.routable || node.type.renderable}
 				<button
 					onclick={changeTab('settings')}
 					class:active={activeTab === 'settings'}
