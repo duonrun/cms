@@ -58,6 +58,43 @@ final class FinderTest extends IntegrationTestCase
 		}
 	}
 
+	public function testFinderFiltersByRoutableBuiltin(): void
+	{
+		$typeId = $this->createTestType('routing-test-page');
+		$this->createTestNode([
+			'uid' => 'finder-routable-node',
+			'type' => $typeId,
+		]);
+
+		$finder = $this->createFinder();
+		$nodes = iterator_to_array($finder->nodes()
+			->types('routing-test-page', 'test-article')
+			->published(null)
+			->filter('routable = true'));
+
+		$this->assertNotEmpty($nodes);
+
+		foreach ($nodes as $node) {
+			$this->assertTrue(NodeMeta::routable(Node::unwrap($node)::class));
+		}
+	}
+
+	public function testFinderFiltersByRenderableBuiltin(): void
+	{
+		$finder = $this->createFinder();
+		$renderable = iterator_to_array($finder->nodes()
+			->types('test-article')
+			->published(null)
+			->filter('renderable = true'));
+		$notRenderable = iterator_to_array($finder->nodes()
+			->types('test-article')
+			->published(null)
+			->filter('renderable = false'));
+
+		$this->assertNotEmpty($renderable);
+		$this->assertEmpty($notRenderable);
+	}
+
 	public function testFinderSupportsMultipleTypes(): void
 	{
 		$finder = $this->createFinder();
