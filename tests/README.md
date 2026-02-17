@@ -156,7 +156,7 @@ Extends `TestCase` for integration tests, provides:
 - **Fixture loading**: `loadFixtures(...$fixtures)`
 - **Test data creation**: `createTestType()`, `createTestNode()`, `createTestUser()`, `createTestPath()`
 - **Context creation**: `createContext()`
-- **Finder creation**: `createFinder()`
+- **Cms creation**: `createCms()`
 
 #### `End2EndTestCase`
 
@@ -288,9 +288,9 @@ public function testWithFixtures(): void
     // Load SQL fixtures
     $this->loadFixtures('basic-types', 'sample-nodes');
 
-    // Use Finder to query fixture data
-    $finder = $this->createFinder();
-    $nodes = $finder->nodes()->types('test-page')->get();
+    // Use Cms to query fixture data
+    $cms = $this->createCms();
+    $nodes = $cms->nodes()->types('test-page')->get();
 
     $this->assertNotEmpty($nodes);
 }

@@ -13,7 +13,7 @@ use Duon\Cms\Field\Image;
 use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Meta\Required;
 use Duon\Cms\Field\Meta\Translate;
-use Duon\Cms\Finder\Finder;
+use Duon\Cms\Cms;
 use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Node\Meta\Route;
 use Duon\Cms\Node\Contract\HasTitle;
@@ -24,7 +24,7 @@ final class Department implements HasTitle
 {
     public function __construct(
         protected readonly Request $request,
-        protected readonly Finder $find,
+        protected readonly Cms $cms,
     ) {}
 
     #[Label('Title'), Required, Translate]
@@ -74,10 +74,10 @@ final class Department implements HasTitle
 
 ### Rendering by uid
 
-Render a node by uid from templates with the neutral finder API:
+Render a node by uid from templates with the neutral cms API:
 
 ```php
-<?= $find->render('some-node-uid') ?>
+<?= $cms->render('some-node-uid') ?>
 ```
 
 ## Settings
