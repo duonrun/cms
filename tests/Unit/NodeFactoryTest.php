@@ -303,7 +303,8 @@ final class NodeFactoryTest extends TestCase
 		$this->assertArrayHasKey('content', $blueprint);
 		$this->assertArrayHasKey('fields', $blueprint);
 		$this->assertArrayHasKey('type', $blueprint);
-		$this->assertEquals('page', $blueprint['type']['kind']);
+		$this->assertTrue($blueprint['type']['routable']);
+		$this->assertTrue($blueprint['type']['renderable']);
 		$this->assertEquals('plain-page', $blueprint['type']['handle']);
 		$this->assertEquals(PlainPage::class, $blueprint['type']['class']);
 		$this->assertArrayHasKey('route', $blueprint);
