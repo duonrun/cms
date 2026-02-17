@@ -1,0 +1,2 @@
+ALTER TABLE cms.types DROP COLUMN IF EXISTS kind;
+DROP TYPE IF EXISTS cms.contenttype;
