@@ -10,9 +10,11 @@ use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Node\Meta\Page;
+use Duon\Cms\Node\Meta\Route;
 
 #[Page]
 #[Name('Test Page')]
+#[Route('/test/{uid}')]
 class TestPage implements HasTitle
 {
 	#[Label('Title')]

@@ -20,14 +20,6 @@ class NodeMeta
 	/**
 	 * @param class-string $class
 	 */
-	public static function kind(string $class): string
-	{
-		return self::forClass($class)->kind;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
 	public static function handle(string $class): string
 	{
 		return self::forClass($class)->handle;
@@ -94,7 +86,7 @@ class NodeMeta
 	 */
 	public static function isNode(string $class): bool
 	{
-		return self::forClass($class)->hasKindAttribute;
+		return class_exists($class);
 	}
 
 	public static function clearCache(): void

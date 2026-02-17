@@ -111,9 +111,7 @@ class NodeManager
 	{
 		$nodeId = $this->persistNode($node, $data, $editor);
 
-		$kind = NodeMeta::kind($node::class);
-
-		if ($kind === 'page') {
+		if (NodeMeta::routable($node::class)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -142,7 +140,7 @@ class NodeManager
 		if (!$type) {
 			$this->db->nodes->addType([
 				'handle' => $handle,
-				'kind' => NodeMeta::kind($class),
+				'kind' => NodeMeta::routable($class) ? 'page' : 'block',
 			])->run();
 		}
 	}

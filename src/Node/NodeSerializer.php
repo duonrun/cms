@@ -79,7 +79,8 @@ class NodeSerializer
 		}
 
 		$class = $node::class;
-		$kind = NodeMeta::kind($class);
+		$routable = NodeMeta::routable($class);
+		$kind = $routable ? 'page' : 'block';
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
@@ -103,7 +104,7 @@ class NodeSerializer
 			'generatedPaths' => [],
 		];
 
-		if ($kind === 'page') {
+		if ($routable) {
 			$result['route'] = NodeMeta::route($class);
 		}
 
