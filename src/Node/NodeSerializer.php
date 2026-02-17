@@ -33,6 +33,8 @@ class NodeSerializer
 
 	public function data(object $node, array $rawData, array $fieldNames): array
 	{
+		$class = $node::class;
+
 		return [
 			'uid' => $rawData['uid'],
 			'published' => $rawData['published'],
@@ -44,8 +46,9 @@ class NodeSerializer
 			'paths' => $rawData['paths'],
 			'type' => [
 				'handle' => $rawData['handle'],
-				'kind' => $rawData['kind'],
-				'class' => $node::class,
+				'routable' => NodeMeta::routable($class),
+				'renderable' => NodeMeta::renderable($class),
+				'class' => $class,
 			],
 			'editor' => [
 				'uid' => $rawData['editor_uid'],
@@ -80,7 +83,7 @@ class NodeSerializer
 
 		$class = $node::class;
 		$routable = NodeMeta::routable($class);
-		$kind = $routable ? 'page' : 'block';
+		$renderable = NodeMeta::renderable($class);
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
@@ -97,7 +100,8 @@ class NodeSerializer
 			'content' => $content,
 			'type' => [
 				'handle' => NodeMeta::handle($class),
-				'kind' => $kind,
+				'routable' => $routable,
+				'renderable' => $renderable,
 				'class' => $class,
 			],
 			'paths' => $paths,
