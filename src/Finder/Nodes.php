@@ -6,10 +6,10 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Plugin;
 use Generator;
 use Iterator;
 
@@ -27,7 +27,7 @@ final class Nodes implements Iterator
 
 	public function __construct(
 		private readonly Context $context,
-		private readonly Finder $find,
+		private readonly Cms $cms,
 		private readonly NodeFactory $nodeFactory,
 	) {
 		$this->builtins = [
@@ -132,11 +132,11 @@ final class Nodes implements Iterator
 		$page['paths'] = json_decode($page['paths'], true);
 		$class = $this->context
 			->registry
-			->tag(Cms::NODE_TAG)
+			->tag(Plugin::NODE_TAG)
 			->entry($page['handle'])
 			->definition();
 
-		$node = $this->nodeFactory->create($class, $this->context, $this->find, $page);
+		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $page);
 
 		return $this->nodeFactory->proxy($node, $this->context->request);
 	}
@@ -211,7 +211,7 @@ final class Nodes implements Iterator
 	private function typeFlagExpression(callable $flag): string
 	{
 		$handles = [];
-		$types = $this->context->registry->tag(Cms::NODE_TAG);
+		$types = $this->context->registry->tag(Plugin::NODE_TAG);
 
 		foreach ($types->entries() as $handle) {
 			$class = $types->entry($handle)->definition();

@@ -8,11 +8,11 @@ use Closure;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Middleware\AddLocale;
 use Duon\Core\App;
-use Duon\Core\Plugin;
+use Duon\Core\Plugin as CorePlugin;
 use Iterator;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class Locales implements Iterator, Plugin
+class Locales implements Iterator, CorePlugin
 {
 	/** @var array<string, Locale> */
 	protected array $locales = [];

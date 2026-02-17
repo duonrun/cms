@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Node\Contract\ProvidesRenderContext;
 use Duon\Cms\Renderer;
 use Duon\Core\Factory;
@@ -32,7 +32,7 @@ class TemplateRenderer
 	public function renderPage(
 		object $node,
 		array $fieldNames,
-		Finder $find,
+		Cms $cms,
 		Request $request,
 		Config $config,
 		array $context = [],
@@ -41,7 +41,7 @@ class TemplateRenderer
 
 		$baseContext = [
 			'page' => $proxy,
-			'find' => $find,
+			'cms' => $cms,
 			'locale' => $request->get('locale'),
 			'locales' => $request->get('locales'),
 			'request' => $request,
@@ -68,7 +68,7 @@ class TemplateRenderer
 	public function renderNode(
 		object $node,
 		array $fieldNames,
-		Finder $find,
+		Cms $cms,
 		Request $request,
 		Config $config,
 		array $context = [],
@@ -77,7 +77,7 @@ class TemplateRenderer
 
 		$baseContext = array_merge([
 			'node' => $proxy,
-			'find' => $find,
+			'cms' => $cms,
 			'locale' => $request->get('locale'),
 			'locales' => $request->get('locales'),
 			'request' => $request,
