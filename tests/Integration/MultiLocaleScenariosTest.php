@@ -23,7 +23,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testFallbackToDefaultLocale(): void
 	{
-		$typeId = $this->createTestType('fallback-test', 'page');
+		$typeId = $this->createTestType('fallback-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'fallback-node',
@@ -57,7 +57,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testLocaleSpecificContent(): void
 	{
-		$typeId = $this->createTestType('locale-specific-test', 'page');
+		$typeId = $this->createTestType('locale-specific-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'locale-specific-node',
@@ -101,7 +101,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testTranslatableFileFieldsPerLocale(): void
 	{
-		$typeId = $this->createTestType('locale-file-test', 'page');
+		$typeId = $this->createTestType('locale-file-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'locale-file-node',
@@ -135,7 +135,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testTranslatableImageAltPerLocale(): void
 	{
-		$typeId = $this->createTestType('locale-image-test', 'page');
+		$typeId = $this->createTestType('locale-image-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'locale-image-node',
@@ -172,7 +172,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testPathsForMultipleLocales(): void
 	{
-		$typeId = $this->createTestType('multi-locale-paths-test', 'page');
+		$typeId = $this->createTestType('multi-locale-paths-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'multi-locale-node',
@@ -204,7 +204,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testPartialTranslationFallbackChain(): void
 	{
-		$typeId = $this->createTestType('partial-fallback-test', 'page');
+		$typeId = $this->createTestType('partial-fallback-test');
 
 		// Create content with only some locales translated
 		$nodeId = $this->createTestNode([
@@ -241,7 +241,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 
 	public function testGridWithTranslatableItems(): void
 	{
-		$typeId = $this->createTestType('locale-grid-test', 'page');
+		$typeId = $this->createTestType('locale-grid-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'locale-grid-node',

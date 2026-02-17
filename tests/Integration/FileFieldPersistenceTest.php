@@ -23,7 +23,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testSingleFileField(): void
 	{
-		$typeId = $this->createTestType('single-file-test', 'page');
+		$typeId = $this->createTestType('single-file-test');
 
 		$fileContent = [
 			'document' => [
@@ -53,7 +53,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testMultipleFilesField(): void
 	{
-		$typeId = $this->createTestType('multiple-files-test', 'page');
+		$typeId = $this->createTestType('multiple-files-test');
 
 		$fileContent = [
 			'attachments' => [
@@ -86,7 +86,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testImageFieldWithMetadata(): void
 	{
-		$typeId = $this->createTestType('image-metadata-test', 'page');
+		$typeId = $this->createTestType('image-metadata-test');
 
 		$imageContent = [
 			'hero' => [
@@ -121,7 +121,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testImageFieldWithTranslatableAlt(): void
 	{
-		$typeId = $this->createTestType('image-translatable-test', 'page');
+		$typeId = $this->createTestType('image-translatable-test');
 
 		$imageContent = [
 			'gallery' => [
@@ -157,7 +157,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testFileFieldWithTranslatableTitle(): void
 	{
-		$typeId = $this->createTestType('file-translatable-test', 'page');
+		$typeId = $this->createTestType('file-translatable-test');
 
 		$fileContent = [
 			'download' => [
@@ -193,7 +193,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testPictureFieldWithMultipleSources(): void
 	{
-		$typeId = $this->createTestType('picture-multiple-test', 'page');
+		$typeId = $this->createTestType('picture-multiple-test');
 
 		$pictureContent = [
 			'hero' => [
@@ -238,7 +238,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testEmptyFileField(): void
 	{
-		$typeId = $this->createTestType('empty-file-test', 'page');
+		$typeId = $this->createTestType('empty-file-test');
 
 		$fileContent = [
 			'optional' => [
@@ -265,7 +265,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 
 	public function testVideoField(): void
 	{
-		$typeId = $this->createTestType('video-test', 'page');
+		$typeId = $this->createTestType('video-test');
 
 		$videoContent = [
 			'teaser' => [

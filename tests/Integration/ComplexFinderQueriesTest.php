@@ -23,7 +23,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testPaginationWithOffsetAndLimit(): void
 	{
-		$typeId = $this->createTestType('pagination-test', 'page');
+		$typeId = $this->createTestType('pagination-test');
 
 		// Create 10 nodes
 		for ($i = 1; $i <= 10; $i++) {
@@ -59,7 +59,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testCombinedFiltersPublishedAndHidden(): void
 	{
-		$typeId = $this->createTestType('combined-filter-test', 'page');
+		$typeId = $this->createTestType('combined-filter-test');
 
 		// Create nodes with different published/hidden combinations
 		$this->createTestNode(['uid' => 'pub-visible', 'type' => $typeId, 'published' => true, 'hidden' => false]);
@@ -87,7 +87,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testQueryByJsonbContentValue(): void
 	{
-		$typeId = $this->createTestType('jsonb-query-test', 'page');
+		$typeId = $this->createTestType('jsonb-query-test');
 
 		// Create nodes with different content values
 		$this->createTestNode([
@@ -122,7 +122,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testQueryByJsonbContentWithLocale(): void
 	{
-		$typeId = $this->createTestType('jsonb-locale-query-test', 'page');
+		$typeId = $this->createTestType('jsonb-locale-query-test');
 
 		$this->createTestNode([
 			'uid' => 'en-only-node',
@@ -160,7 +160,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testOrderingByMultipleCriteria(): void
 	{
-		$typeId = $this->createTestType('multi-order-test', 'page');
+		$typeId = $this->createTestType('multi-order-test');
 
 		// Create nodes with different published status and dates
 		$this->db()->execute(
@@ -197,7 +197,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testCountWithFilters(): void
 	{
-		$typeId = $this->createTestType('count-filter-test', 'page');
+		$typeId = $this->createTestType('count-filter-test');
 
 		// Create 5 published and 3 unpublished nodes
 		for ($i = 1; $i <= 5; $i++) {
@@ -240,7 +240,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testQueryWithJsonbArrayContains(): void
 	{
-		$typeId = $this->createTestType('jsonb-array-test', 'page');
+		$typeId = $this->createTestType('jsonb-array-test');
 
 		// Node with multiple categories
 		$this->createTestNode([
@@ -290,7 +290,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testComplexQueryWithJoins(): void
 	{
-		$typeId = $this->createTestType('complex-join-test', 'page');
+		$typeId = $this->createTestType('complex-join-test');
 
 		$nodeId = $this->createTestNode([
 			'uid' => 'path-node-1',
@@ -317,7 +317,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 	public function testDateRangeQuery(): void
 	{
-		$typeId = $this->createTestType('date-range-test', 'page');
+		$typeId = $this->createTestType('date-range-test');
 
 		// Insert nodes with specific dates
 		$this->db()->execute(

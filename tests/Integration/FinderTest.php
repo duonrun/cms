@@ -79,7 +79,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderOrdersByField(): void
 	{
-		$typeId = $this->createTestType('ordered-test-page', 'page');
+		$typeId = $this->createTestType('ordered-test-page');
 
 		// Create nodes with specific UIDs to ensure predictable ordering
 		$this->createTestNode([
@@ -111,7 +111,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderLimitsResults(): void
 	{
-		$typeId = $this->createTestType('limit-test-page', 'page');
+		$typeId = $this->createTestType('limit-test-page');
 
 		for ($i = 1; $i <= 5; $i++) {
 			$this->createTestNode([
@@ -130,7 +130,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderFiltersHiddenNodes(): void
 	{
-		$typeId = $this->createTestType('hidden-test-page', 'page');
+		$typeId = $this->createTestType('hidden-test-page');
 
 		$this->createTestNode([
 			'uid' => 'visible-node',

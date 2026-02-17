@@ -23,7 +23,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridWithTextAndHtmlItems(): void
 	{
-		$typeId = $this->createTestType('grid-text-html-test', 'page');
+		$typeId = $this->createTestType('grid-text-html-test');
 
 		$gridContent = [
 			'grid' => [
@@ -66,7 +66,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridWithImageItems(): void
 	{
-		$typeId = $this->createTestType('grid-image-test', 'page');
+		$typeId = $this->createTestType('grid-image-test');
 
 		$gridContent = [
 			'gallery' => [
@@ -113,7 +113,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridWithYoutubeItem(): void
 	{
-		$typeId = $this->createTestType('grid-youtube-test', 'page');
+		$typeId = $this->createTestType('grid-youtube-test');
 
 		$gridContent = [
 			'content' => [
@@ -151,7 +151,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridWithMixedItemTypes(): void
 	{
-		$typeId = $this->createTestType('grid-mixed-test', 'page');
+		$typeId = $this->createTestType('grid-mixed-test');
 
 		$gridContent = [
 			'mixed' => [
@@ -188,7 +188,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridWithTranslatableContent(): void
 	{
-		$typeId = $this->createTestType('grid-translatable-test', 'page');
+		$typeId = $this->createTestType('grid-translatable-test');
 
 		$gridContent = [
 			'grid' => [
@@ -234,7 +234,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testEmptyGridStructure(): void
 	{
-		$typeId = $this->createTestType('grid-empty-test', 'page');
+		$typeId = $this->createTestType('grid-empty-test');
 
 		$gridContent = [
 			'emptygrid' => [
@@ -261,7 +261,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 	public function testGridComplexLayout(): void
 	{
-		$typeId = $this->createTestType('grid-layout-test', 'page');
+		$typeId = $this->createTestType('grid-layout-test');
 
 		// Create a 12-column layout with various spans
 		$gridContent = [

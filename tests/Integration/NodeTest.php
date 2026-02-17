@@ -10,7 +10,7 @@ final class NodeTest extends IntegrationTestCase
 {
 	public function testCreateAndRetrieveNode(): void
 	{
-		$typeId = $this->createTestType('integration-test-page', 'page');
+		$typeId = $this->createTestType('integration-test-page');
 		$content = [
 			'title' => [
 				'type' => 'text',
@@ -46,7 +46,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testCreateNodeWithDefaults(): void
 	{
-		$typeId = $this->createTestType('default-test-page', 'page');
+		$typeId = $this->createTestType('default-test-page');
 
 		$nodeId = $this->createTestNode([
 			'type' => $typeId,
@@ -67,7 +67,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testUpdateNodeContent(): void
 	{
-		$typeId = $this->createTestType('update-test-page', 'page');
+		$typeId = $this->createTestType('update-test-page');
 		$initialContent = [
 			'title' => ['type' => 'text', 'value' => ['en' => 'Initial Title']],
 		];
@@ -100,7 +100,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testQueryNodesByType(): void
 	{
-		$typeId = $this->createTestType('query-test-page', 'page');
+		$typeId = $this->createTestType('query-test-page');
 
 		$this->createTestNode(['uid' => 'query-node-1', 'type' => $typeId, 'published' => true]);
 		$this->createTestNode(['uid' => 'query-node-2', 'type' => $typeId, 'published' => true]);
@@ -118,7 +118,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testNodeHierarchy(): void
 	{
-		$typeId = $this->createTestType('hierarchy-test-page', 'page');
+		$typeId = $this->createTestType('hierarchy-test-page');
 
 		$parentId = $this->createTestNode([
 			'uid' => 'hierarchy-parent',
@@ -143,7 +143,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testDeleteNode(): void
 	{
-		$typeId = $this->createTestType('delete-test-page', 'page');
+		$typeId = $this->createTestType('delete-test-page');
 		$nodeId = $this->createTestNode([
 			'uid' => 'delete-test-node',
 			'type' => $typeId,
@@ -169,7 +169,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testNodeJsonbQuerying(): void
 	{
-		$typeId = $this->createTestType('jsonb-test-page', 'page');
+		$typeId = $this->createTestType('jsonb-test-page');
 
 		$this->createTestNode([
 			'uid' => 'jsonb-node-1',
@@ -232,7 +232,7 @@ final class NodeTest extends IntegrationTestCase
 		$db = $this->testDb;
 		$locales = $context->locales();
 
-		$typeId = $this->createTestType('path-locale-test', 'page');
+		$typeId = $this->createTestType('path-locale-test');
 		$nodeId = $this->createTestNode([
 			'uid' => 'path-missing-default',
 			'type' => $typeId,
