@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
-use Duon\Cms\Node\Meta\Block as BlockAttr;
 use Duon\Cms\Node\Meta\Deletable;
-use Duon\Cms\Node\Meta\Document as DocumentAttr;
 use Duon\Cms\Node\Meta\FieldOrder;
 use Duon\Cms\Node\Meta\Handle;
 use Duon\Cms\Node\Meta\Name;
-use Duon\Cms\Node\Meta\Page as PageAttr;
 use Duon\Cms\Node\Meta\Permission;
 use Duon\Cms\Node\Meta\Render;
 use Duon\Cms\Node\Meta\Route;
@@ -26,8 +23,6 @@ class Meta
 	public readonly bool $renderable;
 	public readonly string|array $route;
 	public readonly string|array $permission;
-	public readonly string $kind; // 'page', 'block', or 'document'
-	public readonly bool $hasKindAttribute; // true if kind was resolved from an attribute
 	public readonly ?string $titleField; // Field name from #[Title], or null
 	/** @var string[]|null */
 	public readonly ?array $fieldOrder; // From #[FieldOrder], or null for declaration order
@@ -50,7 +45,6 @@ class Meta
 		$this->routable = $route !== null;
 		$this->renderable = $render !== null || $this->renderer !== '';
 		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
-		[$this->kind, $this->hasKindAttribute] = $this->resolveKind($attributes);
 		$this->titleField = ($attributes[Title::class] ?? null)?->field;
 		$this->fieldOrder = ($attributes[FieldOrder::class] ?? null)?->fields;
 		$this->deletable = ($attributes[Deletable::class] ?? null)?->value ?? true;
@@ -125,23 +119,6 @@ class Meta
 			'change' => 'authenticated',
 			'deeete' => 'authenticated',
 		];
-	}
-
-	private function resolveKind(array $attributes): array
-	{
-		if (isset($attributes[PageAttr::class])) {
-			return ['page', true];
-		}
-
-		if (isset($attributes[BlockAttr::class])) {
-			return ['block', true];
-		}
-
-		if (isset($attributes[DocumentAttr::class])) {
-			return ['document', true];
-		}
-
-		return ['document', false];
 	}
 
 	private function getClassName(): string

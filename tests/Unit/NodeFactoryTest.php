@@ -227,14 +227,14 @@ final class NodeFactoryTest extends TestCase
 
 	// -- NodeMeta with plain objects ------------------------------------------
 
-	public function testNodeMetaKindForPlainPage(): void
+	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertEquals('page', NodeMeta::kind(PlainPage::class));
+		$this->assertTrue(NodeMeta::routable(PlainPage::class));
 	}
 
-	public function testNodeMetaKindForPlainBlock(): void
+	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertEquals('block', NodeMeta::kind(PlainBlock::class));
+		$this->assertTrue(NodeMeta::renderable(PlainBlock::class));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void

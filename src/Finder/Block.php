@@ -40,7 +40,7 @@ class Block
 			->entry($data['handle'])
 			->definition();
 
-		if (NodeMeta::kind($class) !== 'block') {
+		if (!NodeMeta::renderable($class)) {
 			throw new RuntimeException('Invalid block class' . $class);
 		}
 
