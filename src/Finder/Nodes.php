@@ -40,6 +40,12 @@ final class Nodes implements Iterator
 			'locked' => 'n.locked',
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
+			'routable' => $this->typeFlagExpression(
+				fn(string $class): bool => NodeMeta::routable($class),
+			),
+			'renderable' => $this->typeFlagExpression(
+				fn(string $class): bool => NodeMeta::renderable($class),
+			),
 			'type' => 't.handle',
 			'handle' => 't.handle',
 			'uid' => 'n.uid',
@@ -200,5 +206,29 @@ final class Nodes implements Iterator
 				. implode("\n        OR ", $result)
 				. "\n    )",
 		};
+	}
+
+	private function typeFlagExpression(callable $flag): string
+	{
+		$handles = [];
+		$types = $this->context->registry->tag(Cms::NODE_TAG);
+
+		foreach ($types->entries() as $handle) {
+			$class = $types->entry($handle)->definition();
+
+			if (!is_string($class) || !class_exists($class) || !$flag($class)) {
+				continue;
+			}
+
+			$handles[] = $this->context->db->quote($handle);
+		}
+
+		sort($handles);
+
+		if ($handles === []) {
+			return 'FALSE';
+		}
+
+		return 't.handle IN (' . implode(', ', $handles) . ')';
 	}
 }
