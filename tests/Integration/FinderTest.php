@@ -20,7 +20,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderReturnsNodesOfSpecificType(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes->types('test-article'));
 
 		$this->assertGreaterThan(0, count($nodes));
@@ -32,7 +32,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderFiltersPublishedNodes(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$publishedNodes = iterator_to_array($finder->nodes->types('test-article')->published(true));
 		$allNodes = iterator_to_array($finder->nodes->types('test-article')->published(null));
 
@@ -46,7 +46,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderFiltersUnpublishedNodes(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$unpublishedNodes = iterator_to_array($finder->nodes()
 			->types('test-article')
 			->published(false));
@@ -66,7 +66,7 @@ final class FinderTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes()
 			->types('routing-test-page', 'test-article')
 			->published(null)
@@ -81,7 +81,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderFiltersByRenderableBuiltin(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$renderable = iterator_to_array($finder->nodes()
 			->types('test-article')
 			->published(null)
@@ -97,7 +97,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderSupportsMultipleTypes(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes()
 			->types('test-home', 'test-article'));
 
@@ -135,7 +135,7 @@ final class FinderTest extends IntegrationTestCase
 			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'B Title']]],
 		]);
 
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes()
 			->types('ordered-test-page')
 			->order('uid ASC'));
@@ -157,7 +157,7 @@ final class FinderTest extends IntegrationTestCase
 			]);
 		}
 
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes()
 			->types('limit-test-page')
 			->limit(3));
@@ -181,7 +181,7 @@ final class FinderTest extends IntegrationTestCase
 			'hidden' => true,
 		]);
 
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$visibleNodes = iterator_to_array($finder->nodes()
 			->types('hidden-test-page')
 			->hidden(false));
@@ -192,7 +192,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderReturnsEmptyArrayWhenNoResults(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$nodes = iterator_to_array($finder->nodes()
 			->types('non-existent-type'));
 
@@ -202,7 +202,7 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderWithFixtureData(): void
 	{
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 		$homepage = iterator_to_array($finder->nodes()->types('test-home'));
 
 		$this->assertNotEmpty($homepage);

@@ -6,7 +6,7 @@ namespace Duon\Cms\Tests;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
-use Duon\Cms\Finder\Finder;
+use Duon\Cms\Plugin;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
@@ -135,41 +135,41 @@ class IntegrationTestCase extends TestCase
 		$registry = new Registry();
 
 		// Register test Node classes for fixture types
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-article', \Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-home', \Duon\Cms\Tests\Fixtures\Node\TestHome::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-block', \Duon\Cms\Tests\Fixtures\Node\TestBlock::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-widget', \Duon\Cms\Tests\Fixtures\Node\TestWidget::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-document', \Duon\Cms\Tests\Fixtures\Node\TestDocument::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('test-media-document', \Duon\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
 
 		// Register dynamically created test types (reuse TestPage for all page types)
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('ordered-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('limit-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('hidden-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('routing-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('nested-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('unpublished-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('create-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('crud-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('update-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$registry->tag(Cms::NODE_TAG)
+		$registry->tag(Plugin::NODE_TAG)
 			->add('delete-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 
 		return $registry;
@@ -310,8 +310,8 @@ class IntegrationTestCase extends TestCase
 		);
 	}
 
-	protected function createFinder(): Finder
+	protected function createCms(): Cms
 	{
-		return new Finder($this->createContext());
+		return new Cms($this->createContext());
 	}
 }

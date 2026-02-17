@@ -26,7 +26,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testFieldPropertiesIncludesNameAndType(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
@@ -41,7 +41,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testFieldPropertiesCollectsFromMultipleCapabilities(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
@@ -64,7 +64,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testFieldPropertiesHandlesHiddenAndImmutable(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
@@ -80,7 +80,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testFieldPropertiesHandlesResizableProperties(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
@@ -102,7 +102,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testGridFieldPropertiesIncludesColumns(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
@@ -121,7 +121,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testImageFieldPropertiesIncludesMultipleAndTranslateFile(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
@@ -137,7 +137,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testOptionFieldPropertiesIncludesOptions(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestMediaDocument::class, $context, $finder, ['content' => []]);
 
@@ -150,7 +150,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	public function testNodeFieldsMethodReturnsAllFieldProperties(): void
 	{
 		$context = $this->createContext();
-		$finder = $this->createFinder();
+		$finder = $this->createCms();
 
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 

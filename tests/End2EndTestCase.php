@@ -7,13 +7,13 @@ namespace Duon\Cms\Tests;
 use Duon\Cms\Boiler\Error\Handler;
 use Duon\Cms\Cms;
 use Duon\Cms\Config;
-use Duon\Cms\Finder\Finder;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Plugin;
 use Duon\Core\App;
 use Duon\Core\Factory\Laminas;
-use Duon\Core\Plugin;
+use Duon\Core\Plugin as CorePlugin;
 use Duon\Core\Request;
 use Duon\Registry\Registry;
 use Duon\Router\Router;
@@ -244,14 +244,14 @@ class End2EndTestCase extends IntegrationTestCase
 		$app->load($this->createLocales());
 
 		// Load CMS
-		$cms = $this->createCms();
-		$app->load($cms);
-		$app->addRoute($cms->catchallRoute());
+		$plugin = $this->createPlugin();
+		$app->load($plugin);
+		$app->addRoute($plugin->catchallRoute());
 
 		return $app;
 	}
 
-	protected function createLocales(): Plugin
+	protected function createLocales(): CorePlugin
 	{
 		$locales = new Locales();
 		$locales->add('en', title: 'English', pgDict: 'english');
@@ -260,24 +260,24 @@ class End2EndTestCase extends IntegrationTestCase
 		return $locales;
 	}
 
-	protected function createCms(): Cms
+	protected function createPlugin(): Plugin
 	{
-		$cms = new Cms(sessionEnabled: false);
+		$plugin = new Plugin(sessionEnabled: false);
 
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestHome::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestBlock::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestWidget::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestDocument::class);
-		$cms->node(\Duon\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestHome::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestBlock::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestWidget::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestDocument::class);
+		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
 
-		$cms->renderer('template', \Duon\Cms\Boiler\Renderer::class)->args(
+		$plugin->renderer('template', \Duon\Cms\Boiler\Renderer::class)->args(
 			dirs: self::root() . '/tests/Fixtures/templates',
 			autoescape: true,
 			whitelist: [
 				Node::class,
-				\Duon\Cms\Finder\Finder::class,
+				Cms::class,
 				\Duon\Cms\Locales::class,
 				\Duon\Cms\Locale::class,
 				\Duon\Cms\Config::class,
@@ -285,7 +285,7 @@ class End2EndTestCase extends IntegrationTestCase
 			],
 		);
 
-		return $cms;
+		return $plugin;
 	}
 
 	protected function createErrorHandler(Laminas $factory): \Duon\Error\Handler
@@ -302,7 +302,7 @@ class End2EndTestCase extends IntegrationTestCase
 
 		$handler->whitelist([
 			Node::class,
-			Finder::class,
+			Cms::class,
 			Locales::class,
 			Locale::class,
 			Config::class,
