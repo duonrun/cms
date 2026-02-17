@@ -1,6 +1,5 @@
 SELECT
 	type,
-	handle,
-	kind
+	handle
 FROM
 	cms.types;

@@ -120,7 +120,7 @@ class NodeManager
 	{
 		$class = $node::class;
 		$handle = NodeMeta::handle($class);
-		$this->ensureTypeExists($class, $handle);
+		$this->ensureTypeExists($handle);
 
 		return (int) $this->db->nodes->save([
 			'uid' => $data['uid'],
@@ -133,14 +133,13 @@ class NodeManager
 		])->one()['node'];
 	}
 
-	private function ensureTypeExists(string $class, string $handle): void
+	private function ensureTypeExists(string $handle): void
 	{
 		$type = $this->db->nodes->type(['handle' => $handle])->one();
 
 		if (!$type) {
 			$this->db->nodes->addType([
 				'handle' => $handle,
-				'kind' => NodeMeta::routable($class) ? 'page' : 'block',
 			])->run();
 		}
 	}

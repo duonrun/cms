@@ -166,7 +166,6 @@ class Cms implements Plugin
 			if (!in_array($handle, $types)) {
 				$this->db->nodes->addType([
 					'handle' => $handle,
-					'kind' => NodeMeta::routable($class) ? 'page' : 'block',
 				])->run();
 			}
 		}

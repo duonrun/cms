@@ -31,7 +31,6 @@ class Block
 			'uid' => $uid,
 			'published' => $published,
 			'deleted' => $deleted,
-			'kind' => 'block',
 		])->one();
 		$class = $this
 			->context

@@ -43,7 +43,6 @@ final class Nodes implements Iterator
 			'type' => 't.handle',
 			'handle' => 't.handle',
 			'uid' => 'n.uid',
-			'kind' => 't.kind',
 		];
 	}
 

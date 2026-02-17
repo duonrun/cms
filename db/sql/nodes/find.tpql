@@ -9,7 +9,6 @@ SELECT
 	n.deleted,
 	n.content,
 	t.handle,
-	t.kind,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,
 	uc.username AS creator_username,
@@ -43,9 +42,6 @@ FROM
 	) sup ON sup.node = n.node
 WHERE
 	1 = 1
-<?php if (isset($kind)) : ?>
-	AND t.kind = :kind
-<?php endif ?>
 <?php if (isset($uid)) : ?>
 	AND n.uid = :uid
 <?php endif ?>
@@ -80,8 +76,7 @@ GROUP BY
 	ue.email,
 	ue.username,
 	ue.data,
-	t.handle,
-	t.kind
+	t.handle
 <?php if (isset($order)) : ?>
 ORDER BY <?= $order ?>
 <?php endif ?>

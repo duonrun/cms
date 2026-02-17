@@ -1,7 +1,5 @@
 INSERT INTO cms.types (
-	handle,
-	kind
+	handle
 ) VALUES (
-	:handle,
-	:kind
+	:handle
 );
