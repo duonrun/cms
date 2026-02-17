@@ -29,7 +29,6 @@ class Node
 			'path' => $path,
 			'published' => $published,
 			'deleted' => $deleted,
-			'kind' => 'page',
 		]);
 	}
 
