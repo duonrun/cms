@@ -41,15 +41,15 @@ class SchemaRegistry
 	/** @var array<class-string, Handler> */
 	private array $handlers = [];
 
-	/** @param class-string $metaClass */
-	public function register(string $metaClass, Handler $handler): void
+	/** @param class-string $schema */
+	public function register(string $schema, Handler $handler): void
 	{
-		$this->handlers[$metaClass] = $handler;
+		$this->handlers[$schema] = $handler;
 	}
 
-	public function getHandler(object $meta): ?Handler
+	public function getHandler(object $schema): ?Handler
 	{
-		return $this->handlers[$meta::class] ?? null;
+		return $this->handlers[$schema::class] ?? null;
 	}
 
 	public static function withDefaults(): self
