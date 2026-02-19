@@ -9,7 +9,7 @@ class Token
 	protected string $token;
 	protected string $secret;
 
-	public function __construct(string $secret, string $token = null)
+	public function __construct(string $secret, ?string $token = null)
 	{
 		$this->secret = $secret;
 
