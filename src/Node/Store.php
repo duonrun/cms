@@ -12,7 +12,7 @@ use Duon\Core\Request;
 use Duon\Quma\Database;
 use Throwable;
 
-class NodeManager
+class Store
 {
 	public function __construct(
 		private readonly Database $db,
@@ -78,7 +78,7 @@ class NodeManager
 			throw new HttpBadRequest($request);
 		}
 
-		$uid = NodeFactory::meta($node, 'uid');
+		$uid = Factory::meta($node, 'uid');
 
 		$this->db->nodes->delete([
 			'uid' => $uid,
