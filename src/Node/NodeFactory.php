@@ -8,7 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Field\SchemaRegistry;
+use Duon\Cms\Field\Schema\Registry as SchemaRegistry;
 use Duon\Cms\Node\Contract\HasInit;
 use Duon\Core\Factory;
 use Duon\Core\Request;

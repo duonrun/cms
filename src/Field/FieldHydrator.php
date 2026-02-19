@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Field\SchemaRegistry;
+use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
@@ -13,7 +13,7 @@ use ReflectionUnionType;
 class FieldHydrator
 {
 	public function __construct(
-		private readonly SchemaRegistry $metaRegistry = new SchemaRegistry(),
+		private readonly Registry $metaRegistry = new Registry(),
 	) {}
 
 	/**
@@ -77,7 +77,7 @@ class FieldHydrator
 		return $fields;
 	}
 
-	public function metaRegistry(): SchemaRegistry
+	public function metaRegistry(): Registry
 	{
 		return $this->metaRegistry;
 	}

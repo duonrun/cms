@@ -7,7 +7,7 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Field\Grid;
 use Duon\Cms\Field\Image;
 use Duon\Cms\Field\Option;
-use Duon\Cms\Field\SchemaRegistry;
+use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Schema\Columns;
@@ -28,12 +28,12 @@ use Duon\Cms\Value\ValueContext;
 
 final class FieldCapabilityPropertiesTest extends TestCase
 {
-	private SchemaRegistry $registry;
+	private Registry $registry;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->registry = SchemaRegistry::withDefaults();
+		$this->registry = Registry::withDefaults();
 	}
 
 	private function createOwner(): NodeFieldOwner

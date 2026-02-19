@@ -2,24 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Duon\Cms\Field\Schema;
 
-use Duon\Cms\Field\Schema\ColumnsHandler;
-use Duon\Cms\Field\Schema\DefaultValueHandler;
-use Duon\Cms\Field\Schema\DescriptionHandler;
-use Duon\Cms\Field\Schema\FulltextHandler;
-use Duon\Cms\Field\Schema\Handler;
-use Duon\Cms\Field\Schema\HiddenHandler;
-use Duon\Cms\Field\Schema\ImmutableHandler;
-use Duon\Cms\Field\Schema\LabelHandler;
-use Duon\Cms\Field\Schema\MultipleHandler;
-use Duon\Cms\Field\Schema\OptionsHandler;
-use Duon\Cms\Field\Schema\RequiredHandler;
-use Duon\Cms\Field\Schema\RowsHandler;
-use Duon\Cms\Field\Schema\TranslateFileHandler;
-use Duon\Cms\Field\Schema\TranslateHandler;
-use Duon\Cms\Field\Schema\ValidateHandler;
-use Duon\Cms\Field\Schema\WidthHandler;
 use Duon\Cms\Schema\Columns;
 use Duon\Cms\Schema\DefaultValue;
 use Duon\Cms\Schema\Description;
@@ -36,7 +20,7 @@ use Duon\Cms\Schema\TranslateFile;
 use Duon\Cms\Schema\Validate;
 use Duon\Cms\Schema\Width;
 
-class SchemaRegistry
+class Registry
 {
 	/** @var array<class-string, Handler> */
 	private array $handlers = [];

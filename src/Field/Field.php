@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Schema\Handler;
-use Duon\Cms\Field\SchemaRegistry;
+use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Schema;
@@ -35,7 +35,7 @@ abstract class Field implements
 	/** @var list<array{object, Handler}> */
 	protected array $meta = [];
 
-	protected ?SchemaRegistry $metaRegistry = null;
+	protected ?Registry $metaRegistry = null;
 
 	final public function __construct(
 		public readonly string $name,
@@ -61,7 +61,7 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function initMeta(ReflectionProperty $property, SchemaRegistry $registry): void
+	public function initMeta(ReflectionProperty $property, Registry $registry): void
 	{
 		$this->metaRegistry = $registry;
 
@@ -78,9 +78,9 @@ abstract class Field implements
 		}
 	}
 
-	public function metaRegistry(): SchemaRegistry
+	public function metaRegistry(): Registry
 	{
-		return $this->metaRegistry ??= SchemaRegistry::withDefaults();
+		return $this->metaRegistry ??= Registry::withDefaults();
 	}
 
 	public function properties(): array
