@@ -11,6 +11,7 @@ use Duon\Cms\Field\Meta\Description;
 use Duon\Cms\Field\Meta\Hidden;
 use Duon\Cms\Field\Meta\Immutable;
 use Duon\Cms\Field\Meta\Label;
+use Duon\Cms\Field\Meta\MetaRegistry;
 use Duon\Cms\Field\Meta\Multiple;
 use Duon\Cms\Field\Meta\Options;
 use Duon\Cms\Field\Meta\Required;
@@ -27,6 +28,14 @@ use Duon\Cms\Value\ValueContext;
 
 final class FieldCapabilityPropertiesTest extends TestCase
 {
+	private MetaRegistry $registry;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->registry = MetaRegistry::withDefaults();
+	}
+
 	private function createOwner(): NodeFieldOwner
 	{
 		$context = new \Duon\Cms\Context(
@@ -60,13 +69,20 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		return new Option($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
+	private function applyAndGetProperties(object $meta, $field): array
+	{
+		$handler = $this->registry->getHandler($meta);
+		$handler->apply($meta, $field);
+
+		return $handler->properties($meta, $field);
+	}
+
 	public function testLabelCapabilityReturnsLabelProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Label('Test Label');
-		$capability->set($field);
+		$meta = new Label('Test Label');
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('label', $properties);
 		$this->assertEquals('Test Label', $properties['label']);
@@ -75,10 +91,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testDescriptionCapabilityReturnsDescriptionProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Description('Test description');
-		$capability->set($field);
+		$meta = new Description('Test description');
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('description', $properties);
 		$this->assertEquals('Test description', $properties['description']);
@@ -87,10 +102,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testHiddenCapabilityReturnsHiddenProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Hidden();
-		$capability->set($field);
+		$meta = new Hidden();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('hidden', $properties);
 		$this->assertTrue($properties['hidden']);
@@ -99,10 +113,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testRequiredCapabilityReturnsRequiredProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Required();
-		$capability->set($field);
+		$meta = new Required();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('required', $properties);
 		$this->assertTrue($properties['required']);
@@ -111,10 +124,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testImmutableCapabilityReturnsImmutableProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Immutable();
-		$capability->set($field);
+		$meta = new Immutable();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('immutable', $properties);
 		$this->assertTrue($properties['immutable']);
@@ -123,10 +135,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testRowsCapabilityReturnsRowsProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Rows(10);
-		$capability->set($field);
+		$meta = new Rows(10);
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('rows', $properties);
 		$this->assertEquals(10, $properties['rows']);
@@ -135,10 +146,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testWidthCapabilityReturnsWidthProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Width(6);
-		$capability->set($field);
+		$meta = new Width(6);
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('width', $properties);
 		$this->assertEquals(6, $properties['width']);
@@ -147,10 +157,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testColumnsCapabilityReturnsColumnsProperties(): void
 	{
 		$field = $this->createGridField();
-		$capability = new Columns(12, 2);
-		$capability->set($field);
+		$meta = new Columns(12, 2);
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('columns', $properties);
 		$this->assertArrayHasKey('minCellWidth', $properties);
@@ -162,10 +171,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	{
 		$field = $this->createOptionField();
 		$options = ['option1', 'option2', 'option3'];
-		$capability = new Options($options);
-		$capability->set($field);
+		$meta = new Options($options);
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('options', $properties);
 		$this->assertEquals($options, $properties['options']);
@@ -174,10 +182,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testTranslateCapabilityReturnsTranslateProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Translate();
-		$capability->set($field);
+		$meta = new Translate();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);
@@ -186,10 +193,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testTranslateFileCapabilityReturnsTranslateFileProperty(): void
 	{
 		$field = $this->createImageField();
-		$capability = new TranslateFile();
-		$capability->set($field);
+		$meta = new TranslateFile();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('translateFile', $properties);
 		$this->assertTrue($properties['translateFile']);
@@ -198,10 +204,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testMultipleCapabilityReturnsMultipleProperty(): void
 	{
 		$field = $this->createImageField();
-		$capability = new Multiple();
-		$capability->set($field);
+		$meta = new Multiple();
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('multiple', $properties);
 		$this->assertTrue($properties['multiple']);
@@ -210,10 +215,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testValidateCapabilityReturnsValidatorsProperty(): void
 	{
 		$field = $this->createTextField();
-		$capability = new Validate('minLength:5', 'maxLength:100');
-		$capability->set($field);
+		$meta = new Validate('minLength:5', 'maxLength:100');
 
-		$properties = $capability->properties($field);
+		$properties = $this->applyAndGetProperties($meta, $field);
 
 		$this->assertArrayHasKey('validators', $properties);
 		$this->assertContains('minLength:5', $properties['validators']);

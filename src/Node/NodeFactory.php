@@ -8,6 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
+use Duon\Cms\Field\Meta\MetaRegistry;
 use Duon\Cms\Node\Contract\HasInit;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -27,8 +28,9 @@ class NodeFactory
 
 	public function __construct(
 		private readonly Registry $registry,
+		?MetaRegistry $metaRegistry = null,
 	) {
-		$this->hydrator = new FieldHydrator();
+		$this->hydrator = new FieldHydrator($metaRegistry ?? MetaRegistry::withDefaults());
 		self::$nodeState ??= new WeakMap();
 	}
 

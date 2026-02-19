@@ -126,7 +126,7 @@ class Matrix extends Field implements Capability\AllowsMultiple
 				new ValueContext($property->getName(), []),
 			);
 
-			$subfield->initCapabilities($property);
+			$subfield->initMeta($property, $this->metaRegistry());
 			$this->subfields[$property->getName()] = $subfield;
 		}
 	}

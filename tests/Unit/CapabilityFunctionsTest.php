@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
-use Duon\Cms\Field\Meta\Capability;
+use Duon\Cms\Field\Meta\MetaHandler;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
@@ -32,10 +32,10 @@ final class CapabilityFunctionsTest extends TestCase
 	public function testCapabilityErrorMessage(): void
 	{
 		$field = $this->createTextField('title');
-		$message = capabilityErrorMessage($field, Capability::class);
+		$message = capabilityErrorMessage($field, MetaHandler::class);
 
 		$this->assertStringContainsString('title', $message);
 		$this->assertStringContainsString(Text::class, $message);
-		$this->assertStringContainsString(Capability::class, $message);
+		$this->assertStringContainsString(MetaHandler::class, $message);
 	}
 }
