@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Defaultable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\DefaultValue;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class DefaultValueHandler implements SchemaHandler
+class DefaultValueHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -23,7 +20,7 @@ class DefaultValueHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, Defaultable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, Defaultable::class));
 	}
 
 	public function properties(object $meta, Field $field): array

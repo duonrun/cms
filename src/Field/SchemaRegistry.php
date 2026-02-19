@@ -8,6 +8,7 @@ use Duon\Cms\Field\Schema\ColumnsHandler;
 use Duon\Cms\Field\Schema\DefaultValueHandler;
 use Duon\Cms\Field\Schema\DescriptionHandler;
 use Duon\Cms\Field\Schema\FulltextHandler;
+use Duon\Cms\Field\Schema\Handler;
 use Duon\Cms\Field\Schema\HiddenHandler;
 use Duon\Cms\Field\Schema\ImmutableHandler;
 use Duon\Cms\Field\Schema\LabelHandler;
@@ -37,16 +38,16 @@ use Duon\Cms\Schema\Width;
 
 class SchemaRegistry
 {
-	/** @var array<class-string, SchemaHandler> */
+	/** @var array<class-string, Handler> */
 	private array $handlers = [];
 
 	/** @param class-string $metaClass */
-	public function register(string $metaClass, SchemaHandler $handler): void
+	public function register(string $metaClass, Handler $handler): void
 	{
 		$this->handlers[$metaClass] = $handler;
 	}
 
-	public function getHandler(object $meta): ?SchemaHandler
+	public function getHandler(object $meta): ?Handler
 	{
 		return $this->handlers[$meta::class] ?? null;
 	}

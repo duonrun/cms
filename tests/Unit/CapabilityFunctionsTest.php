@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
-use Duon\Cms\Field\SchemaHandler;
+use Duon\Cms\Field\Schema\Handler;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
-
-use function Duon\Cms\Field\capabilityErrorMessage;
 
 final class CapabilityFunctionsTest extends TestCase
 {
@@ -32,10 +30,26 @@ final class CapabilityFunctionsTest extends TestCase
 	public function testCapabilityErrorMessage(): void
 	{
 		$field = $this->createTextField('title');
-		$message = capabilityErrorMessage($field, SchemaHandler::class);
+
+		// Create a concrete handler to test the protected method
+		$handler = new class extends Handler {
+			public function apply(object $meta, $field): void {}
+
+			public function properties(object $meta, $field): array
+			{
+				return [];
+			}
+
+			public function testErrorMessage($field, string $capability): string
+			{
+				return $this->capabilityErrorMessage($field, $capability);
+			}
+		};
+
+		$message = $handler->testErrorMessage($field, Handler::class);
 
 		$this->assertStringContainsString('title', $message);
 		$this->assertStringContainsString(Text::class, $message);
-		$this->assertStringContainsString(SchemaHandler::class, $message);
+		$this->assertStringContainsString(Handler::class, $message);
 	}
 }

@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Requirable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Required;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class RequiredHandler implements SchemaHandler
+class RequiredHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class RequiredHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, Requirable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, Requirable::class));
 	}
 
 	public function properties(object $meta, Field $field): array

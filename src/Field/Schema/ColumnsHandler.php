@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\GridResizable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Columns;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class ColumnsHandler implements SchemaHandler
+class ColumnsHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class ColumnsHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, GridResizable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, GridResizable::class));
 	}
 
 	public function properties(object $meta, Field $field): array

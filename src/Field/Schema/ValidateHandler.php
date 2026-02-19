@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Validatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Validate;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class ValidateHandler implements SchemaHandler
+class ValidateHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class ValidateHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, Validatable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, Validatable::class));
 	}
 
 	public function properties(object $meta, Field $field): array

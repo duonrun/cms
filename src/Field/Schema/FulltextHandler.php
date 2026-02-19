@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Searchable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Fulltext;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class FulltextHandler implements SchemaHandler
+class FulltextHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class FulltextHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, Searchable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, Searchable::class));
 	}
 
 	public function properties(object $meta, Field $field): array

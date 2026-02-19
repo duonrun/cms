@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Field\SchemaHandler;
+use Duon\Cms\Field\Schema\Handler;
 use Duon\Cms\Field\SchemaRegistry;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
@@ -32,7 +32,7 @@ abstract class Field implements
 
 	public readonly string $type;
 
-	/** @var list<array{object, SchemaHandler}> */
+	/** @var list<array{object, Handler}> */
 	protected array $meta = [];
 
 	protected ?SchemaRegistry $metaRegistry = null;

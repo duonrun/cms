@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Multiple;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class MultipleHandler implements SchemaHandler
+class MultipleHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class MultipleHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, AllowsMultiple::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, AllowsMultiple::class));
 	}
 
 	public function properties(object $meta, Field $field): array

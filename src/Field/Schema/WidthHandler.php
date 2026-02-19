@@ -7,12 +7,9 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Resizable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Width;
 
-use function Duon\Cms\Field\capabilityErrorMessage;
-
-class WidthHandler implements SchemaHandler
+class WidthHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
@@ -22,7 +19,7 @@ class WidthHandler implements SchemaHandler
 			return;
 		}
 
-		throw new RuntimeException(capabilityErrorMessage($field, Resizable::class));
+		throw new RuntimeException($this->capabilityErrorMessage($field, Resizable::class));
 	}
 
 	public function properties(object $meta, Field $field): array
