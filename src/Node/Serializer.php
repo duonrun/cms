@@ -90,7 +90,7 @@ class Serializer
 		}
 
 		$result = [
-			'title' => _('Neues Dokument:') . ' ' . Meta::name($class),
+			'title' => _('Neues Dokument:') . ' ' . Meta::label($class),
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => nanoid(),
 			'published' => false,

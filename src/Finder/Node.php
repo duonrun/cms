@@ -6,9 +6,9 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node as NodeWrapper;
-use Duon\Cms\Node\Factory;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 

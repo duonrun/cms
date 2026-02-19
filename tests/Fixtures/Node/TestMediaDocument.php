@@ -12,12 +12,11 @@ use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Schema\Columns;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Multiple;
-use Duon\Cms\Schema\Name;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\TranslateFile;
 
-#[Name('Test Media Document')]
+#[Label('Test Media Document')]
 class TestMediaDocument implements HasTitle
 {
 	#[Label('Gallery')]

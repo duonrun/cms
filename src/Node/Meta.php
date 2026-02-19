@@ -28,9 +28,9 @@ class Meta
 	/**
 	 * @param class-string $class
 	 */
-	public static function name(string $class): string
+	public static function label(string $class): string
 	{
-		return self::forClass($class)->name;
+		return self::forClass($class)->label;
 	}
 
 	/**

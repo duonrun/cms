@@ -12,14 +12,13 @@ use Duon\Cms\Schema\Description;
 use Duon\Cms\Schema\Hidden;
 use Duon\Cms\Schema\Immutable;
 use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Name;
 use Duon\Cms\Schema\Required;
 use Duon\Cms\Schema\Rows;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\Validate;
 use Duon\Cms\Schema\Width;
 
-#[Name('Test Document')]
+#[Label('Test Document')]
 class TestDocument implements HasTitle
 {
 	#[Label('Document Title')]

@@ -7,7 +7,7 @@ namespace Duon\Cms\Node;
 use Duon\Cms\Schema\Deletable;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Handle;
-use Duon\Cms\Schema\Name;
+use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Permission;
 use Duon\Cms\Schema\Render;
 use Duon\Cms\Schema\Route;
@@ -16,7 +16,7 @@ use ReflectionClass;
 
 class Schema
 {
-	public readonly string $name; // The public name of the node type
+	public readonly string $label; // The public name of the node type
 	public readonly string $handle; // Used also as slug to address the node type in the panel
 	public readonly string $renderer;
 	public readonly bool $routable;
@@ -38,7 +38,7 @@ class Schema
 		$render = $attributes[Render::class] ?? null;
 		$route = $attributes[Route::class] ?? null;
 
-		$this->name = $this->getName($attributes[Name::class] ?? null);
+		$this->label = $this->getLabel($attributes[Label::class] ?? null);
 		$this->handle = $this->getHandle($handle);
 		$this->renderer = $this->getRenderer($render, $handle);
 		$this->route = $this->getRoute($route);
@@ -64,10 +64,10 @@ class Schema
 		return $map;
 	}
 
-	private function getName(?Name $name): string
+	private function getLabel(?Label $label): string
 	{
-		if ($name) {
-			return $name->value;
+		if ($label) {
+			return $label->label;
 		}
 
 		return $this->getClassName();

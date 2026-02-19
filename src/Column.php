@@ -7,9 +7,9 @@ namespace Duon\Cms;
 use Closure;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Factory;
 
 use function Duon\Cms\Util\escape;
 
@@ -87,7 +87,7 @@ final class Column
 
 				return method_exists($inner, 'title') ? $inner->title() : '';
 			case 'meta.name':
-				return Meta::name($inner::class);
+				return Meta::label($inner::class);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
@@ -97,21 +97,21 @@ final class Column
 			case 'meta.deleted':
 			case 'meta.content':
 			case 'meta.handle':
-			return Factory::meta($node, explode('.', $field)[1]);
-		case 'meta.class':
-			return $inner::class;
-		case 'meta.classname':
-			return basename(str_replace('\\', '/', $inner::class));
-		case 'meta.editor':
-			return escape(
-				Factory::meta($node, 'editor_data')['name']
-				?? Factory::meta($node, 'editor_username'),
-			) ?? Factory::meta($node, 'editor_email');
-		case 'meta.creator':
-			return escape(
-				Factory::meta($node, 'creator_data')['name']
-				?? Factory::meta($node, 'creator_username'),
-			) ?? Factory::meta($node, 'creator_email');
+				return Factory::meta($node, explode('.', $field)[1]);
+			case 'meta.class':
+				return $inner::class;
+			case 'meta.classname':
+				return basename(str_replace('\\', '/', $inner::class));
+			case 'meta.editor':
+				return escape(
+					Factory::meta($node, 'editor_data')['name']
+					?? Factory::meta($node, 'editor_username'),
+				) ?? Factory::meta($node, 'editor_email');
+			case 'meta.creator':
+				return escape(
+					Factory::meta($node, 'creator_data')['name']
+					?? Factory::meta($node, 'creator_username'),
+				) ?? Factory::meta($node, 'creator_email');
 			default:
 				$hydrator = new FieldHydrator();
 				$fieldObj = $hydrator->getField($inner, $field);

@@ -10,12 +10,12 @@ use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Factory as NodeFactory;
+use Duon\Cms\Node\PathManager;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Store;
-use Duon\Cms\Node\PathManager;
 use Duon\Cms\Plugin;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
@@ -139,7 +139,7 @@ class Panel
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
 				'slug' => Meta::handle($blueprint),
-				'name' => Meta::name($blueprint),
+				'name' => Meta::label($blueprint),
 			];
 		}
 

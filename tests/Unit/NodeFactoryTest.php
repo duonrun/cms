@@ -7,9 +7,9 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
@@ -245,9 +245,9 @@ final class NodeFactoryTest extends TestCase
 		$this->assertEquals('plain-page', Meta::handle(PlainPage::class));
 	}
 
-	public function testNodeMetaNameForPlainPage(): void
+	public function testNodeMetaLabelForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', Meta::name(PlainPage::class));
+		$this->assertEquals('Plain Page', Meta::label(PlainPage::class));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void

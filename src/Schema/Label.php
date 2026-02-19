@@ -6,7 +6,7 @@ namespace Duon\Cms\Schema;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 readonly class Label
 {
 	public function __construct(public string $label) {}

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Schema\Name;
+use Duon\Cms\Schema\Label;
 
-#[Name('Node With Custom Name Attribute')]
+#[Label('Node With Custom Name Attribute')]
 class NodeWithNameAttribute implements HasTitle
 {
 	public function title(): string

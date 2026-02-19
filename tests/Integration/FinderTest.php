@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Factory;
 use Duon\Cms\Tests\IntegrationTestCase;
 
 final class FinderTest extends IntegrationTestCase

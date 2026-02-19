@@ -8,12 +8,11 @@ use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Name;
 use Duon\Cms\Schema\Route;
 use Duon\Cms\Schema\Title;
 use Duon\Cms\Schema\Translate;
 
-#[Name('Plain Page')]
+#[Label('Plain Page')]
 #[Route('/plain-page/{uid}')]
 #[Title('heading')]
 #[FieldOrder('heading', 'body')]

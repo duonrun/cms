@@ -14,10 +14,10 @@ use Duon\Cms\Tests\TestCase;
 
 final class MetaTest extends TestCase
 {
-	public function testNameAttributeSet(): void
+	public function testLabelAttributeSet(): void
 	{
-		$this->assertEquals('NodeWithHandleAttribute', Meta::name(NodeWithHandleAttribute::class));
-		$this->assertEquals('Node With Custom Name Attribute', Meta::name(NodeWithNameAttribute::class));
+		$this->assertEquals('NodeWithHandleAttribute', Meta::label(NodeWithHandleAttribute::class));
+		$this->assertEquals('Node With Custom Name Attribute', Meta::label(NodeWithNameAttribute::class));
 	}
 
 	public function testHandleAttributeSet(): void
