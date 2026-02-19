@@ -6,15 +6,15 @@ namespace Duon\Cms\Node;
 
 class NodeMeta
 {
-	/** @var array<class-string, Meta> */
+	/** @var array<class-string, Schema> */
 	private static array $cache = [];
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function forClass(string $class): Meta
+	public static function forClass(string $class): Schema
 	{
-		return self::$cache[$class] ??= new Meta($class);
+		return self::$cache[$class] ??= new Schema($class);
 	}
 
 	/**

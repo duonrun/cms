@@ -14,7 +14,7 @@ use Duon\Cms\Schema\Route;
 use Duon\Cms\Schema\Title;
 use ReflectionClass;
 
-class Meta
+class Schema
 {
 	public readonly string $name; // The public name of the node type
 	public readonly string $handle; // Used also as slug to address the node type in the panel
