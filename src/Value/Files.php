@@ -8,7 +8,7 @@ use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Capability\FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use Iterator;
 
 class Files extends Value implements Iterator
@@ -16,7 +16,7 @@ class Files extends Value implements Iterator
 	protected int $pointer = 0;
 
 	public function __construct(
-		FieldOwner $owner,
+		Owner $owner,
 		Field&AllowsMultiple&FileTranslatable&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,

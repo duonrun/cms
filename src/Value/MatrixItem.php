@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use Duon\Cms\Field\Matrix;
 use ReflectionClass;
 use ReflectionNamedType;
@@ -19,7 +19,7 @@ class MatrixItem extends Value
 	protected array $subfields = [];
 
 	public function __construct(
-		FieldOwner $owner,
+		Owner $owner,
 		Matrix $field,
 		ValueContext $context,
 	) {

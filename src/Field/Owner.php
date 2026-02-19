@@ -9,7 +9,7 @@ use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Core\Request;
 
-interface FieldOwner
+interface Owner
 {
 	public function uid(): string;
 
