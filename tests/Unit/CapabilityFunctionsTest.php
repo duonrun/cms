@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
-use Duon\Cms\Field\Meta\MetaHandler;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Schema\MetaHandler;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 
-use function Duon\Cms\Field\Meta\capabilityErrorMessage;
+use function Duon\Cms\Schema\capabilityErrorMessage;
 
 final class CapabilityFunctionsTest extends TestCase
 {

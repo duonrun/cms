@@ -6,6 +6,7 @@ namespace Duon\Cms\Validation;
 
 use Duon\Sire\Schema;
 use Duon\Sire\ValidationResult;
+use Override;
 
 class GridItemValidator extends Schema
 {
@@ -17,6 +18,7 @@ class GridItemValidator extends Schema
 		$this->add('colstart', 'int');
 	}
 
+	#[Override]
 	public function validate(array $data, int $level = 1): ValidationResult
 	{
 		$result = parent::validate($data, $level);

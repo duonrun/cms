@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field\Capability;
 
-use Duon\Cms\Field\Meta\FulltextWeight;
+use Duon\Cms\Schema\FulltextWeight;
 
 interface Searchable
 {

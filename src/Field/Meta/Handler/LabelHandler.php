@@ -7,10 +7,10 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Labelable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Meta\Label;
-use Duon\Cms\Field\Meta\MetaHandler;
+use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\MetaHandler;
 
-use function Duon\Cms\Field\Meta\capabilityErrorMessage;
+use function Duon\Cms\Schema\capabilityErrorMessage;
 
 /** @implements MetaHandler<Label> */
 class LabelHandler implements MetaHandler

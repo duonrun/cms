@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasInit;
 use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Node\Meta\Route;
+use Duon\Cms\Schema\Label;
 
 #[Name('Plain Page With Init')]
 #[Route('/plain-page-with-init/{uid}')]

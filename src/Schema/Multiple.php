@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Meta;
+namespace Duon\Cms\Schema;
 
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-readonly class Required {}
+readonly class Multiple {}

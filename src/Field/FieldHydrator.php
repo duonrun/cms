@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Field\Meta\MetaRegistry;
+use Duon\Cms\Schema\MetaRegistry;
 use Duon\Cms\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;

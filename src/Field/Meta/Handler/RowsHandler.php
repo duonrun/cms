@@ -7,10 +7,10 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Resizable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Meta\MetaHandler;
-use Duon\Cms\Field\Meta\Rows;
+use Duon\Cms\Schema\MetaHandler;
+use Duon\Cms\Schema\Rows;
 
-use function Duon\Cms\Field\Meta\capabilityErrorMessage;
+use function Duon\Cms\Schema\capabilityErrorMessage;
 
 /** @implements MetaHandler<Rows> */
 class RowsHandler implements MetaHandler

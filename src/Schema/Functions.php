@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Meta;
+namespace Duon\Cms\Schema;
 
 use Duon\Cms\Field\Field;
 

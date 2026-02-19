@@ -7,10 +7,10 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\FileTranslatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Meta\MetaHandler;
-use Duon\Cms\Field\Meta\TranslateFile;
+use Duon\Cms\Schema\MetaHandler;
+use Duon\Cms\Schema\TranslateFile;
 
-use function Duon\Cms\Field\Meta\capabilityErrorMessage;
+use function Duon\Cms\Schema\capabilityErrorMessage;
 
 /** @implements MetaHandler<TranslateFile> */
 class TranslateFileHandler implements MetaHandler

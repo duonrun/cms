@@ -6,10 +6,10 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Grid;
 use Duon\Cms\Field\Matrix;
-use Duon\Cms\Field\Meta\Label;
-use Duon\Cms\Field\Meta\Required;
-use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Field\Text;
+use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Required;
+use Duon\Cms\Schema\Translate;
 
 class TestMatrix extends Matrix
 {
