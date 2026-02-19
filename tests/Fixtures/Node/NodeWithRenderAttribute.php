@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Render;
+use Duon\Cms\Schema\Render;
 
 #[Render('template-defined-by-render-attribute')]
 class NodeWithRenderAttribute implements HasTitle

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
-use Duon\Cms\Node\Meta\Deletable;
-use Duon\Cms\Node\Meta\FieldOrder;
-use Duon\Cms\Node\Meta\Handle;
-use Duon\Cms\Node\Meta\Name;
-use Duon\Cms\Node\Meta\Permission;
-use Duon\Cms\Node\Meta\Render;
-use Duon\Cms\Node\Meta\Route;
-use Duon\Cms\Node\Meta\Title;
+use Duon\Cms\Schema\Deletable;
+use Duon\Cms\Schema\FieldOrder;
+use Duon\Cms\Schema\Handle;
+use Duon\Cms\Schema\Name;
+use Duon\Cms\Schema\Permission;
+use Duon\Cms\Schema\Render;
+use Duon\Cms\Schema\Route;
+use Duon\Cms\Schema\Title;
 use ReflectionClass;
 
 class Meta

@@ -14,8 +14,8 @@ use Duon\Cms\Field\Meta\Label;
 use Duon\Cms\Field\Meta\Required;
 use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Cms;
-use Duon\Cms\Node\Meta\Name;
-use Duon\Cms\Node\Meta\Route;
+use Duon\Cms\Schema\Name;
+use Duon\Cms\Schema\Route;
 use Duon\Cms\Node\Contract\HasTitle;
 use Duon\Core\Request;
 
