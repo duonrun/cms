@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Hidable;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Hidden;
-use Duon\Cms\Schema\MetaHandler;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Hidden> */
-class HiddenHandler implements MetaHandler
+/** @implements SchemaHandler<Hidden> */
+class HiddenHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

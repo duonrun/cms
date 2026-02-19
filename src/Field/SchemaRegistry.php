@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Schema;
+namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Meta\Handler\ColumnsHandler;
 use Duon\Cms\Field\Meta\Handler\DefaultValueHandler;
@@ -19,19 +19,34 @@ use Duon\Cms\Field\Meta\Handler\TranslateFileHandler;
 use Duon\Cms\Field\Meta\Handler\TranslateHandler;
 use Duon\Cms\Field\Meta\Handler\ValidateHandler;
 use Duon\Cms\Field\Meta\Handler\WidthHandler;
+use Duon\Cms\Schema\Columns;
+use Duon\Cms\Schema\DefaultValue;
+use Duon\Cms\Schema\Description;
+use Duon\Cms\Schema\Fulltext;
+use Duon\Cms\Schema\Hidden;
+use Duon\Cms\Schema\Immutable;
+use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Multiple;
+use Duon\Cms\Schema\Options;
+use Duon\Cms\Schema\Required;
+use Duon\Cms\Schema\Rows;
+use Duon\Cms\Schema\Translate;
+use Duon\Cms\Schema\TranslateFile;
+use Duon\Cms\Schema\Validate;
+use Duon\Cms\Schema\Width;
 
-class MetaRegistry
+class SchemaRegistry
 {
-	/** @var array<class-string, MetaHandler> */
+	/** @var array<class-string, SchemaHandler> */
 	private array $handlers = [];
 
 	/** @param class-string $metaClass */
-	public function register(string $metaClass, MetaHandler $handler): void
+	public function register(string $metaClass, SchemaHandler $handler): void
 	{
 		$this->handlers[$metaClass] = $handler;
 	}
 
-	public function getHandler(object $meta): ?MetaHandler
+	public function getHandler(object $meta): ?SchemaHandler
 	{
 		return $this->handlers[$meta::class] ?? null;
 	}

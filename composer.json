@@ -39,7 +39,7 @@
 		},
 		"files": [
 			"src/Util/Functions.php",
-			"src/Schema/Functions.php"
+			"src/Field/Functions.php"
 		]
 	},
 	"autoload-dev": {

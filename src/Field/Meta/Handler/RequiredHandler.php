@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Requirable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\MetaHandler;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Required;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Required> */
-class RequiredHandler implements MetaHandler
+/** @implements SchemaHandler<Required> */
+class RequiredHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

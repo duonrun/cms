@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Schema;
+namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 
-interface MetaHandler
+interface SchemaHandler
 {
 	public function apply(object $meta, Field $field): void;
 

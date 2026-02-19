@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Resizable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\MetaHandler;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Width;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Width> */
-class WidthHandler implements MetaHandler
+/** @implements SchemaHandler<Width> */
+class WidthHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

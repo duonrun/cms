@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\MetaHandler;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Translate;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Translate> */
-class TranslateHandler implements MetaHandler
+/** @implements SchemaHandler<Translate> */
+class TranslateHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

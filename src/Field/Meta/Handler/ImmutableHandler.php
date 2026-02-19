@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Immutable;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Immutable as ImmutableMeta;
-use Duon\Cms\Schema\MetaHandler;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<ImmutableMeta> */
-class ImmutableHandler implements MetaHandler
+/** @implements SchemaHandler<ImmutableMeta> */
+class ImmutableHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

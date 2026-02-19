@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\GridResizable;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Columns;
-use Duon\Cms\Schema\MetaHandler;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Columns> */
-class ColumnsHandler implements MetaHandler
+/** @implements SchemaHandler<Columns> */
+class ColumnsHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{

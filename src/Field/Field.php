@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Schema\MetaHandler;
-use Duon\Cms\Schema\MetaRegistry;
+use Duon\Cms\Field\SchemaHandler;
+use Duon\Cms\Field\SchemaRegistry;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Schema;
@@ -32,10 +32,10 @@ abstract class Field implements
 
 	public readonly string $type;
 
-	/** @var list<array{object, MetaHandler}> */
+	/** @var list<array{object, SchemaHandler}> */
 	protected array $meta = [];
 
-	protected ?MetaRegistry $metaRegistry = null;
+	protected ?SchemaRegistry $metaRegistry = null;
 
 	final public function __construct(
 		public readonly string $name,
@@ -61,7 +61,7 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function initMeta(ReflectionProperty $property, MetaRegistry $registry): void
+	public function initMeta(ReflectionProperty $property, SchemaRegistry $registry): void
 	{
 		$this->metaRegistry = $registry;
 
@@ -78,9 +78,9 @@ abstract class Field implements
 		}
 	}
 
-	public function metaRegistry(): MetaRegistry
+	public function metaRegistry(): SchemaRegistry
 	{
-		return $this->metaRegistry ??= MetaRegistry::withDefaults();
+		return $this->metaRegistry ??= SchemaRegistry::withDefaults();
 	}
 
 	public function properties(): array

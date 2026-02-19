@@ -7,13 +7,13 @@ namespace Duon\Cms\Field\Meta\Handler;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Searchable;
 use Duon\Cms\Field\Field;
+use Duon\Cms\Field\SchemaHandler;
 use Duon\Cms\Schema\Fulltext;
-use Duon\Cms\Schema\MetaHandler;
 
-use function Duon\Cms\Schema\capabilityErrorMessage;
+use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements MetaHandler<Fulltext> */
-class FulltextHandler implements MetaHandler
+/** @implements SchemaHandler<Fulltext> */
+class FulltextHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
 	{
