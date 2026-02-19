@@ -6,9 +6,9 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node as NodeWrapper;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 
@@ -64,7 +64,7 @@ class Node
 			->entry($data['handle'])
 			->definition();
 
-		if (NodeMeta::isNode($class)) {
+		if (Meta::isNode($class)) {
 			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
 
 			return $this->nodeFactory->proxy($node, $this->context->request);

@@ -7,9 +7,9 @@ namespace Duon\Cms;
 use Closure;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
 
 use function Duon\Cms\Util\escape;
 
@@ -87,7 +87,7 @@ final class Column
 
 				return method_exists($inner, 'title') ? $inner->title() : '';
 			case 'meta.name':
-				return NodeMeta::name($inner::class);
+				return Meta::name($inner::class);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':

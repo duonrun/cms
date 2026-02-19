@@ -10,10 +10,10 @@ use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Cms\Node\NodeManager;
-use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;
 use Duon\Cms\Plugin;
@@ -138,8 +138,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => NodeMeta::handle($blueprint),
-				'name' => NodeMeta::name($blueprint),
+				'slug' => Meta::handle($blueprint),
+				'name' => Meta::name($blueprint),
 			];
 		}
 

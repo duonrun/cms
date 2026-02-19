@@ -7,9 +7,9 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
@@ -33,7 +33,7 @@ final class NodeFactoryTest extends TestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		NodeMeta::clearCache();
+		Meta::clearCache();
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
@@ -42,7 +42,7 @@ final class NodeFactoryTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		NodeMeta::clearCache();
+		Meta::clearCache();
 		parent::tearDown();
 	}
 
@@ -227,47 +227,47 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertTrue(NodeMeta::routable(PlainPage::class));
+		$this->assertTrue(Meta::routable(PlainPage::class));
 	}
 
 	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertTrue(NodeMeta::renderable(PlainBlock::class));
+		$this->assertTrue(Meta::renderable(PlainBlock::class));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void
 	{
-		$this->assertTrue(NodeMeta::isNode(PlainPage::class));
+		$this->assertTrue(Meta::isNode(PlainPage::class));
 	}
 
 	public function testNodeMetaHandleForPlainPage(): void
 	{
-		$this->assertEquals('plain-page', NodeMeta::handle(PlainPage::class));
+		$this->assertEquals('plain-page', Meta::handle(PlainPage::class));
 	}
 
 	public function testNodeMetaNameForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', NodeMeta::name(PlainPage::class));
+		$this->assertEquals('Plain Page', Meta::name(PlainPage::class));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void
 	{
-		$this->assertEquals('heading', NodeMeta::titleField(PlainPage::class));
+		$this->assertEquals('heading', Meta::titleField(PlainPage::class));
 	}
 
 	public function testNodeMetaFieldOrderForPlainPage(): void
 	{
-		$this->assertEquals(['heading', 'body'], NodeMeta::fieldOrder(PlainPage::class));
+		$this->assertEquals(['heading', 'body'], Meta::fieldOrder(PlainPage::class));
 	}
 
 	public function testNodeMetaDeletableForPlainBlock(): void
 	{
-		$this->assertFalse(NodeMeta::deletable(PlainBlock::class));
+		$this->assertFalse(Meta::deletable(PlainBlock::class));
 	}
 
 	public function testNodeMetaDeletableDefaultsToTrue(): void
 	{
-		$this->assertTrue(NodeMeta::deletable(PlainPage::class));
+		$this->assertTrue(Meta::deletable(PlainPage::class));
 	}
 
 	// -- NodeSerializer with plain objects ------------------------------------

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\NodeMeta;
+use Duon\Cms\Node\Meta;
 use Duon\Core\App;
 use Duon\Core\Factory;
 use Duon\Core\Plugin as CorePlugin;
@@ -91,7 +91,7 @@ class Plugin implements CorePlugin
 
 	public function node(string $class): void
 	{
-		$handle = NodeMeta::handle($class);
+		$handle = Meta::handle($class);
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);

@@ -7,8 +7,8 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
@@ -39,7 +39,7 @@ class Render
 			->entry($data['handle'])
 			->definition();
 
-		if (!NodeMeta::renderable($class)) {
+		if (!Meta::renderable($class)) {
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 

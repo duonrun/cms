@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
-class NodeMeta
+class Meta
 {
 	/** @var array<class-string, Schema> */
 	private static array $cache = [];
