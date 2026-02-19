@@ -8,7 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node as NodeWrapper;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 
@@ -17,7 +17,7 @@ class Node
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
-		private readonly NodeFactory $nodeFactory,
+		private readonly Factory $nodeFactory,
 	) {}
 
 	public function byPath(

@@ -8,7 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Meta;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
@@ -21,7 +21,7 @@ class Render
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
-		private readonly NodeFactory $nodeFactory,
+		private readonly Factory $nodeFactory,
 		string $uid,
 		private readonly array $templateContext = [],
 		?bool $deleted = false,
@@ -56,9 +56,9 @@ class Render
 				$this->nodeFactory->hydrator(),
 			);
 
-			return $renderer->renderNode(
-				$this->node,
-				NodeFactory::fieldNamesFor($this->node),
+		return $renderer->renderNode(
+			$this->node,
+			Factory::fieldNamesFor($this->node),
 				$this->cms,
 				$this->context->request,
 				$this->context->config,

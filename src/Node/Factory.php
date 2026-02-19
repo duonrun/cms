@@ -10,7 +10,7 @@ use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Field\Schema\Registry as SchemaRegistry;
 use Duon\Cms\Node\Contract\HasInit;
-use Duon\Core\Factory;
+use Duon\Core\Factory as CoreFactory;
 use Duon\Core\Request;
 use Duon\Quma\Database;
 use Duon\Registry\Registry;
@@ -19,7 +19,7 @@ use WeakMap;
 
 use function Duon\Cms\Util\nanoid;
 
-class NodeFactory
+class Factory
 {
 	/** @var WeakMap<object, array{data: array, fieldNames: string[]}> */
 	private static WeakMap $nodeState;
@@ -58,7 +58,7 @@ class NodeFactory
 			Config::class => $context->config,
 			Database::class => $context->db,
 			Registry::class => $context->registry,
-			Factory::class => $context->factory,
+			CoreFactory::class => $context->factory,
 			self::class => $this,
 			TemplateRenderer::class => $templateRenderer,
 			NodeSerializer::class => $serializer,

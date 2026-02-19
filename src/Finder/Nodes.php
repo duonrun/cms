@@ -8,7 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Plugin;
 use Generator;
 use Iterator;
@@ -28,7 +28,7 @@ final class Nodes implements Iterator
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
-		private readonly NodeFactory $nodeFactory,
+		private readonly Factory $nodeFactory,
 	) {
 		$this->builtins = [
 			'changed' => 'n.changed',

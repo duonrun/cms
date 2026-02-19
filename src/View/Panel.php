@@ -12,7 +12,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\NodeManager;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;

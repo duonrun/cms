@@ -9,7 +9,7 @@ use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
@@ -28,7 +28,7 @@ final class NodeFactoryTest extends TestCase
 {
 	private Context $context;
 	private \Duon\Cms\Cms $cms;
-	private NodeFactory $factory;
+	private Factory $factory;
 
 	protected function setUp(): void
 	{
@@ -37,7 +37,7 @@ final class NodeFactoryTest extends TestCase
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
-		$this->factory = new NodeFactory($this->registry());
+		$this->factory = new Factory($this->registry());
 	}
 
 	protected function tearDown(): void
@@ -117,7 +117,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertContains('heading', $fieldNames);
 		$this->assertContains('body', $fieldNames);
 		$this->assertCount(2, $fieldNames);
@@ -160,7 +160,7 @@ final class NodeFactoryTest extends TestCase
 		];
 
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, $data);
-		$stored = NodeFactory::dataFor($node);
+		$stored = Factory::dataFor($node);
 
 		$this->assertEquals('data-1', $stored['uid']);
 		$this->assertEquals('plain-page', $stored['handle']);
@@ -173,7 +173,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertEquals(['heading', 'body'], $fieldNames);
 	}
 
@@ -186,17 +186,17 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$this->assertEquals('meta-1', NodeFactory::meta($node, 'uid'));
-		$this->assertEquals('plain-page', NodeFactory::meta($node, 'handle'));
-		$this->assertTrue(NodeFactory::meta($node, 'published'));
-		$this->assertNull(NodeFactory::meta($node, 'nonexistent'));
+		$this->assertEquals('meta-1', Factory::meta($node, 'uid'));
+		$this->assertEquals('plain-page', Factory::meta($node, 'handle'));
+		$this->assertTrue(Factory::meta($node, 'published'));
+		$this->assertNull(Factory::meta($node, 'nonexistent'));
 	}
 
 	public function testDataForUnknownNodeReturnsEmpty(): void
 	{
 		$unknown = new stdClass();
-		$this->assertEmpty(NodeFactory::dataFor($unknown));
-		$this->assertEmpty(NodeFactory::fieldNamesFor($unknown));
+		$this->assertEmpty(Factory::dataFor($unknown));
+		$this->assertEmpty(Factory::fieldNamesFor($unknown));
 	}
 
 	// -- HasInit callback -----------------------------------------------------
@@ -219,7 +219,7 @@ final class NodeFactoryTest extends TestCase
 		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
 
 		$this->assertInstanceOf(PlainPage::class, $node);
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertCount(2, $fieldNames);
 	}
 
@@ -280,7 +280,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$serializer = new NodeSerializer($this->factory->hydrator());
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertCount(2, $fields);
@@ -291,7 +291,7 @@ final class NodeFactoryTest extends TestCase
 	public function testSerializerBlueprintForPlainPage(): void
 	{
 		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
 		$serializer = new NodeSerializer($this->factory->hydrator());
@@ -320,7 +320,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertTrue(isset($proxy->heading));
@@ -336,7 +336,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertEquals('Method Test', $proxy->title());
@@ -349,7 +349,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertNull($proxy->heading);

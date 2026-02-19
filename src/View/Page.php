@@ -10,7 +10,7 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Util\Path;
