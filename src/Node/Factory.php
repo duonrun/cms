@@ -42,7 +42,7 @@ class Factory
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
-		$serializer = new NodeSerializer($this->hydrator);
+		$serializer = new Serializer($this->hydrator);
 		$store = new Store($context->db, new PathManager());
 		$templateRenderer = new TemplateRenderer(
 			$this->registry,
@@ -61,7 +61,7 @@ class Factory
 			CoreFactory::class => $context->factory,
 			self::class => $this,
 			TemplateRenderer::class => $templateRenderer,
-			NodeSerializer::class => $serializer,
+			Serializer::class => $serializer,
 			Store::class => $store,
 			FieldHydrator::class => $this->hydrator,
 		]);

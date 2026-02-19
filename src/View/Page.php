@@ -11,7 +11,7 @@ use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Contract\HandlesFormPost;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Util\Path;
 use Duon\Core\Exception\HttpBadRequest;
@@ -109,7 +109,7 @@ class Page
 			$data = $inner->read();
 		} else {
 			$hydrator = $cms->nodeFactory()->hydrator();
-			$serializer = new NodeSerializer($hydrator);
+			$serializer = new Serializer($hydrator);
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),

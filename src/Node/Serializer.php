@@ -11,7 +11,7 @@ use ReflectionMethod;
 
 use function Duon\Cms\Util\nanoid;
 
-class NodeSerializer
+class Serializer
 {
 	public function __construct(
 		private readonly FieldHydrator $hydrator,

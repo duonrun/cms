@@ -13,7 +13,7 @@ use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Store;
 use Duon\Cms\Node\PathManager;
 use Duon\Cms\Plugin;
@@ -170,7 +170,7 @@ class Panel
 		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $factory->blueprint($class, $context, $cms);
 
-		$serializer = new NodeSerializer(
+		$serializer = new Serializer(
 			$factory->hydrator(),
 		);
 
@@ -219,7 +219,7 @@ class Panel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new NodeSerializer($nodeFactory->hydrator());
+		$serializer = new Serializer($nodeFactory->hydrator());
 		$store = new Store($context->db, new PathManager());
 		$method = $this->request->method();
 

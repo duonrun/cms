@@ -10,7 +10,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\Serializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
@@ -132,7 +132,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$title = $serializer->resolveTitle($node);
 		$this->assertEquals('My Title', $title);
 	}
@@ -144,7 +144,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
 	}
@@ -270,7 +270,7 @@ final class NodeFactoryTest extends TestCase
 		$this->assertTrue(Meta::deletable(PlainPage::class));
 	}
 
-	// -- NodeSerializer with plain objects ------------------------------------
+	// -- Serializer with plain objects ------------------------------------
 
 	public function testSerializerFieldsForPlainPage(): void
 	{
@@ -279,7 +279,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
@@ -294,7 +294,7 @@ final class NodeFactoryTest extends TestCase
 		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$blueprint = $serializer->blueprint($node, $fieldNames, $locales);
 
 		$this->assertArrayHasKey('uid', $blueprint);
