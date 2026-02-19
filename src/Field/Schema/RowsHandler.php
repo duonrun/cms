@@ -7,7 +7,6 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Resizable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\Rows;
 
 class RowsHandler extends Handler
 {

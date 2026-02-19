@@ -7,7 +7,6 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\Translate;
 
 class TranslateHandler extends Handler
 {

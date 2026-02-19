@@ -7,7 +7,6 @@ namespace Duon\Cms\Field\Schema;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\Multiple;
 
 class MultipleHandler extends Handler
 {
