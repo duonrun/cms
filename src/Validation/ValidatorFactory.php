@@ -10,7 +10,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Node\NodeFactory;
 use Duon\Sire\Schema;
 
-class NodeSchemaFactory
+class ValidatorFactory
 {
 	protected readonly Schema $schema;
 

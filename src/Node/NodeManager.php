@@ -6,7 +6,7 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Locales;
-use Duon\Cms\Validation\NodeSchemaFactory;
+use Duon\Cms\Validation\ValidatorFactory;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Request;
 use Duon\Quma\Database;
@@ -93,7 +93,7 @@ class NodeManager
 
 	public function validate(object $node, array $data, Locales $locales, Request $request): array
 	{
-		$factory = new NodeSchemaFactory($node, $locales);
+		$factory = new ValidatorFactory($node, $locales);
 		$schema = $factory->create();
 		$result = $schema->validate($data);
 
