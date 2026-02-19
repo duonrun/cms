@@ -5,32 +5,6 @@ declare(strict_types=1);
 namespace Duon\Cms\Field\Meta;
 
 use Attribute;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\Capability\FileTranslatable;
-use Duon\Cms\Field\Field;
-
-use function Duon\Cms\Field\Meta\capabilityErrorMessage;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class TranslateFile implements Capability
-{
-	public function set(Field $field): void
-	{
-		if ($field instanceof FileTranslatable) {
-			$field->translateFile(true);
-
-			return;
-		}
-
-		throw new RuntimeException(capabilityErrorMessage($field, FileTranslatable::class));
-	}
-
-	public function properties(Field $field): array
-	{
-		if ($field instanceof FileTranslatable) {
-			return ['translateFile' => $field->getTranslateFile()];
-		}
-
-		return [];
-	}
-}
+readonly class TranslateFile {}
