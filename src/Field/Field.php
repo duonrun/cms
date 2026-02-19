@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
+use Duon\Cms\Field\Meta\MetaHandler;
+use Duon\Cms\Field\Meta\MetaRegistry;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Schema;
@@ -30,8 +32,10 @@ abstract class Field implements
 
 	public readonly string $type;
 
-	/** @var Meta\Capability[] */
-	protected array $capabilities = [];
+	/** @var list<array{object, MetaHandler}> */
+	protected array $meta = [];
+
+	protected ?MetaRegistry $metaRegistry = null;
 
 	final public function __construct(
 		public readonly string $name,
@@ -57,13 +61,26 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function initCapabilities(ReflectionProperty $property): void
+	public function initMeta(ReflectionProperty $property, MetaRegistry $registry): void
 	{
+		$this->metaRegistry = $registry;
+
 		foreach ($property->getAttributes() as $attr) {
-			$capability = $attr->newInstance();
-			$capability->set($this);
-			$this->capabilities[] = $capability;
+			$instance = $attr->newInstance();
+			$handler = $registry->getHandler($instance);
+
+			if ($handler === null) {
+				continue;
+			}
+
+			$handler->apply($instance, $this);
+			$this->meta[] = [$instance, $handler];
 		}
+	}
+
+	public function metaRegistry(): MetaRegistry
+	{
+		return $this->metaRegistry ??= MetaRegistry::withDefaults();
 	}
 
 	public function properties(): array
@@ -73,8 +90,8 @@ abstract class Field implements
 			'type' => $this::class,
 		];
 
-		foreach ($this->capabilities as $capability) {
-			$properties = array_merge($properties, $capability->properties($this));
+		foreach ($this->meta as [$meta, $handler]) {
+			$properties = array_merge($properties, $handler->properties($meta, $this));
 		}
 
 		return $properties;

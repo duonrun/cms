@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
+use Duon\Cms\Field\Meta\MetaRegistry;
 use Duon\Cms\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
@@ -11,6 +12,10 @@ use ReflectionUnionType;
 
 class FieldHydrator
 {
+	public function __construct(
+		private readonly MetaRegistry $metaRegistry = new MetaRegistry(),
+	) {}
+
 	/**
 	 * Scan $target for Field-typed properties, instantiate each Field with
 	 * the given FieldOwner and content data, then set them on the target.
@@ -72,6 +77,11 @@ class FieldHydrator
 		return $fields;
 	}
 
+	public function metaRegistry(): MetaRegistry
+	{
+		return $this->metaRegistry;
+	}
+
 	protected function initField(
 		ReflectionProperty $property,
 		string $fieldType,
@@ -82,7 +92,7 @@ class FieldHydrator
 		$data = $content[$fieldName] ?? [];
 		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $data));
 
-		$field->initCapabilities($property);
+		$field->initMeta($property, $this->metaRegistry);
 
 		return $field;
 	}

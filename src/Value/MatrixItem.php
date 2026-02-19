@@ -103,7 +103,7 @@ class MatrixItem extends Value
 				$subfieldContext,
 			);
 
-			$subfield->initCapabilities($property);
+			$subfield->initMeta($property, $this->field->metaRegistry());
 			$this->subfields[$property->getName()] = $subfield;
 		}
 	}
