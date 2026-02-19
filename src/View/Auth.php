@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\View;
 
 use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Schema;
+use Duon\Cms\Validation;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
@@ -28,7 +28,7 @@ class Auth
 
 	public function login(Request $request): Response
 	{
-		$schema = new Schema\Login();
+		$schema = new Validation\Login();
 		$response = Response::create($this->factory);
 		$result = $schema->validate($request->json());
 
@@ -64,7 +64,7 @@ class Auth
 
 	public function tokenLogin(Request $request): Response
 	{
-		$schema = new Schema\TokenLogin();
+		$schema = new Validation\TokenLogin();
 		$response = Response::create($this->factory);
 		$result = $schema->validate($request->json());
 

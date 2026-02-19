@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Schema;
+namespace Duon\Cms\Validation;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Field\FieldHydrator;

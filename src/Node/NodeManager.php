@@ -6,7 +6,7 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Locales;
-use Duon\Cms\Schema\NodeSchemaFactory;
+use Duon\Cms\Validation\NodeSchemaFactory;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Request;
 use Duon\Quma\Database;

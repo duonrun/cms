@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
-use Duon\Cms\Schema\GridItemSchema;
+use Duon\Cms\Validation\GridItemSchema;
 use Duon\Cms\Value\Grid as GridValue;
 use Duon\Sire\Schema;
 use ValueError;
