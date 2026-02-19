@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Meta\Handler;
+namespace Duon\Cms\Field\Schema;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\AllowsMultiple;
@@ -12,7 +12,6 @@ use Duon\Cms\Schema\Multiple;
 
 use function Duon\Cms\Field\capabilityErrorMessage;
 
-/** @implements SchemaHandler<Multiple> */
 class MultipleHandler implements SchemaHandler
 {
 	public function apply(object $meta, Field $field): void
