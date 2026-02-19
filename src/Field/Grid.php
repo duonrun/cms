@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
-use Duon\Cms\Validation\GridItemSchema;
+use Duon\Cms\Validation\GridItemValidator;
 use Duon\Cms\Value\Grid as GridValue;
 use Duon\Sire\Schema;
 use ValueError;
@@ -50,7 +50,7 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		$schema->add('type', 'text', 'required', 'in:grid');
 		$schema->add('columns', 'int', 'required');
 
-		$itemSchema = new GridItemSchema(list: true, title: $this->label, keepUnknown: true);
+		$itemSchema = new GridItemValidator(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();

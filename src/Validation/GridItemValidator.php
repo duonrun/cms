@@ -7,7 +7,7 @@ namespace Duon\Cms\Validation;
 use Duon\Sire\Schema;
 use Duon\Sire\ValidationResult;
 
-class GridItemSchema extends Schema
+class GridItemValidator extends Schema
 {
 	protected function rules(): void
 	{
