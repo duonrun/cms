@@ -35,7 +35,7 @@ abstract class Field implements
 	/** @var list<array{object, Handler}> */
 	protected array $meta = [];
 
-	protected ?Registry $metaRegistry = null;
+	protected ?Registry $schemaRegistry = null;
 
 	final public function __construct(
 		public readonly string $name,
@@ -61,9 +61,9 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function initMeta(ReflectionProperty $property, Registry $registry): void
+	public function initSchema(ReflectionProperty $property, Registry $registry): void
 	{
-		$this->metaRegistry = $registry;
+		$this->schemaRegistry = $registry;
 
 		foreach ($property->getAttributes() as $attr) {
 			$instance = $attr->newInstance();
@@ -78,9 +78,9 @@ abstract class Field implements
 		}
 	}
 
-	public function metaRegistry(): Registry
+	public function schemaRegistry(): Registry
 	{
-		return $this->metaRegistry ??= Registry::withDefaults();
+		return $this->schemaRegistry ??= Registry::withDefaults();
 	}
 
 	public function properties(): array

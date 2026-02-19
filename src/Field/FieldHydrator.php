@@ -13,7 +13,7 @@ use ReflectionUnionType;
 class FieldHydrator
 {
 	public function __construct(
-		private readonly Registry $metaRegistry = new Registry(),
+		private readonly Registry $schemaRegistry = new Registry(),
 	) {}
 
 	/**
@@ -77,9 +77,9 @@ class FieldHydrator
 		return $fields;
 	}
 
-	public function metaRegistry(): Registry
+	public function schemaRegistry(): Registry
 	{
-		return $this->metaRegistry;
+		return $this->schemaRegistry;
 	}
 
 	protected function initField(
@@ -92,7 +92,7 @@ class FieldHydrator
 		$data = $content[$fieldName] ?? [];
 		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $data));
 
-		$field->initMeta($property, $this->metaRegistry);
+		$field->initSchema($property, $this->schemaRegistry);
 
 		return $field;
 	}

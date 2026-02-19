@@ -28,9 +28,9 @@ class NodeFactory
 
 	public function __construct(
 		private readonly Registry $registry,
-		?SchemaRegistry $metaRegistry = null,
+		?SchemaRegistry $schemaRegistry = null,
 	) {
-		$this->hydrator = new FieldHydrator($metaRegistry ?? SchemaRegistry::withDefaults());
+		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
 		self::$nodeState ??= new WeakMap();
 	}
 
