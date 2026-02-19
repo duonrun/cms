@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Matrix;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestMatrix;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\MatrixValue;
@@ -38,7 +38,7 @@ class MatrixTest extends TestCase
 	public function testMatrixFieldCreation(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 
@@ -52,7 +52,7 @@ class MatrixTest extends TestCase
 	public function testMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$structure = $matrix->structure();
@@ -64,7 +64,7 @@ class MatrixTest extends TestCase
 	public function testMatrixSchema(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$schema = $matrix->schema();
@@ -75,7 +75,7 @@ class MatrixTest extends TestCase
 	public function testMatrixSubfieldsHaveTranslateCapability(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$subfields = $matrix->getSubfields();
@@ -98,7 +98,7 @@ class MatrixTest extends TestCase
 	public function testMatrixStructureFromValueContext(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		// Simulate data as it comes from the database (stored format)
 		$storedData = [

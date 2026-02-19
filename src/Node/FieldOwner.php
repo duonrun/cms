@@ -11,7 +11,7 @@ use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Core\Request;
 
-class NodeFieldOwner implements Owner
+class FieldOwner implements Owner
 {
 	public function __construct(
 		private readonly Context $context,

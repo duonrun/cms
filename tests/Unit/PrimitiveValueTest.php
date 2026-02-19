@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestCheckbox;
 use Duon\Cms\Tests\Fixtures\Field\TestHtml;
 use Duon\Cms\Tests\Fixtures\Field\TestNumber;
@@ -43,9 +43,9 @@ final class PrimitiveValueTest extends TestCase
 		);
 	}
 
-	private function createOwner(Context $context): NodeFieldOwner
+	private function createOwner(Context $context): FieldOwner
 	{
-		return new NodeFieldOwner($context, 'test-node');
+		return new FieldOwner($context, 'test-node');
 	}
 
 	public function testTextValueFallsBackToDefaultLocale(): void

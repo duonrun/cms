@@ -67,7 +67,7 @@ class NodeFactory
 		]);
 
 		$uid = $data['uid'] ?? nanoid();
-		$owner = new NodeFieldOwner($context, $uid);
+		$owner = new FieldOwner($context, $uid);
 		$fieldNames = $this->hydrator->hydrate($node, $data['content'] ?? [], $owner);
 
 		if ($node instanceof HasInit) {

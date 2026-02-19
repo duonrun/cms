@@ -6,7 +6,7 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Schema\Handler;
 use Duon\Cms\Field\Text;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 
@@ -22,7 +22,7 @@ final class CapabilityFunctionsTest extends TestCase
 			$this->factory(),
 		);
 
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		return new Text($name, $owner, new ValueContext($name, []));
 	}

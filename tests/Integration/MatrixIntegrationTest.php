@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeFieldOwner;
 use Duon\Cms\Tests\Fixtures\Node\TestMatrix;
 use Duon\Cms\Tests\Fixtures\Node\TestNodeWithMatrix;
 use Duon\Cms\Tests\TestCase;
@@ -87,7 +87,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixStructure(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 
@@ -108,7 +108,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMatrixSubfieldTranslateStructure(): void
 	{
 		$context = $this->createContext();
-		$owner = new NodeFieldOwner($context, 'test-node');
+		$owner = new FieldOwner($context, 'test-node');
 
 		// Create matrix with one empty item
 		$matrix = new TestMatrix(
