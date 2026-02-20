@@ -6,7 +6,7 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Field\Textarea;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Schema\DefaultValue;
 use Duon\Cms\Schema\Description;
 use Duon\Cms\Schema\Hidden;
@@ -19,7 +19,7 @@ use Duon\Cms\Schema\Validate;
 use Duon\Cms\Schema\Width;
 
 #[Label('Test Document')]
-class TestDocument implements HasTitle
+class TestDocument implements Title
 {
 	#[Label('Document Title')]
 	#[Required]

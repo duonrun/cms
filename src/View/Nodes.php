@@ -65,7 +65,7 @@ class Nodes
 			$uid = NodeFactory::meta($node, 'uid');
 			$n = [
 				'uid' => $uid,
-				'title' => $node instanceof \Duon\Cms\Node\Contract\HasTitle ? $node->title() : (method_exists($node, 'title') ? $node->title() : ''),
+				'title' => $node instanceof \Duon\Cms\Node\Contract\Title ? $node->title() : (method_exists($node, 'title') ? $node->title() : ''),
 				'handle' => NodeFactory::meta($node, 'handle'),
 				'published' => NodeFactory::meta($node, 'published'),
 				'hidden' => NodeFactory::meta($node, 'hidden'),

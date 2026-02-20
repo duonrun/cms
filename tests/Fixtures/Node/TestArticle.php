@@ -6,12 +6,12 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Field\Textarea;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Translate;
 
 #[Label('Test Article')]
-class TestArticle implements HasTitle
+class TestArticle implements Title
 {
 	#[Label('Title')]
 	#[Translate]

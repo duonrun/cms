@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node\Contract;
 
-interface HasTitle
+interface Title
 {
 	public function title(): string;
 }

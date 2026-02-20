@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Route;
 use Duon\Cms\Schema\Translate;
 
 #[Label('Test Page')]
 #[Route('/test/{uid}')]
-class TestPage implements HasTitle
+class TestPage implements Title
 {
 	#[Label('Title')]
 	#[Translate]

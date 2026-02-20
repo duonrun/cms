@@ -16,11 +16,11 @@ use Duon\Cms\Field\Meta\Translate;
 use Duon\Cms\Cms;
 use Duon\Cms\Schema\Name;
 use Duon\Cms\Schema\Route;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Core\Request;
 
 #[Name('Department'), Route('/{title}')]
-final class Department implements HasTitle
+final class Department implements Title
 {
     public function __construct(
         protected readonly Request $request,
@@ -67,7 +67,7 @@ final class Department implements HasTitle
 
 | Interface | Method | Purpose |
 | --------- | ------ | ------- |
-| `HasTitle` | `title(): string` | Computed title (takes precedence over `#[Title]`) |
+| `Title` | `title(): string` | Computed title (takes precedence over `#[Title]`) |
 | `HasInit` | `init(): void` | Post-hydration initialization hook |
 | `HandlesFormPost` | `formPost(?array $body): Response` | Frontend form submission handling |
 | `ProvidesRenderContext` | `renderContext(): array` | Extra template variables |

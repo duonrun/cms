@@ -31,7 +31,7 @@ conventions.
 
 - `#[Name]`, `#[Handle]`, `#[Route]`, `#[Render]`, `#[Title]`, `#[FieldOrder]`,
   `#[Deletable]`, `#[Permission]` attributes for node metadata.
-- `HasTitle`, `HasInit`, `HandlesFormPost`, `ProvidesRenderContext` interfaces
+- `Title`, `HasInit`, `HandlesFormPost`, `ProvidesRenderContext` interfaces
   for behavioral hooks.
 - `FieldOwner` interface decoupling fields from the node hierarchy.
 - `FieldHydrator` service for external field initialization (two-phase init).
@@ -64,7 +64,7 @@ class Article extends Page
 
 // After
 #[Name('Article'), Route('/{title}')]
-class Article implements HasTitle
+class Article implements Title
 {
     #[Label('Title'), Translate]
     public Text $title;
@@ -80,7 +80,7 @@ Constructor dependencies are autowired from the Registry via `duon/wire`:
 
 ```php
 #[Name('Department'), Route('/{title}')]
-final class Department implements HasTitle
+final class Department implements Title
 {
     public function __construct(
         protected readonly Request $request,

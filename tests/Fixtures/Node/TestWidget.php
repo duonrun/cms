@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Schema\Label;
 
 #[Label('Test Widget')]
-class TestWidget implements HasTitle
+class TestWidget implements Title
 {
 	#[Label('Title')]
 	public Text $title;

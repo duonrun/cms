@@ -6,7 +6,7 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use ReflectionMethod;
 
 use function Duon\Cms\Util\nanoid;
@@ -142,7 +142,7 @@ class Serializer
 
 	public function resolveTitle(object $node): string
 	{
-		if ($node instanceof HasTitle) {
+		if ($node instanceof Title) {
 			return $node->title();
 		}
 

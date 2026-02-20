@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title as TitleContract;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Route;
@@ -16,7 +16,7 @@ use Duon\Cms\Schema\Translate;
 #[Route('/plain-page/{uid}')]
 #[Title('heading')]
 #[FieldOrder('heading', 'body')]
-class PlainPage implements HasTitle
+class PlainPage implements TitleContract
 {
 	#[Label('Heading')]
 	#[Translate]

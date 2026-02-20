@@ -6,7 +6,7 @@ namespace Duon\Cms;
 
 use Closure;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Node\Contract\HasTitle;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
@@ -81,7 +81,7 @@ final class Column
 
 		switch ($field) {
 			case 'title':
-				if ($inner instanceof HasTitle) {
+				if ($inner instanceof Title) {
 					return $inner->title();
 				}
 
