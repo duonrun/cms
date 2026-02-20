@@ -6,10 +6,9 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Schema\Label;
 
-#[Name('Test Widget')]
+#[Label('Test Widget')]
 class TestWidget implements HasTitle
 {
 	#[Label('Title')]

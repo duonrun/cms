@@ -9,7 +9,7 @@ use Duon\Cms\Finder\Menu;
 use Duon\Cms\Finder\Node;
 use Duon\Cms\Finder\Nodes;
 use Duon\Cms\Finder\Render;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 
 /**
  * @psalm-property-read Nodes $nodes
@@ -18,11 +18,11 @@ use Duon\Cms\Node\NodeFactory;
  */
 class Cms
 {
-	private readonly NodeFactory $nodeFactory;
+	private readonly Factory $nodeFactory;
 
 	public function __construct(private readonly Context $context)
 	{
-		$this->nodeFactory = new NodeFactory($context->registry);
+		$this->nodeFactory = new Factory($context->registry);
 	}
 
 	public function __get($key): Nodes|Node|Menu
@@ -63,7 +63,7 @@ class Cms
 		return new Render($this->context, $this, $this->nodeFactory, $uid, $templateContext, $deleted, $published);
 	}
 
-	public function nodeFactory(): NodeFactory
+	public function nodeFactory(): Factory
 	{
 		return $this->nodeFactory;
 	}

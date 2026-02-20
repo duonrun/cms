@@ -10,12 +10,12 @@ use Duon\Cms\Config;
 use Duon\Cms\Context;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
+use Duon\Cms\Node\Factory as NodeFactory;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeManager;
-use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeSerializer;
 use Duon\Cms\Node\PathManager;
+use Duon\Cms\Node\Serializer;
+use Duon\Cms\Node\Store;
 use Duon\Cms\Plugin;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
@@ -138,8 +138,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => NodeMeta::handle($blueprint),
-				'name' => NodeMeta::name($blueprint),
+				'slug' => Meta::handle($blueprint),
+				'name' => Meta::label($blueprint),
 			];
 		}
 
@@ -170,7 +170,7 @@ class Panel
 		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $factory->blueprint($class, $context, $cms);
 
-		$serializer = new NodeSerializer(
+		$serializer = new Serializer(
 			$factory->hydrator(),
 		);
 
@@ -197,8 +197,8 @@ class Panel
 		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
-		$manager = new NodeManager($context->db, new PathManager());
-		$result = $manager->save($obj, $data, $this->request, $context->locales());
+		$store = new Store($context->db, new PathManager());
+		$result = $store->save($obj, $data, $this->request, $context->locales());
 
 		return (new Response(
 			$factory
@@ -219,14 +219,14 @@ class Panel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new NodeSerializer($nodeFactory->hydrator());
-		$manager = new NodeManager($context->db, new PathManager());
+		$serializer = new Serializer($nodeFactory->hydrator());
+		$store = new Store($context->db, new PathManager());
 		$method = $this->request->method();
 
 		$result = match ($method) {
 			'GET' => $serializer->read($node, NodeFactory::dataFor($node), NodeFactory::fieldNamesFor($node)),
-			'PUT' => $this->saveNode($node, $manager, $context),
-			'DELETE' => $manager->delete($node, $this->request),
+			'PUT' => $this->saveNode($node, $store, $context),
+			'DELETE' => $store->delete($node, $this->request),
 			default => throw new HttpBadRequest($this->request),
 		};
 
@@ -240,13 +240,13 @@ class Panel
 		))->body($content);
 	}
 
-	private function saveNode(object $node, NodeManager $manager, Context $context): array
+	private function saveNode(object $node, Store $store, Context $context): array
 	{
 		if ($this->request->header('Content-Type') !== 'application/json') {
 			throw new HttpBadRequest($this->request);
 		}
 
-		return $manager->save($node, $this->request->json(), $this->request, $context->locales());
+		return $store->save($node, $this->request->json(), $this->request, $context->locales());
 	}
 
 	protected function getPanelIndex(): string

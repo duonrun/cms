@@ -6,11 +6,10 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasInit;
-use Duon\Cms\Node\Meta\Name;
-use Duon\Cms\Node\Meta\Route;
 use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Route;
 
-#[Name('Plain Page With Init')]
+#[Label('Plain Page With Init')]
 #[Route('/plain-page-with-init/{uid}')]
 class PlainPageWithInit implements HasInit
 {

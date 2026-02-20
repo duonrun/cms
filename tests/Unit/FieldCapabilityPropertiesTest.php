@@ -9,7 +9,7 @@ use Duon\Cms\Field\Image;
 use Duon\Cms\Field\Option;
 use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Field\Text;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Schema\Columns;
 use Duon\Cms\Schema\Description;
 use Duon\Cms\Schema\Hidden;
@@ -36,7 +36,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->registry = Registry::withDefaults();
 	}
 
-	private function createOwner(): NodeFieldOwner
+	private function createOwner(): FieldOwner
 	{
 		$context = new \Duon\Cms\Context(
 			$this->db(),
@@ -46,7 +46,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			$this->factory(),
 		);
 
-		return new NodeFieldOwner($context, 'test-node');
+		return new FieldOwner($context, 'test-node');
 	}
 
 	private function createTextField(string $name = 'test'): Text

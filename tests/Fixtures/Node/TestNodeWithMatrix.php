@@ -6,12 +6,11 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Required;
 use Duon\Cms\Schema\Translate;
 
-#[Name('Test Node With Matrix')]
+#[Label('Test Node With Matrix')]
 class TestNodeWithMatrix implements HasTitle
 {
 	#[Label('Titel'), Required, Translate]

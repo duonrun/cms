@@ -99,7 +99,7 @@ class TemplateRenderer
 	 */
 	public function resolveRenderer(object $node): array
 	{
-		return ['template', NodeMeta::forClass($node::class)->renderer];
+		return ['template', Meta::forClass($node::class)->renderer];
 	}
 
 	private function doRender(object $node, array $context): Response

@@ -9,7 +9,6 @@ use Duon\Cms\Field\Image;
 use Duon\Cms\Field\Option;
 use Duon\Cms\Field\Video;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Schema\Columns;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Multiple;
@@ -17,7 +16,7 @@ use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\TranslateFile;
 
-#[Name('Test Media Document')]
+#[Label('Test Media Document')]
 class TestMediaDocument implements HasTitle
 {
 	#[Label('Gallery')]

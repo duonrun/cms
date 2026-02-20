@@ -9,8 +9,8 @@ use Duon\Cms\Config;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\Factory as NodeFactory;
+use Duon\Cms\Node\Serializer;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -53,7 +53,7 @@ class Nodes
 
 		$nodeFactory = $cms->nodeFactory();
 		$hydrator = $nodeFactory->hydrator();
-		$serializer = new NodeSerializer($hydrator);
+		$serializer = new Serializer($hydrator);
 		$result = [];
 
 		foreach (

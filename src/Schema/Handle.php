@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Meta;
+namespace Duon\Cms\Schema;
 
 use Attribute;
 
 #[Attribute]
-class Name
+class Handle
 {
 	public function __construct(public readonly string $value) {}
 }

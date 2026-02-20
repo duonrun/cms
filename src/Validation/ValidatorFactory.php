@@ -7,7 +7,7 @@ namespace Duon\Cms\Validation;
 use Duon\Cms\Field\Field;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
-use Duon\Cms\Node\NodeFactory;
+use Duon\Cms\Node\Factory;
 use Duon\Sire\Schema;
 
 class ValidatorFactory
@@ -30,7 +30,7 @@ class ValidatorFactory
 	{
 		$contentSchema = new Schema(title: 'Content', keepUnknown: true);
 
-		foreach (NodeFactory::fieldNamesFor($this->node) as $fieldName) {
+		foreach (Factory::fieldNamesFor($this->node) as $fieldName) {
 			$this->add($contentSchema, $fieldName, $this->hydrator->getField($this->node, $fieldName));
 		}
 

@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Duon\Cms\Node;
+
+use Duon\Cms\Schema\Deletable;
+use Duon\Cms\Schema\FieldOrder;
+use Duon\Cms\Schema\Handle;
+use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Permission;
+use Duon\Cms\Schema\Render;
+use Duon\Cms\Schema\Route;
+use Duon\Cms\Schema\Title;
+use ReflectionClass;
+
+class Schema
+{
+	public readonly string $label; // The public name of the node type
+	public readonly string $handle; // Used also as slug to address the node type in the panel
+	public readonly string $renderer;
+	public readonly bool $routable;
+	public readonly bool $renderable;
+	public readonly string|array $route;
+	public readonly string|array $permission;
+	public readonly ?string $titleField; // Field name from #[Title], or null
+	/** @var string[]|null */
+	public readonly ?array $fieldOrder; // From #[FieldOrder], or null for declaration order
+	public readonly bool $deletable;
+
+	/**
+	 * @param class-string $nodeclass
+	 */
+	public function __construct(private readonly string $nodeClass)
+	{
+		$attributes = $this->initAttributes();
+		$handle = $attributes[Handle::class] ?? null;
+		$render = $attributes[Render::class] ?? null;
+		$route = $attributes[Route::class] ?? null;
+
+		$this->label = $this->getLabel($attributes[Label::class] ?? null);
+		$this->handle = $this->getHandle($handle);
+		$this->renderer = $this->getRenderer($render, $handle);
+		$this->route = $this->getRoute($route);
+		$this->routable = $route !== null;
+		$this->renderable = $render !== null || $this->renderer !== '';
+		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
+		$this->titleField = ($attributes[Title::class] ?? null)?->field;
+		$this->fieldOrder = ($attributes[FieldOrder::class] ?? null)?->fields;
+		$this->deletable = ($attributes[Deletable::class] ?? null)?->value ?? true;
+	}
+
+	private function initAttributes(): array
+	{
+		$reflection = new ReflectionClass($this->nodeClass);
+		$attributes = $reflection->getAttributes();
+		$map = [];
+
+		foreach ($attributes as $attribute) {
+			$instance = $attribute->newInstance();
+			$map[$instance::class] = $instance;
+		}
+
+		return $map;
+	}
+
+	private function getLabel(?Label $label): string
+	{
+		if ($label) {
+			return $label->label;
+		}
+
+		return $this->getClassName();
+	}
+
+	private function getHandle(?Handle $handle): string
+	{
+		if ($handle) {
+			return $handle->value;
+		}
+
+		return ltrim(
+			strtolower(preg_replace(
+				'/[A-Z]([A-Z](?![a-z]))*/',
+				'-$0',
+				$this->getClassName(),
+			)),
+			'-',
+		);
+	}
+
+	private function getRenderer(?Render $render, ?Handle $handle): string
+	{
+		if ($render) {
+			return $render->value;
+		}
+
+		return $this->getHandle($handle);
+	}
+
+	private function getRoute(?Route $route): array|string
+	{
+		if ($route) {
+			return $route->value;
+		}
+
+		return '';
+	}
+
+	private function getPermission(?Permission $permission): array|string
+	{
+		if ($permission) {
+			return $permission->value;
+		}
+
+		return [
+			'read' => 'everyone',
+			'create' => 'authenticated',
+			'change' => 'authenticated',
+			'deeete' => 'authenticated',
+		];
+	}
+
+	private function getClassName(): string
+	{
+		return basename(str_replace('\\', '/', $this->nodeClass));
+	}
+}

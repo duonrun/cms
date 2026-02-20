@@ -6,12 +6,12 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Config;
 use Duon\Cms\Context;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
 use Duon\Core\Request;
 
-class NodeFieldOwner implements FieldOwner
+class FieldOwner implements Owner
 {
 	public function __construct(
 		private readonly Context $context,

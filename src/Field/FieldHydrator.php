@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
+use Duon\Cms\Field\Owner;
 use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Value\ValueContext;
 use ReflectionClass;
@@ -22,7 +23,7 @@ class FieldHydrator
 	 *
 	 * @return string[] Discovered field names
 	 */
-	public function hydrate(object $target, array $content, FieldOwner $owner): array
+	public function hydrate(object $target, array $content, Owner $owner): array
 	{
 		$fieldNames = [];
 		$rc = new ReflectionClass($target);
@@ -86,7 +87,7 @@ class FieldHydrator
 		ReflectionProperty $property,
 		string $fieldType,
 		array $content,
-		FieldOwner $owner,
+		Owner $owner,
 	): Field {
 		$fieldName = $property->getName();
 		$data = $content[$fieldName] ?? [];

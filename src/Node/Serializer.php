@@ -11,7 +11,7 @@ use ReflectionMethod;
 
 use function Duon\Cms\Util\nanoid;
 
-class NodeSerializer
+class Serializer
 {
 	public function __construct(
 		private readonly FieldHydrator $hydrator,
@@ -46,8 +46,8 @@ class NodeSerializer
 			'paths' => $rawData['paths'],
 			'type' => [
 				'handle' => $rawData['handle'],
-				'routable' => NodeMeta::routable($class),
-				'renderable' => NodeMeta::renderable($class),
+				'routable' => Meta::routable($class),
+				'renderable' => Meta::renderable($class),
 				'class' => $class,
 			],
 			'editor' => [
@@ -82,15 +82,15 @@ class NodeSerializer
 		}
 
 		$class = $node::class;
-		$routable = NodeMeta::routable($class);
-		$renderable = NodeMeta::renderable($class);
+		$routable = Meta::routable($class);
+		$renderable = Meta::renderable($class);
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
 		}
 
 		$result = [
-			'title' => _('Neues Dokument:') . ' ' . NodeMeta::name($class),
+			'title' => _('Neues Dokument:') . ' ' . Meta::label($class),
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => nanoid(),
 			'published' => false,
@@ -99,7 +99,7 @@ class NodeSerializer
 			'deletable' => $this->resolveDeletable($node),
 			'content' => $content,
 			'type' => [
-				'handle' => NodeMeta::handle($class),
+				'handle' => Meta::handle($class),
 				'routable' => $routable,
 				'renderable' => $renderable,
 				'class' => $class,
@@ -109,7 +109,7 @@ class NodeSerializer
 		];
 
 		if ($routable) {
-			$result['route'] = NodeMeta::route($class);
+			$result['route'] = Meta::route($class);
 		}
 
 		return $result;
@@ -150,7 +150,7 @@ class NodeSerializer
 			return $node->title();
 		}
 
-		$titleField = NodeMeta::titleField($node::class);
+		$titleField = Meta::titleField($node::class);
 
 		if ($titleField) {
 			$field = $this->hydrator->getField($node, $titleField);
@@ -166,7 +166,7 @@ class NodeSerializer
 	 */
 	private function order(object $node, array $fieldNames): array
 	{
-		$metaOrder = NodeMeta::fieldOrder($node::class);
+		$metaOrder = Meta::fieldOrder($node::class);
 
 		if ($metaOrder !== null) {
 			return $metaOrder;
@@ -187,6 +187,6 @@ class NodeSerializer
 			return $method->invoke($node);
 		}
 
-		return NodeMeta::deletable($node::class);
+		return Meta::deletable($node::class);
 	}
 }

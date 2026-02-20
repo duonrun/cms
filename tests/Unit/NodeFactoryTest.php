@@ -7,10 +7,10 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
+use Duon\Cms\Node\Factory;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
-use Duon\Cms\Node\NodeSerializer;
+use Duon\Cms\Node\Serializer;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
@@ -28,21 +28,21 @@ final class NodeFactoryTest extends TestCase
 {
 	private Context $context;
 	private \Duon\Cms\Cms $cms;
-	private NodeFactory $factory;
+	private Factory $factory;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-		NodeMeta::clearCache();
+		Meta::clearCache();
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
-		$this->factory = new NodeFactory($this->registry());
+		$this->factory = new Factory($this->registry());
 	}
 
 	protected function tearDown(): void
 	{
-		NodeMeta::clearCache();
+		Meta::clearCache();
 		parent::tearDown();
 	}
 
@@ -117,7 +117,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertContains('heading', $fieldNames);
 		$this->assertContains('body', $fieldNames);
 		$this->assertCount(2, $fieldNames);
@@ -132,7 +132,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$title = $serializer->resolveTitle($node);
 		$this->assertEquals('My Title', $title);
 	}
@@ -144,7 +144,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
 	}
@@ -160,7 +160,7 @@ final class NodeFactoryTest extends TestCase
 		];
 
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, $data);
-		$stored = NodeFactory::dataFor($node);
+		$stored = Factory::dataFor($node);
 
 		$this->assertEquals('data-1', $stored['uid']);
 		$this->assertEquals('plain-page', $stored['handle']);
@@ -173,7 +173,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertEquals(['heading', 'body'], $fieldNames);
 	}
 
@@ -186,17 +186,17 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$this->assertEquals('meta-1', NodeFactory::meta($node, 'uid'));
-		$this->assertEquals('plain-page', NodeFactory::meta($node, 'handle'));
-		$this->assertTrue(NodeFactory::meta($node, 'published'));
-		$this->assertNull(NodeFactory::meta($node, 'nonexistent'));
+		$this->assertEquals('meta-1', Factory::meta($node, 'uid'));
+		$this->assertEquals('plain-page', Factory::meta($node, 'handle'));
+		$this->assertTrue(Factory::meta($node, 'published'));
+		$this->assertNull(Factory::meta($node, 'nonexistent'));
 	}
 
 	public function testDataForUnknownNodeReturnsEmpty(): void
 	{
 		$unknown = new stdClass();
-		$this->assertEmpty(NodeFactory::dataFor($unknown));
-		$this->assertEmpty(NodeFactory::fieldNamesFor($unknown));
+		$this->assertEmpty(Factory::dataFor($unknown));
+		$this->assertEmpty(Factory::fieldNamesFor($unknown));
 	}
 
 	// -- HasInit callback -----------------------------------------------------
@@ -219,7 +219,7 @@ final class NodeFactoryTest extends TestCase
 		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
 
 		$this->assertInstanceOf(PlainPage::class, $node);
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$this->assertCount(2, $fieldNames);
 	}
 
@@ -227,50 +227,50 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertTrue(NodeMeta::routable(PlainPage::class));
+		$this->assertTrue(Meta::routable(PlainPage::class));
 	}
 
 	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertTrue(NodeMeta::renderable(PlainBlock::class));
+		$this->assertTrue(Meta::renderable(PlainBlock::class));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void
 	{
-		$this->assertTrue(NodeMeta::isNode(PlainPage::class));
+		$this->assertTrue(Meta::isNode(PlainPage::class));
 	}
 
 	public function testNodeMetaHandleForPlainPage(): void
 	{
-		$this->assertEquals('plain-page', NodeMeta::handle(PlainPage::class));
+		$this->assertEquals('plain-page', Meta::handle(PlainPage::class));
 	}
 
-	public function testNodeMetaNameForPlainPage(): void
+	public function testNodeMetaLabelForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', NodeMeta::name(PlainPage::class));
+		$this->assertEquals('Plain Page', Meta::label(PlainPage::class));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void
 	{
-		$this->assertEquals('heading', NodeMeta::titleField(PlainPage::class));
+		$this->assertEquals('heading', Meta::titleField(PlainPage::class));
 	}
 
 	public function testNodeMetaFieldOrderForPlainPage(): void
 	{
-		$this->assertEquals(['heading', 'body'], NodeMeta::fieldOrder(PlainPage::class));
+		$this->assertEquals(['heading', 'body'], Meta::fieldOrder(PlainPage::class));
 	}
 
 	public function testNodeMetaDeletableForPlainBlock(): void
 	{
-		$this->assertFalse(NodeMeta::deletable(PlainBlock::class));
+		$this->assertFalse(Meta::deletable(PlainBlock::class));
 	}
 
 	public function testNodeMetaDeletableDefaultsToTrue(): void
 	{
-		$this->assertTrue(NodeMeta::deletable(PlainPage::class));
+		$this->assertTrue(Meta::deletable(PlainPage::class));
 	}
 
-	// -- NodeSerializer with plain objects ------------------------------------
+	// -- Serializer with plain objects ------------------------------------
 
 	public function testSerializerFieldsForPlainPage(): void
 	{
@@ -279,8 +279,8 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$serializer = new Serializer($this->factory->hydrator());
+		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertCount(2, $fields);
@@ -291,10 +291,10 @@ final class NodeFactoryTest extends TestCase
 	public function testSerializerBlueprintForPlainPage(): void
 	{
 		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
-		$serializer = new NodeSerializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator());
 		$blueprint = $serializer->blueprint($node, $fieldNames, $locales);
 
 		$this->assertArrayHasKey('uid', $blueprint);
@@ -320,7 +320,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertTrue(isset($proxy->heading));
@@ -336,7 +336,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertEquals('Method Test', $proxy->title());
@@ -349,7 +349,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$fieldNames = NodeFactory::fieldNamesFor($node);
+		$fieldNames = Factory::fieldNamesFor($node);
 		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
 
 		$this->assertNull($proxy->heading);

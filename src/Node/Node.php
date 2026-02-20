@@ -22,12 +22,12 @@ class Node
 	/**
 	 * Resolve the locale-aware URL path for this node.
 	 *
-	 * Uses the paths stored in NodeFactory's WeakMap data,
+	 * Uses the paths stored in Factory's WeakMap data,
 	 * walking the locale fallback chain until a path is found.
 	 */
 	public function path(?Locale $locale = null): string
 	{
-		$data = NodeFactory::dataFor($this->node);
+		$data = Factory::dataFor($this->node);
 		$paths = $data['paths'] ?? [];
 
 		if (!$locale && $this->request) {

@@ -39,7 +39,7 @@ abstract class Field implements
 
 	final public function __construct(
 		public readonly string $name,
-		public readonly FieldOwner $owner,
+		public readonly Owner $owner,
 		protected readonly ValueContext $valueContext,
 	) {
 		$this->type = $this::class;

@@ -7,7 +7,7 @@ namespace Duon\Cms\Value;
 use Duon\Cms\Assets\Assets;
 use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use Duon\Cms\Locale;
 
 abstract class Value
@@ -19,7 +19,7 @@ abstract class Value
 	protected readonly array $data;
 
 	public function __construct(
-		protected readonly FieldOwner $owner,
+		protected readonly Owner $owner,
 		protected readonly Field $field,
 		protected readonly ValueContext $context,
 	) {

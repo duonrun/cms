@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Field\Time;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
 use IntlDateFormatter;
@@ -34,9 +34,9 @@ final class TimeValueTest extends TestCase
 		);
 	}
 
-	private function createOwner(\Duon\Cms\Context $context): NodeFieldOwner
+	private function createOwner(\Duon\Cms\Context $context): FieldOwner
 	{
-		return new NodeFieldOwner($context, 'test-node');
+		return new FieldOwner($context, 'test-node');
 	}
 
 	public function testTimeValueHasCorrectFormat(): void

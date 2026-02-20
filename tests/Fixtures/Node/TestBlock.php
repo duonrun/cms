@@ -6,11 +6,10 @@ namespace Duon\Cms\Tests\Fixtures\Node;
 
 use Duon\Cms\Field\Text;
 use Duon\Cms\Node\Contract\HasTitle;
-use Duon\Cms\Node\Meta\Name;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Translate;
 
-#[Name('Test Block')]
+#[Label('Test Block')]
 class TestBlock implements HasTitle
 {
 	#[Label('Title')]

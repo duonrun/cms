@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
-use Duon\Cms\Node\NodeFieldOwner;
+use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestGrid;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\Grid as GridValue;
@@ -41,9 +41,9 @@ final class GridValueTest extends TestCase
 		);
 	}
 
-	private function createOwner(Context $context): NodeFieldOwner
+	private function createOwner(Context $context): FieldOwner
 	{
-		return new NodeFieldOwner($context, 'test-node');
+		return new FieldOwner($context, 'test-node');
 	}
 
 	private function createGridValue(array $data): GridValue

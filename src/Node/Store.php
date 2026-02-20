@@ -12,7 +12,7 @@ use Duon\Core\Request;
 use Duon\Quma\Database;
 use Throwable;
 
-class NodeManager
+class Store
 {
 	public function __construct(
 		private readonly Database $db,
@@ -78,7 +78,7 @@ class NodeManager
 			throw new HttpBadRequest($request);
 		}
 
-		$uid = NodeFactory::meta($node, 'uid');
+		$uid = Factory::meta($node, 'uid');
 
 		$this->db->nodes->delete([
 			'uid' => $uid,
@@ -111,7 +111,7 @@ class NodeManager
 	{
 		$nodeId = $this->persistNode($node, $data, $editor);
 
-		if (NodeMeta::routable($node::class)) {
+		if (Meta::routable($node::class)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -119,7 +119,7 @@ class NodeManager
 	private function persistNode(object $node, array $data, int $editor): int
 	{
 		$class = $node::class;
-		$handle = NodeMeta::handle($class);
+		$handle = Meta::handle($class);
 		$this->ensureTypeExists($handle);
 
 		return (int) $this->db->nodes->save([

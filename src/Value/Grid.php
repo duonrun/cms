@@ -8,7 +8,7 @@ use Duon\Cms\Assets\ResizeMode;
 use Duon\Cms\Assets\Size;
 use Duon\Cms\Field;
 use Duon\Cms\Field\Capability\Translatable;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use Duon\Cms\Util\Html as HtmlUtil;
 use Generator;
 use Gumlet\ImageResize;
@@ -20,7 +20,7 @@ class Grid extends Value
 {
 	protected readonly ?Generator $preparedData;
 
-	public function __construct(FieldOwner $owner, Field\Grid&Translatable $field, ValueContext $context)
+	public function __construct(Owner $owner, Field\Grid&Translatable $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
 

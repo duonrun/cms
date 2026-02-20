@@ -6,7 +6,7 @@ namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 
 use function Duon\Cms\Util\escape;
 
@@ -18,7 +18,7 @@ class Iframe extends Value
 	protected string $value;
 
 	public function __construct(
-		FieldOwner $owner,
+		Owner $owner,
 		Field&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,

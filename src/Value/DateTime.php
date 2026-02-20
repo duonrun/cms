@@ -7,7 +7,7 @@ namespace Duon\Cms\Value;
 use DateTimeImmutable;
 use DateTimeZone;
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 use IntlDateFormatter;
 
 class DateTime extends Value
@@ -17,7 +17,7 @@ class DateTime extends Value
 	public readonly ?DateTimeImmutable $datetime;
 	public readonly ?DateTimeZone $timezone;
 
-	public function __construct(FieldOwner $owner, Field $field, ValueContext $context)
+	public function __construct(Owner $owner, Field $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
 

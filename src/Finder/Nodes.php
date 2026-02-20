@@ -6,9 +6,9 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Node\Factory;
+use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
-use Duon\Cms\Node\NodeFactory;
-use Duon\Cms\Node\NodeMeta;
 use Duon\Cms\Plugin;
 use Generator;
 use Iterator;
@@ -28,7 +28,7 @@ final class Nodes implements Iterator
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
-		private readonly NodeFactory $nodeFactory,
+		private readonly Factory $nodeFactory,
 	) {
 		$this->builtins = [
 			'changed' => 'n.changed',
@@ -41,10 +41,10 @@ final class Nodes implements Iterator
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
 			'routable' => $this->typeFlagExpression(
-				fn(string $class): bool => NodeMeta::routable($class),
+				fn(string $class): bool => Meta::routable($class),
 			),
 			'renderable' => $this->typeFlagExpression(
-				fn(string $class): bool => NodeMeta::renderable($class),
+				fn(string $class): bool => Meta::renderable($class),
 			),
 			'type' => 't.handle',
 			'handle' => 't.handle',
@@ -193,7 +193,7 @@ final class Nodes implements Iterator
 
 		foreach ($types as $type) {
 			if (class_exists($type)) {
-				$type = NodeMeta::handle($type);
+				$type = Meta::handle($type);
 			}
 
 			$result[] = 't.handle = ' . $this->context->db->quote($type);

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Duon\Cms\Value;
 
 use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldOwner;
+use Duon\Cms\Field\Owner;
 
 class Boolean extends Value
 {
 	public readonly bool $value;
 
-	public function __construct(FieldOwner $owner, Field $field, ValueContext $context)
+	public function __construct(Owner $owner, Field $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
 
