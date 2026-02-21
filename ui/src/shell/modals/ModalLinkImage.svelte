@@ -16,7 +16,7 @@
 </script>
 
 <button
-	class="link-image flex items-center justify-center rounded border border-gray-400"
+	class="link-image"
 	{onclick}
 	class:active={current && current.endsWith(`/${file}`)}>
 	<img
@@ -27,6 +27,11 @@
 
 <style lang="postcss">
 	.link-image {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: var(--radius);
+		border: 1px solid var(--gray-400);
 		width: 190px;
 		height: 190px;
 		padding: 5px;

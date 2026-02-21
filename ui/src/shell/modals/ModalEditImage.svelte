@@ -18,7 +18,7 @@
 
 <ModalHeader>{_('Bildtitel und Alt-Text')}</ModalHeader>
 <ModalBody>
-	<div class="mb-8 flex flex-col gap-4">
+	<div class="cms-modal-edit-image-fields">
 		<Input
 			bind:value={asset.title}
 			label={_('Titel')}
@@ -50,3 +50,12 @@
 		</Button>
 	</div>
 </ModalFooter>
+
+<style lang="postcss">
+	.cms-modal-edit-image-fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s-4);
+		margin-bottom: var(--s-8);
+	}
+</style>

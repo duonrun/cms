@@ -24,13 +24,13 @@
 
 <ModalHeader>{_('Inhaltstyp hinzufügen')}</ModalHeader>
 <ModalBody>
-	<div class="mb-8 grid grid-cols-2 gap-4">
+	<div class="cms-modal-create-grid">
 		{#if blueprints.length > 0}
 			{#each blueprints as blueprint}
 				<Button
 					class="secondary"
 					onclick={createNode(blueprint.slug)}>
-					<span class="ml-2">
+					<span class="cms-modal-create-label">
 						{blueprint.name}
 					</span>
 				</Button>
@@ -47,3 +47,16 @@
 		</Button>
 	</div>
 </ModalFooter>
+
+<style lang="postcss">
+	.cms-modal-create-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--s-4);
+		margin-bottom: var(--s-8);
+	}
+
+	.cms-modal-create-label {
+		margin-left: var(--s-2);
+	}
+</style>
