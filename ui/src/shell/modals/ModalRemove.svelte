@@ -18,7 +18,7 @@
 		{_('Soll der Eintrag wirklich gelöscht werden?')}
 	</p>
 	{#if message}
-		<p class="mt-6 font-semibold">{message}</p>
+		<p class="cms-modal-remove-message">{message}</p>
 	{/if}
 </ModalBody>
 <ModalFooter>
@@ -35,3 +35,10 @@
 		</Button>
 	</div>
 </ModalFooter>
+
+<style lang="postcss">
+	.cms-modal-remove-message {
+		margin-top: var(--s-6);
+		font-weight: 600;
+	}
+</style>

@@ -14,16 +14,42 @@
 	const onclick = () => clickFile(path);
 </script>
 
-<div class="mt-2 pr-4">
+<div class="cms-modal-link-file-wrap">
 	<button
 		{onclick}
-		class="inline-flex w-full items-center gap-x-1.5 rounded-md border border-emerald-600 px-3 py-2 text-sm font-semibold text-emerald-600 shadow-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+		class="cms-modal-link-file-button"
 		class:active={current && current.endsWith(`/${file}`)}>
 		{file}
 	</button>
 </div>
 
 <style lang="postcss">
+	.cms-modal-link-file-wrap {
+		margin-top: var(--s-2);
+		padding-right: var(--s-4);
+	}
+
+	button.cms-modal-link-file-button {
+		display: inline-flex;
+		width: 100%;
+		align-items: center;
+		gap: var(--s-1-5);
+		border: 1px solid var(--color-emerald-600);
+		border-radius: var(--radius-md);
+		padding: var(--s-2) var(--s-3);
+		font-size: var(--font-size-sm);
+		font-weight: 600;
+		color: var(--color-emerald-600);
+		background: transparent;
+		box-shadow: var(--shadow-sm);
+		cursor: pointer;
+	}
+
+	button.cms-modal-link-file-button:focus-visible {
+		outline: 2px solid var(--color-emerald-600);
+		outline-offset: 2px;
+	}
+
 	button.active {
 		background-color: var(--color-emerald-600);
 		color: var(--color-white);
