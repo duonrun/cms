@@ -118,17 +118,29 @@
 	function resizeCell(item: GridItem) {
 		return (element: HTMLElement) => (item.width = element.clientWidth);
 	}
+
+	function gridStyle(columns: number): string {
+		return `grid-template-columns: repeat(${columns}, minmax(0, 1fr));`;
+	}
+
+	function gridItemStyle(item: GridItem): string {
+		const column = item.colstart
+			? `${item.colstart} / span ${item.colspan}`
+			: `span ${item.colspan} / span ${item.colspan}`;
+
+		return `grid-column: ${column}; grid-row: span ${item.rowspan} / span ${item.rowspan};`;
+	}
 </script>
 
-<div class="grid-field grid grid-cols-{cols} gap-3 rounded border border-gray-300 bg-gray-200 p-3">
+<div
+	class="grid-field cms-grid-field"
+	style={gridStyle(cols)}>
 	{#if data && data.length > 0}
 		{#each data as item, index (item)}
 			{@const Control = controls[item.type]}
 			<div
-				class="col-span-{item.colspan} row-span-{item.rowspan} {item.colstart === null
-					? ''
-					: 'col-start-' +
-						item.colstart} relative flex flex-col rounded border border-gray-300 bg-white px-2 pb-2"
+				class="cms-grid-item"
+				style={gridItemStyle(item)}
 				animate:flip={{ duration: 300 }}
 				use:resize={resizeCell(item)}>
 				<Control
@@ -149,11 +161,11 @@
 			</div>
 		{/each}
 	{:else}
-		<div class="p-4 col-span-{cols} flex flex-row justify-center">
+		<div class="cms-grid-empty">
 			<Button
 				class="secondary"
 				onclick={openAddModal(null)}>
-				<span class="mr-2 h-5 w-5">
+				<span class="cms-grid-empty-icon">
 					<IcoCirclePlus />
 				</span>
 				{_('Inhalt hinzfügen')}
@@ -161,3 +173,38 @@
 		</div>
 	{/if}
 </div>
+
+<style lang="postcss">
+	.cms-grid-field {
+		display: grid;
+		gap: var(--s-3);
+		padding: var(--s-3);
+		border-radius: var(--radius);
+		border: var(--border);
+		background-color: var(--gray-200);
+	}
+
+	.cms-grid-item {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		border-radius: var(--radius);
+		border: var(--border);
+		background-color: var(--white);
+		padding: 0 var(--s-2) var(--s-2);
+	}
+
+	.cms-grid-empty {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: center;
+		padding: var(--s-4);
+	}
+
+	.cms-grid-empty-icon {
+		display: inline-flex;
+		width: 1.25rem;
+		height: 1.25rem;
+		margin-right: var(--s-2);
+	}
+</style>
