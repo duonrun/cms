@@ -7,14 +7,21 @@
 </script>
 
 {#if value !== null}
-	<span
-		class="grid-button-label absolute flex items-center justify-center rounded-full bg-rose-800 text-xs font-semibold text-white">
+	<span class="grid-button-label">
 		{value}
 	</span>
 {/if}
 
 <style lang="postcss">
-	span {
+	span.grid-button-label {
+		position: absolute;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: var(--radius-full);
+		background-color: var(--color-rose-700);
+		font-weight: 600;
+		color: var(--white);
 		font-size: 9px;
 		height: 12px;
 		width: 12px;

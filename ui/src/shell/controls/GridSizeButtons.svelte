@@ -66,9 +66,9 @@
 </script>
 
 <div
-	class="flex flex-grow flex-row items-center gap-x-3 py-2"
-	class:justify-start={!dropdown}
-	class:justify-center={dropdown}>
+	class="cms-grid-size-buttons"
+	class:cms-grid-size-buttons-inline={!dropdown}
+	class:cms-grid-size-buttons-dropdown={dropdown}>
 	<button
 		class="width-plus"
 		disabled={widest}
@@ -118,6 +118,23 @@
 </div>
 
 <style lang="postcss">
+	.cms-grid-size-buttons {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--s-3);
+		padding: var(--s-2) 0;
+	}
+
+	.cms-grid-size-buttons-inline {
+		justify-content: flex-start;
+	}
+
+	.cms-grid-size-buttons-dropdown {
+		justify-content: center;
+	}
+
 	div button {
 		position: relative;
 		height: var(--s-4);

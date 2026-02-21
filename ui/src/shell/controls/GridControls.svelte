@@ -27,14 +27,14 @@
 	let showDropdown = $state(false);
 </script>
 
-<div class="content-actions flex flex-row items-center justify-end">
+<div class="content-actions cms-grid-controls">
 	{#if item.width < 350}
-		<div class="mr-3 flex flex-grow flex-row items-center justify-end gap-x-3 py-2">
-			<div class="grid-buttons dropdown relative inline-block text-left">
+		<div class="cms-grid-controls-compact">
+			<div class="cms-grid-buttons cms-grid-buttons-dropdown">
 				<div>
 					<button
 						type="button"
-						class="flex items-center"
+						class="cms-grid-buttons-toggle"
 						onclick={() => (showDropdown = !showDropdown)}>
 						<span class="sr-only">Open options</span>
 						<IcoThreeDots />
@@ -42,13 +42,13 @@
 				</div>
 				{#if showDropdown}
 					<div
-						class="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-md bg-white px-2 shadow-lg ring-1 ring-black/5 focus:outline-none"
+						class="cms-grid-buttons-menu"
 						role="menu"
 						aria-orientation="vertical"
 						aria-labelledby="menu-button"
 						tabindex="-1">
 						<div
-							class="flex flex-col justify-center py-1"
+							class="cms-grid-buttons-menu-content"
 							role="none">
 							<GridCellButtons
 								bind:data
@@ -66,7 +66,7 @@
 			</div>
 		</div>
 	{:else}
-		<div class="grid-buttons flex flex-grow flex-row items-center justify-end">
+		<div class="cms-grid-buttons cms-grid-buttons-inline">
 			<GridSizeButtons
 				bind:field
 				bind:item />
@@ -77,7 +77,7 @@
 				{add} />
 		</div>
 	{/if}
-	<div class="flex flex-shrink flex-row items-center justify-end">
+	<div class="cms-grid-controls-edit">
 		<button
 			class="edit"
 			onclick={edit}>
@@ -92,24 +92,89 @@
 		width: var(--s-4);
 	}
 
-	.grid-buttons {
+	.cms-grid-controls {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+	}
+
+	.cms-grid-controls-compact {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--s-3);
+		padding: var(--s-2) 0;
+		margin-right: var(--s-3);
+	}
+
+	.cms-grid-controls-edit {
+		display: flex;
+		flex: 0 1 auto;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+	}
+
+	.cms-grid-buttons {
 		opacity: 0;
 		transition: opacity 0.35s ease;
+	}
 
-		&.dropdown {
-			opacity: 1;
-		}
+	.cms-grid-buttons-dropdown {
+		position: relative;
+		display: inline-block;
+		text-align: left;
+		opacity: 1;
+	}
 
-		&:hover {
-			opacity: 1;
-		}
+	.cms-grid-buttons-inline {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+	}
 
-		:global(button .grid-button-label) {
-			opacity: 0;
-		}
-		:global(button:hover .grid-button-label) {
-			opacity: 1;
-		}
+	.cms-grid-buttons-toggle {
+		display: flex;
+		align-items: center;
+	}
+
+	.cms-grid-buttons-menu {
+		position: absolute;
+		right: 0;
+		z-index: 10;
+		margin-top: var(--s-2);
+		width: 11rem;
+		transform-origin: top right;
+		border-radius: var(--radius-md);
+		background-color: var(--white);
+		padding: 0 var(--s-2);
+		box-shadow: var(--shadow-lg);
+		outline: none;
+		border: 1px solid color-mix(in srgb, var(--color-black) 5%, transparent);
+	}
+
+	.cms-grid-buttons-menu-content {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: var(--s-1) 0;
+	}
+
+	.cms-grid-buttons:hover {
+		opacity: 1;
+	}
+
+	.cms-grid-buttons :global(button .grid-button-label) {
+		opacity: 0;
+	}
+
+	.cms-grid-buttons :global(button:hover .grid-button-label) {
+		opacity: 1;
 	}
 
 	.edit {

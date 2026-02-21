@@ -62,7 +62,7 @@
 	}
 </script>
 
-<div class="flex flex-row items-center gap-x-2">
+<div class="cms-matrix-controls">
 	<button
 		type="button"
 		class="collapse-btn"
@@ -100,6 +100,13 @@
 </div>
 
 <style lang="postcss">
+	.cms-matrix-controls {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--s-2);
+	}
+
 	div button {
 		height: var(--s-4);
 		width: var(--s-4);
