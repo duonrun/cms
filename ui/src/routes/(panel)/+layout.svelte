@@ -14,9 +14,9 @@
 </script>
 
 <Modal>
-	<div class="relative flex flex-row">
+	<div class="cms-panel-layout">
 		<Nav collections={data.system.collections} />
-		<main class="flex-grow">
+		<main class="cms-panel-main">
 			{@render children()}
 		</main>
 	</div>
@@ -24,7 +24,14 @@
 </Modal>
 
 <style lang="postcss">
-	main {
+	.cms-panel-layout {
+		position: relative;
+		display: flex;
+		flex-direction: row;
+	}
+
+	.cms-panel-main {
+		flex-grow: 1;
 		height: 100vh;
 		overflow: hidden;
 	}

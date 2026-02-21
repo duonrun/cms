@@ -37,11 +37,11 @@
 	}
 </script>
 
-<div class="flex min-h-full flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
+<div class="cms-login">
 	{#if $system.initialized}
 		{#if $system.logo}
-			<div class="-mt-32 sm:mx-auto sm:w-full sm:max-w-md">
-				<div class="mx-auto w-auto">
+			<div class="cms-login-logo-wrap">
+				<div class="cms-login-logo-box">
 					<img
 						style="width: 10rem; display: block; margin: 0 auto;"
 						src={$system.logo}
@@ -49,8 +49,8 @@
 				</div>
 			</div>
 		{:else}
-			<div class="-mt-32 sm:mx-auto sm:w-full sm:max-w-md">
-				<div class="mx-auto h-16 w-auto">
+			<div class="cms-login-logo-wrap">
+				<div class="cms-login-logo-box cms-login-logo-fallback">
 					<Logo />
 				</div>
 			</div>
@@ -58,49 +58,48 @@
 	{/if}
 
 	{#if message}
-		<div
-			class="mt-8 rounded border border-rose-600 bg-rose-200 px-4 py-2 text-center text-rose-600 sm:mx-auto sm:w-full sm:max-w-md">
+		<div class="cms-login-message">
 			{message}
 		</div>
 	{/if}
 
-	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
-		<div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+	<div class="cms-login-card-wrap">
+		<div class="cms-login-card">
 			<form
 				method="POST"
 				onsubmit={preventDefault(handleSubmit)}
-				class="space-y-6">
-				<div>
+				class="cms-login-form">
+				<div class="cms-login-field">
 					<label
 						for="login"
-						class="block text-sm leading-6 font-semibold text-gray-900">
+						class="cms-field-label">
 						{_('Benutzername oder E-Mail-Adresse')}
 					</label>
-					<div class="mt-2">
+					<div class="cms-field-control">
 						<input
 							id="login"
 							name="login"
 							type="text"
 							autocomplete="username"
 							required
-							class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-gray-600 focus:ring-inset sm:text-sm sm:leading-6" />
+							class="cms-input" />
 					</div>
 				</div>
 
-				<div>
+				<div class="cms-login-field">
 					<label
 						for="password"
-						class="block text-sm leading-6 font-semibold text-gray-900">
+						class="cms-field-label">
 						{_('Passwort')}
 					</label>
-					<div class="mt-2">
+					<div class="cms-field-control">
 						<input
 							id="password"
 							name="password"
 							type="password"
 							autocomplete="current-password"
 							required
-							class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-gray-600 focus:ring-inset sm:text-sm sm:leading-6" />
+							class="cms-input" />
 					</div>
 				</div>
 
@@ -128,9 +127,10 @@
                     </div>
                 </div>-->
 
-				<div class="flex justify-end">
+				<div class="cms-login-actions">
 					<Button
-						class="primary w-full"
+						class="primary"
+						style="width: 100%;"
 						type="submit"
 						icon={IcoLogin}>
 						Anmelden
@@ -140,3 +140,75 @@
 		</div>
 	</div>
 </div>
+
+<style lang="postcss">
+	.cms-login {
+		display: flex;
+		min-height: 100%;
+		flex-direction: column;
+		justify-content: center;
+		background-color: var(--gray-50);
+		padding: var(--s-12) var(--s-4);
+	}
+
+	.cms-login-logo-wrap,
+	.cms-login-message,
+	.cms-login-card-wrap {
+		width: 100%;
+		max-width: 28rem;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.cms-login-logo-wrap {
+		margin-top: calc(var(--s-32) * -1);
+	}
+
+	.cms-login-logo-box {
+		margin: 0 auto;
+		width: auto;
+	}
+
+	.cms-login-logo-fallback {
+		height: var(--s-16);
+	}
+
+	.cms-login-message {
+		margin-top: var(--s-8);
+		border: 1px solid var(--color-rose-700);
+		border-radius: var(--radius);
+		background-color: color-mix(in srgb, var(--color-rose-700) 18%, white);
+		padding: var(--s-2) var(--s-4);
+		text-align: center;
+		color: var(--color-rose-700);
+	}
+
+	.cms-login-card-wrap {
+		margin-top: var(--s-10);
+	}
+
+	.cms-login-card {
+		background-color: var(--white);
+		padding: var(--s-12) var(--s-6);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow);
+	}
+
+	.cms-login-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s-6);
+	}
+
+	.cms-login-actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	@media (min-width: 1024px) {
+		.cms-login {
+			padding-left: var(--s-8);
+			padding-right: var(--s-8);
+		}
+	}
+</style>

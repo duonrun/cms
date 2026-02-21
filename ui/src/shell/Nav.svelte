@@ -14,18 +14,18 @@
 
 	{#each $collections as item (item)}
 		{#if item.type === 'section'}
-			<h2 class="mt-6 font-semibold">{item.name}</h2>
+			<h2 class="cms-nav-section-title">{item.name}</h2>
 		{:else}
-			<div class="mt-1 ml-4">
+			<div class="cms-nav-link-row">
 				<Link href="collection/{item.slug}">
 					{item.name}
 				</Link>
 			</div>
 		{/if}
 	{/each}
-	<h2 class="mt-6 font-semibold">{_('Benutzer')}</h2>
-	<div class="mt-1 ml-4"><Link href="userprofile">{_('Mein Benutzerprofil')}</Link></div>
-	<div class="mt-1 ml-4"><button onclick={logoutUser}>{_('Abmelden')}</button></div>
+	<h2 class="cms-nav-section-title">{_('Benutzer')}</h2>
+	<div class="cms-nav-link-row"><Link href="userprofile">{_('Mein Benutzerprofil')}</Link></div>
+	<div class="cms-nav-link-row"><button onclick={logoutUser}>{_('Abmelden')}</button></div>
 </div>
 
 <style lang="postcss">
@@ -44,5 +44,26 @@
 		&.open {
 			margin-left: 0;
 		}
+
+		:global(a),
+		button {
+			font-size: var(--font-size-sm);
+			color: var(--high);
+		}
+
+		button {
+			text-align: left;
+		}
+	}
+
+	.cms-nav-section-title {
+		margin-top: var(--s-6);
+		font-size: var(--font-size-sm);
+		font-weight: 600;
+	}
+
+	.cms-nav-link-row {
+		margin-top: var(--s-1);
+		padding-left: var(--s-4);
 	}
 </style>
