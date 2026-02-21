@@ -8,12 +8,14 @@
 	let { children }: Props = $props();
 </script>
 
-<div class="mb-6">
-	<div class="border-b border-gray-200">
-		<nav
-			class="-mb-px flex space-x-8"
-			aria-label="Tabs">
-			{@render children()}
-		</nav>
-	</div>
+<div class="tabs cms-tabs">
+	<nav aria-label="Tabs">
+		{@render children()}
+	</nav>
 </div>
+
+<style lang="postcss">
+	.cms-tabs {
+		margin-bottom: var(--s-6);
+	}
+</style>
