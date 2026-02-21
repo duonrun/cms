@@ -87,6 +87,29 @@ Render a node by uid from templates with the neutral cms API:
 'session.expires' => 60 * 60 * 24,    // One day by default
 ```
 
+### Admin panel theming
+
+You can override admin panel tokens through `panel.theme` in your CMS config.
+Only CSS variables prefixed with `--cms-` are applied at runtime.
+
+```php
+return [
+	'panel.theme' => [
+		'--cms-color-brand' => '#0f766e',
+		'--cms-color-surface' => '#f7f7f5',
+		'--cms-font-family-base' => '"Source Sans 3", sans-serif',
+	],
+];
+```
+
+The panel no longer depends on Tailwind. To prevent accidental reintroduction,
+run the guard check:
+
+```bash
+cd ui
+npm run check:tailwind
+```
+
 Test database:
 
 ```bash
