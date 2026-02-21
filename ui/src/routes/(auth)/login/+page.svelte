@@ -103,30 +103,6 @@
 					</div>
 				</div>
 
-				<!--<div
-                    class="flex flex-col sm:flex-row items-center justify-between">
-                    <div class="flex items-center">
-                        <input
-                            id="rememberme"
-                            name="rememberme"
-                            type="checkbox"
-                            value="true"
-                            class="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-600" />
-                        <label
-                            for="rememberme"
-                            class="ml-3 block text-sm leading-6 text-gray-900"
-                            >{_('Angemeldet bleiben')}</label>
-                    </div>
-
-                    <div class="text-sm leading-6 mt-4 sm:mt-0">
-                        <Link
-                            href="forgot"
-                            class="font-semibold text-emerald-700 underline">
-                            {_('Passwort vergessen?')}
-                        </Link>
-                    </div>
-                </div>-->
-
 				<div class="cms-login-actions">
 					<Button
 						class="primary"
