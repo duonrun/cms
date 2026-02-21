@@ -33,7 +33,7 @@
 		{...attributes}>
 		{#if icon}
 			{@const Icon = icon}
-			<span class="h-5 w-5">
+			<span class="cms-button-icon">
 				<Icon />
 			</span>
 		{/if}
@@ -49,7 +49,7 @@
 			onclick={() => (openMenu = !openMenu)}>
 			<span class="sr-only">Open options</span>
 			<svg
-				class="h-5 w-5"
+				class="cms-button-icon"
 				viewBox="0 0 20 20"
 				fill="currentColor"
 				aria-hidden="true">

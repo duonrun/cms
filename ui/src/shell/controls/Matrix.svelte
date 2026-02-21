@@ -120,7 +120,7 @@
 				<Button
 					class="secondary"
 					onclick={addItem}>
-					<span class="mr-2 h-5 w-5">
+					<span class="cms-button-icon">
 						<IcoCirclePlus />
 					</span>
 					{_('Eintrag hinzufügen')}
@@ -131,7 +131,7 @@
 				<Button
 					class="secondary"
 					onclick={addItem}>
-					<span class="mr-2 h-5 w-5">
+					<span class="cms-button-icon">
 						<IcoCirclePlus />
 					</span>
 					{_('Ersten Eintrag hinzufügen')}
