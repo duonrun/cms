@@ -208,10 +208,10 @@
 	{/if}
 {:else}
 	<div
-		class="upload upload-{type} flex h-full w-full flex-col md:flex-row"
+		class="upload upload-{type}"
 		class:required
 		class:upload-multiple={multiple}
-		class:mt-6={inline}>
+		class:upload-inline={inline}>
 		<MediaList
 			bind:assets
 			{multiple}
@@ -222,20 +222,19 @@
 			{translate} />
 		{#if !assets || assets.length === 0 || multiple}
 			<label
-				class="dragdrop flex flex-1 flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100 px-2 py-4 text-center align-middle md:mt-0 md:h-auto"
+				class="dragdrop"
 				class:dragging
 				class:image={type === 'image'}
 				for={name}
 				ondrop={preventDefault(onFile(getFilesFromDrop))}
 				ondragover={preventDefault(startDragging)}
 				ondragleave={preventDefault(stopDragging)}>
-				<div
-					class="cms-field-label flex flex-row items-center justify-center gap-2 text-gray-600">
-					<span class="inline-block h-6 w-6"><IcoUpload /></span>
+				<div class="cms-field-label upload-drop-label">
+					<span class="upload-drop-icon"><IcoUpload /></span>
 					{_('Neue Dateien per Drag and Drop hier einfügen oder')}
 					<u>{_('auswählen')}</u>
 				</div>
-				<div class="file-extensions mt-0 text-xs">
+				<div class="file-extensions">
 					Erlaubte Dateiendungen: {allowedExtensions}
 				</div>
 				<input
@@ -250,6 +249,15 @@
 
 <style lang="postcss">
 	.upload {
+		display: flex;
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+
+		&.upload-inline {
+			margin-top: var(--s-6);
+		}
+
 		&.upload-multiple {
 			flex-direction: column;
 		}
@@ -259,6 +267,46 @@
 			border-left-color: var(--color-rose-700);
 			border-left-style: solid;
 		}
+	}
+
+	@media (min-width: var(--breakpoint-md)) {
+		.upload {
+			flex-direction: row;
+		}
+	}
+
+	.dragdrop {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		border: 2px dashed var(--gray-300);
+		border-radius: var(--radius-md);
+		background-color: var(--gray-100);
+		padding: var(--s-4) var(--s-2);
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	.dragdrop.dragging {
+		border-color: var(--color-sky-700);
+		background-color: color-mix(in srgb, var(--color-sky-700) 10%, var(--gray-100));
+	}
+
+	.upload-drop-label {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: var(--s-2);
+		color: var(--gray-600);
+	}
+
+	.upload-drop-icon {
+		display: inline-block;
+		width: var(--s-6);
+		height: var(--s-6);
 	}
 
 	.upload input {
@@ -275,16 +323,18 @@
 		cursor: pointer;
 	}
 
-	:global(.dragdrop > div.label svg) {
+	:global(.dragdrop > .upload-drop-label svg) {
 		display: inline;
 		margin-bottom: var(--s-2);
 	}
-	:global(.dragdrop > div.label u) {
+	:global(.dragdrop > .upload-drop-label u) {
 		color: var(--color-sky-700);
 	}
+
 	.dragdrop > div.file-extensions {
 		font-weight: normal;
-		color: var(--color-gray-400);
+		font-size: var(--text-xs);
+		color: var(--gray-400);
 		margin-top: var(--s-1);
 	}
 
