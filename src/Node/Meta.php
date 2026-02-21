@@ -7,12 +7,14 @@ namespace Duon\Cms\Node;
 class Meta
 {
 	private readonly object $node;
+	public readonly string $uid;
 
 	public function __construct(
 		object $node,
 		private readonly Types $types,
 	) {
 		$this->node = Node::unwrap($node);
+		$this->uid = (string) (Factory::meta($this->node, 'uid') ?? '');
 	}
 
 	public function __get(string $name): mixed
@@ -63,6 +65,7 @@ class Meta
 		$schema = $this->types->forClass($this->node::class)->properties();
 
 		return array_merge($schema, Factory::dataFor($this->node), [
+			'uid' => $this->uid,
 			'name' => $schema['label'],
 			'class' => $this->node::class,
 			'classname' => basename(str_replace('\\', '/', $this->node::class)),
