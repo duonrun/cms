@@ -29,12 +29,14 @@
 	}
 </script>
 
-<ModalHeader class="text-xl font-bold">{_('Add link')}</ModalHeader>
+<ModalHeader>{_('Add link')}</ModalHeader>
 <ModalBody>
-	<div class="flex flex-col gap-4">
+	<div class="cms-modal-link-body">
 		<div class="tabs">
-			<div class="border-b border-gray-200">
-				<nav aria-label="Tabs">
+			<div class="cms-modal-link-tabs-frame">
+				<nav
+					class="cms-modal-link-tabs-nav"
+					aria-label="Tabs">
 					<button
 						class="tab"
 						class:active={currentTab === 'manually'}
@@ -59,10 +61,10 @@
 				</nav>
 			</div>
 		</div>
-		<div class="files overflow-y-auto">
+		<div class="files cms-modal-link-files">
 			{#if currentTab === 'images'}
 				{#if $fields}
-					<div class="flex flex-row flex-wrap gap-2">
+					<div class="cms-modal-link-images-grid">
 						{#each $fields as field (field)}
 							{#if field.type === 'Duon\\Cms\\Field\\Image'}
 								{#if $node.content[field.name] && $node.content[field.name].files}
@@ -102,10 +104,10 @@
 				{/if}
 			{:else}
 				<div>
-					<div class="mt-4">
+					<div class="cms-modal-link-manual-hint">
 						{_('Bitte eine gültige URL eingeben')}
 					</div>
-					<div class="mt-4">
+					<div class="cms-modal-link-manual-input-wrap">
 						<input
 							class="cms-input"
 							type="text"
@@ -115,9 +117,9 @@
 			{/if}
 		</div>
 	</div>
-	<div class="mt-4">
-		<div class="relative flex items-start">
-			<div class="flex h-6 items-center">
+	<div class="cms-modal-link-target-wrap">
+		<div class="cms-modal-link-target-row">
+			<div class="cms-modal-link-target-input-wrap">
 				<input
 					id="modallink_target"
 					aria-describedby="comments-description"
@@ -126,7 +128,7 @@
 					bind:checked={blank}
 					class="cms-checkbox" />
 			</div>
-			<div class="ml-3 text-sm leading-6">
+			<div class="cms-modal-link-target-label-wrap">
 				<label
 					for="modallink_target"
 					class="cms-checkbox-label">
@@ -153,7 +155,61 @@
 </ModalFooter>
 
 <style lang="postcss">
-	.files {
+	.cms-modal-link-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s-4);
+	}
+
+	.cms-modal-link-tabs-frame {
+		border-bottom: 1px solid var(--gray-200);
+	}
+
+	.cms-modal-link-tabs-nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-2);
+	}
+
+	.cms-modal-link-files {
 		max-height: 50vh;
+		overflow-y: auto;
+	}
+
+	.cms-modal-link-images-grid {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: var(--s-2);
+	}
+
+	.cms-modal-link-manual-hint {
+		margin-top: var(--s-4);
+	}
+
+	.cms-modal-link-manual-input-wrap {
+		margin-top: var(--s-4);
+	}
+
+	.cms-modal-link-target-wrap {
+		margin-top: var(--s-4);
+	}
+
+	.cms-modal-link-target-row {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.cms-modal-link-target-input-wrap {
+		display: flex;
+		height: var(--s-6);
+		align-items: center;
+	}
+
+	.cms-modal-link-target-label-wrap {
+		margin-left: var(--s-3);
+		font-size: var(--font-size-sm);
+		line-height: 1.5rem;
 	}
 </style>
