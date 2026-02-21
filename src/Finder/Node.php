@@ -18,6 +18,7 @@ class Node
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
+		private readonly Meta $meta = new Meta(),
 	) {}
 
 	public function byPath(
@@ -64,7 +65,7 @@ class Node
 			->entry($data['handle'])
 			->definition();
 
-		if (Meta::isNode($class)) {
+		if ($this->meta->isNode($class)) {
 			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
 
 			return $this->nodeFactory->proxy($node, $this->context->request);

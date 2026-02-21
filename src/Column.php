@@ -24,13 +24,15 @@ final class Column
 	public function __construct(
 		public readonly string $title,
 		public readonly string|Closure $field,
+		private readonly ?Meta $meta = null,
 	) {}
 
 	public static function new(
 		string|Closure $title,
 		string|Closure $field,
+		?Meta $meta = null,
 	): self {
-		return new self($title, $field);
+		return new self($title, $field, $meta);
 	}
 
 	public function bold(bool|Closure $bold): self
@@ -87,7 +89,9 @@ final class Column
 
 				return method_exists($inner, 'title') ? $inner->title() : '';
 			case 'meta.name':
-				return Meta::label($inner::class);
+				$meta = $this->meta ?? new Meta();
+
+				return $meta->label($inner::class);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':

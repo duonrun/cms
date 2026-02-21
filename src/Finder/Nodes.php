@@ -29,6 +29,7 @@ final class Nodes implements Iterator
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
+		private readonly Meta $meta = new Meta(),
 	) {
 		$this->builtins = [
 			'changed' => 'n.changed',
@@ -41,10 +42,10 @@ final class Nodes implements Iterator
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
 			'routable' => $this->typeFlagExpression(
-				fn(string $class): bool => Meta::routable($class),
+				fn(string $class): bool => $this->meta->routable($class),
 			),
 			'renderable' => $this->typeFlagExpression(
-				fn(string $class): bool => Meta::renderable($class),
+				fn(string $class): bool => $this->meta->renderable($class),
 			),
 			'type' => 't.handle',
 			'handle' => 't.handle',
@@ -193,7 +194,7 @@ final class Nodes implements Iterator
 
 		foreach ($types as $type) {
 			if (class_exists($type)) {
-				$type = Meta::handle($type);
+				$type = $this->meta->handle($type);
 			}
 
 			$result[] = 't.handle = ' . $this->context->db->quote($type);

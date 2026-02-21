@@ -15,6 +15,7 @@ class Serializer
 {
 	public function __construct(
 		private readonly FieldHydrator $hydrator,
+		private readonly Meta $meta = new Meta(),
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array
@@ -44,12 +45,7 @@ class Serializer
 			'changed' => $rawData['changed'],
 			'deleted' => $rawData['deleted'],
 			'paths' => $rawData['paths'],
-			'type' => [
-				'handle' => $rawData['handle'],
-				'routable' => Meta::routable($class),
-				'renderable' => Meta::renderable($class),
-				'class' => $class,
-			],
+			'type' => $this->resolveType($class, $rawData['handle']),
 			'editor' => [
 				'uid' => $rawData['editor_uid'],
 				'email' => $rawData['editor_email'],
@@ -82,15 +78,14 @@ class Serializer
 		}
 
 		$class = $node::class;
-		$routable = Meta::routable($class);
-		$renderable = Meta::renderable($class);
+		$schema = $this->meta->forClass($class);
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
 		}
 
 		$result = [
-			'title' => _('Neues Dokument:') . ' ' . Meta::label($class),
+			'title' => _('Neues Dokument:') . ' ' . $schema->label,
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => nanoid(),
 			'published' => false,
@@ -98,18 +93,13 @@ class Serializer
 			'locked' => false,
 			'deletable' => $this->resolveDeletable($node),
 			'content' => $content,
-			'type' => [
-				'handle' => Meta::handle($class),
-				'routable' => $routable,
-				'renderable' => $renderable,
-				'class' => $class,
-			],
+			'type' => $this->resolveType($class),
 			'paths' => $paths,
 			'generatedPaths' => [],
 		];
 
-		if ($routable) {
-			$result['route'] = Meta::route($class);
+		if ($schema->routable) {
+			$result['route'] = $schema->route;
 		}
 
 		return $result;
@@ -150,7 +140,7 @@ class Serializer
 			return $node->title();
 		}
 
-		$titleField = Meta::titleField($node::class);
+		$titleField = $this->meta->titleField($node::class);
 
 		if ($titleField) {
 			$field = $this->hydrator->getField($node, $titleField);
@@ -166,7 +156,7 @@ class Serializer
 	 */
 	private function order(object $node, array $fieldNames): array
 	{
-		$metaOrder = Meta::fieldOrder($node::class);
+		$metaOrder = $this->meta->fieldOrder($node::class);
 
 		if ($metaOrder !== null) {
 			return $metaOrder;
@@ -179,6 +169,22 @@ class Serializer
 		return $fieldNames;
 	}
 
+	/**
+	 * @param class-string $class
+	 * @return array<string, mixed>
+	 */
+	private function resolveType(string $class, ?string $handle = null): array
+	{
+		$schema = $this->meta->forClass($class);
+
+		return array_merge([
+			'handle' => $handle ?? $schema->handle,
+			'routable' => $schema->routable,
+			'renderable' => $schema->renderable,
+			'class' => $class,
+		], $schema->properties());
+	}
+
 	private function resolveDeletable(object $node): bool
 	{
 		if (method_exists($node, 'deletable')) {
@@ -187,6 +193,6 @@ class Serializer
 			return $method->invoke($node);
 		}
 
-		return Meta::deletable($node::class);
+		return $this->meta->deletable($node::class);
 	}
 }
