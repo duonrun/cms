@@ -128,7 +128,7 @@ class TestCase extends BaseTestCase
 		return new Request($this->psrRequest());
 	}
 
-	public function registry(): Container
+	public function container(): Container
 	{
 		return new Container();
 	}

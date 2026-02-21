@@ -221,7 +221,7 @@ class End2EndTestCase extends IntegrationTestCase
 	{
 		$factory = new Laminas();
 		$router = new Router();
-		$registry = $this->registry();
+		$container = $this->container();
 		$config = $this->config([
 			'db.dsn' => 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
 			'path.root' => self::root(),
@@ -233,7 +233,7 @@ class End2EndTestCase extends IntegrationTestCase
 			'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
 		]);
 
-		$app = new App($factory, $router, $registry, $config);
+		$app = new App($factory, $router, $container, $config);
 
 		// Configure error handler middleware
 		$this->errorHandler = $this->createErrorHandler($factory);

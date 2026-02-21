@@ -20,7 +20,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->nodeFactory = new Factory($this->registry(), types: new Types());
+		$this->nodeFactory = new Factory($this->container(), types: new Types());
 		$this->hydrator = $this->nodeFactory->hydrator();
 	}
 

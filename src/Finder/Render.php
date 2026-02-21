@@ -35,7 +35,7 @@ class Render
 		])->one();
 		$class = $this
 			->context
-			->registry
+			->container
 			->tag(Plugin::NODE_TAG)
 			->entry($data['handle'])
 			->definition();
@@ -52,7 +52,7 @@ class Render
 	{
 		try {
 			$renderer = new TemplateRenderer(
-				$this->context->registry,
+				$this->context->container,
 				$this->context->factory,
 				$this->nodeFactory->hydrator(),
 				$this->types,

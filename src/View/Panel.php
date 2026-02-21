@@ -33,7 +33,7 @@ class Panel
 	public function __construct(
 		protected readonly Request $request,
 		protected readonly Config $config,
-		protected readonly Container $registry,
+		protected readonly Container $container,
 		protected readonly Locales $locales,
 		protected readonly Types $types,
 	) {
@@ -97,8 +97,8 @@ class Panel
 	#[Permission('panel')]
 	public function collections(): array
 	{
-		$creator = new Creator($this->registry);
-		$tag = $this->registry->tag(Collection::class);
+		$creator = new Creator($this->container);
+		$tag = $this->container->tag(Collection::class);
 		$collections = [];
 
 		foreach ($tag->entries() as $id) {
@@ -130,9 +130,9 @@ class Panel
 	#[Permission('panel')]
 	public function collection(string $collection): array
 	{
-		$creator = new Creator($this->registry);
+		$creator = new Creator($this->container);
 		$obj = $creator->create(
-			$this->registry->tag(Collection::class)->entry($collection)->definition(),
+			$this->container->tag(Collection::class)->entry($collection)->definition(),
 			predefinedTypes: [Request::class => $this->request],
 		);
 		$blueprints = [];
@@ -168,7 +168,7 @@ class Panel
 		}
 
 		$factory = $cms->nodeFactory();
-		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
+		$class = $this->container->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $factory->blueprint($class, $context, $cms);
 
 		$serializer = new Serializer(
@@ -196,7 +196,7 @@ class Panel
 		}
 
 		$data = $this->request->json();
-		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
+		$class = $this->container->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
 		$store = new Store($context->db, new PathManager(), $this->types);

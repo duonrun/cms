@@ -38,7 +38,7 @@ final class MatrixValueTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(['path.prefix' => '/cms']),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}

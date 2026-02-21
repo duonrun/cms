@@ -26,7 +26,7 @@ class Page
 {
 	public function __construct(
 		protected readonly Factory $factory,
-		protected readonly Container $registry,
+		protected readonly Container $container,
 		protected readonly Types $types,
 	) {}
 
@@ -92,7 +92,7 @@ class Page
 		}
 
 		$hydrator = $cms->nodeFactory()->hydrator();
-		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator, $this->types);
+		$renderer = new TemplateRenderer($this->container, $this->factory, $hydrator, $this->types);
 
 		return $renderer->renderPage(
 			$node,

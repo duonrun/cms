@@ -60,7 +60,7 @@ class Node
 		$data['paths'] = json_decode($data['paths'], true);
 		$class = $this
 			->context
-			->registry
+			->container
 			->tag(Plugin::NODE_TAG)
 			->entry($data['handle'])
 			->definition();

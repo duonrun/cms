@@ -28,7 +28,7 @@ class Factory
 	private readonly Types $types;
 
 	public function __construct(
-		private readonly Container $registry,
+		private readonly Container $container,
 		Types $types,
 		?SchemaRegistry $schemaRegistry = null,
 	) {
@@ -48,20 +48,20 @@ class Factory
 		$serializer = new Serializer($this->hydrator, $this->types);
 		$store = new Store($context->db, new PathManager(), $this->types);
 		$templateRenderer = new TemplateRenderer(
-			$this->registry,
+			$this->container,
 			$context->factory,
 			$this->hydrator,
 			$this->types,
 		);
 
-		$creator = new Creator($this->registry);
+		$creator = new Creator($this->container);
 		$node = $creator->create($class, predefinedTypes: [
 			Context::class => $context,
 			Cms::class => $cms,
 			Request::class => $context->request,
 			Config::class => $context->config,
 			Database::class => $context->db,
-			Container::class => $context->registry,
+			Container::class => $context->container,
 			CoreFactory::class => $context->factory,
 			self::class => $this,
 			TemplateRenderer::class => $templateRenderer,

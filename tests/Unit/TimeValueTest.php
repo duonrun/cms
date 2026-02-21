@@ -29,7 +29,7 @@ final class TimeValueTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}

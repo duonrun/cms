@@ -19,7 +19,7 @@ final class ComparisonTest extends TestCase
 			$this->db(),
 			$this->request(),
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}

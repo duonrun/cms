@@ -31,7 +31,7 @@ class MatrixIntegrationTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}
@@ -40,7 +40,7 @@ class MatrixIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$cms = $this->createStub(\Duon\Cms\Cms::class);
-		$nodeFactory = new Factory($this->registry(), types: new Types());
+		$nodeFactory = new Factory($this->container(), types: new Types());
 		$hydrator = $nodeFactory->hydrator();
 
 		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $cms, ['content' => [

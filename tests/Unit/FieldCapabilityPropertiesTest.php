@@ -42,7 +42,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			$this->db(),
 			$this->request(),
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 

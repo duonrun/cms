@@ -132,7 +132,7 @@ final class Nodes implements Iterator
 		$page['creator_data'] = json_decode($page['creator_data'], true);
 		$page['paths'] = json_decode($page['paths'], true);
 		$class = $this->context
-			->registry
+			->container
 			->tag(Plugin::NODE_TAG)
 			->entry($page['handle'])
 			->definition();
@@ -212,7 +212,7 @@ final class Nodes implements Iterator
 	private function typeFlagExpression(callable $flag): string
 	{
 		$handles = [];
-		$types = $this->context->registry->tag(Plugin::NODE_TAG);
+		$types = $this->context->container->tag(Plugin::NODE_TAG);
 
 		foreach ($types->entries() as $handle) {
 			$class = $types->entry($handle)->definition();

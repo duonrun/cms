@@ -38,7 +38,7 @@ final class NodeFactoryTest extends TestCase
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
-		$this->factory = new Factory($this->registry(), types: $this->types);
+		$this->factory = new Factory($this->container(), types: $this->types);
 	}
 
 	private function createContext(): Context
@@ -59,7 +59,7 @@ final class NodeFactoryTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(['path.prefix' => '/cms']),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}

@@ -24,7 +24,7 @@ class Nodes
 	public function __construct(
 		protected readonly Request $request,
 		protected readonly Config $config,
-		protected readonly Container $registry,
+		protected readonly Container $container,
 		protected readonly Locales $locales,
 		protected readonly Types $types,
 	) {}

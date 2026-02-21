@@ -17,7 +17,7 @@ use Duon\Core\Response;
 class TemplateRenderer
 {
 	public function __construct(
-		private readonly Container $registry,
+		private readonly Container $container,
 		private readonly Factory $factory,
 		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
@@ -46,7 +46,7 @@ class TemplateRenderer
 			'locale' => $request->get('locale'),
 			'locales' => $request->get('locales'),
 			'request' => $request,
-			'registry' => $this->registry,
+			'container' => $this->container,
 			'debug' => $config->debug,
 			'env' => $config->env,
 		];
@@ -82,13 +82,13 @@ class TemplateRenderer
 			'locale' => $request->get('locale'),
 			'locales' => $request->get('locales'),
 			'request' => $request,
-			'registry' => $this->registry,
+			'container' => $this->container,
 			'debug' => $config->debug,
 			'env' => $config->env,
 		], $context);
 
 		[$type, $id] = $this->resolveRenderer($node);
-		$renderer = $this->registry->tag(Renderer::class)->get($type);
+		$renderer = $this->container->tag(Renderer::class)->get($type);
 
 		return $renderer->render($id, $baseContext);
 	}
@@ -106,7 +106,7 @@ class TemplateRenderer
 	private function doRender(object $node, array $context): Response
 	{
 		[$type, $id] = $this->resolveRenderer($node);
-		$renderer = $this->registry->tag(Renderer::class)->get($type);
+		$renderer = $this->container->tag(Renderer::class)->get($type);
 
 		return (new Response(
 			$this->factory

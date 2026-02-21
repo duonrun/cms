@@ -30,7 +30,7 @@ class MatrixTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 	}

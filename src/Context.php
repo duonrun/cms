@@ -18,7 +18,7 @@ final class Context
 		public readonly Database $db,
 		public readonly Request $request,
 		public readonly Config $config,
-		public readonly Container $registry,
+		public readonly Container $container,
 		public readonly Factory $factory,
 	) {}
 

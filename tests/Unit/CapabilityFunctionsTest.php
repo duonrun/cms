@@ -18,7 +18,7 @@ final class CapabilityFunctionsTest extends TestCase
 			$this->db(),
 			$this->request(),
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		);
 

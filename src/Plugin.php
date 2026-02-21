@@ -22,7 +22,7 @@ class Plugin implements CorePlugin
 
 	protected readonly Config $config;
 	protected readonly Factory $factory;
-	protected readonly Container $registry;
+	protected readonly Container $container;
 	protected readonly Database $db;
 	protected readonly Connection $connection;
 	protected readonly Routes $routes;
@@ -44,16 +44,16 @@ class Plugin implements CorePlugin
 	public function load(App $app): void
 	{
 		$this->factory = $app->factory();
-		$this->registry = $app->container();
+		$this->container = $app->container();
 		$this->config = $app->config();
 		$this->collect();
 		$this->database();
 
-		$this->registry->add($this->registry::class, $this->registry);
-		$this->registry->add(Connection::class, $this->connection);
-		$this->registry->add(Database::class, $this->db);
-		$this->registry->add(Factory::class, $this->factory);
-		$this->registry->add(Types::class, $this->types);
+		$this->container->add($this->container::class, $this->container);
+		$this->container->add(Connection::class, $this->connection);
+		$this->container->add(Database::class, $this->db);
+		$this->container->add(Factory::class, $this->factory);
+		$this->container->add(Types::class, $this->types);
 
 		$this->routes = new Routes($app->config(), $this->db, $this->factory, $this->sessionEnabled);
 		$this->routes->add($app);
@@ -62,19 +62,19 @@ class Plugin implements CorePlugin
 	protected function collect(): void
 	{
 		foreach ($this->collections as $name => $collection) {
-			$this->registry
+			$this->container
 				->tag(Collection::class)
 				->add($name, $collection);
 		}
 
 		foreach ($this->nodes as $name => $node) {
-			$this->registry
+			$this->container
 				->tag(self::NODE_TAG)
 				->add($name, $node);
 		}
 
 		foreach ($this->renderers as $entry) {
-			$this->registry
+			$this->container
 				->tag(Renderer::class)
 				->addEntry($entry);
 		}

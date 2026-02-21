@@ -25,7 +25,7 @@ final class QueryParserTest extends TestCase
 			$this->db(),
 			$this->request(),
 			$this->config(),
-			$this->registry(),
+			$this->container(),
 			$this->factory(),
 		), ['builtin' => 'c.builtin']);
 	}
