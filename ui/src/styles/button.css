@@ -26,6 +26,13 @@ button.danger {
 	padding: 0.5rem 0.75rem;
 }
 
+.cms-button-icon {
+	display: inline-flex;
+	height: 1.25rem;
+	width: 1.25rem;
+	flex: 0 0 auto;
+}
+
 .cms-button:focus-visible,
 button.primary:focus-visible,
 button.secondary:focus-visible,

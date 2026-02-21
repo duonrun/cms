@@ -32,7 +32,7 @@
 	{disabled}>
 	{#if icon}
 		{@const Icon = icon}
-		<span class="h-5 w-5">
+		<span class="cms-button-icon">
 			<Icon />
 		</span>
 	{/if}
