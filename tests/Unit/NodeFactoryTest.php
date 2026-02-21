@@ -29,21 +29,16 @@ final class NodeFactoryTest extends TestCase
 	private Context $context;
 	private \Duon\Cms\Cms $cms;
 	private Factory $factory;
+	private Meta $meta;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-		Meta::clearCache();
+		$this->meta = new Meta();
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
-		$this->factory = new Factory($this->registry());
-	}
-
-	protected function tearDown(): void
-	{
-		Meta::clearCache();
-		parent::tearDown();
+		$this->factory = new Factory($this->registry(), meta: $this->meta);
 	}
 
 	private function createContext(): Context
@@ -227,47 +222,47 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertTrue(Meta::routable(PlainPage::class));
+		$this->assertTrue($this->meta->routable(PlainPage::class));
 	}
 
 	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertTrue(Meta::renderable(PlainBlock::class));
+		$this->assertTrue($this->meta->renderable(PlainBlock::class));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void
 	{
-		$this->assertTrue(Meta::isNode(PlainPage::class));
+		$this->assertTrue($this->meta->isNode(PlainPage::class));
 	}
 
 	public function testNodeMetaHandleForPlainPage(): void
 	{
-		$this->assertEquals('plain-page', Meta::handle(PlainPage::class));
+		$this->assertEquals('plain-page', $this->meta->handle(PlainPage::class));
 	}
 
 	public function testNodeMetaLabelForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', Meta::label(PlainPage::class));
+		$this->assertEquals('Plain Page', $this->meta->label(PlainPage::class));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void
 	{
-		$this->assertEquals('heading', Meta::titleField(PlainPage::class));
+		$this->assertEquals('heading', $this->meta->titleField(PlainPage::class));
 	}
 
 	public function testNodeMetaFieldOrderForPlainPage(): void
 	{
-		$this->assertEquals(['heading', 'body'], Meta::fieldOrder(PlainPage::class));
+		$this->assertEquals(['heading', 'body'], $this->meta->fieldOrder(PlainPage::class));
 	}
 
 	public function testNodeMetaDeletableForPlainBlock(): void
 	{
-		$this->assertFalse(Meta::deletable(PlainBlock::class));
+		$this->assertFalse($this->meta->deletable(PlainBlock::class));
 	}
 
 	public function testNodeMetaDeletableDefaultsToTrue(): void
 	{
-		$this->assertTrue(Meta::deletable(PlainPage::class));
+		$this->assertTrue($this->meta->deletable(PlainPage::class));
 	}
 
 	// -- Serializer with plain objects ------------------------------------

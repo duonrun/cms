@@ -35,6 +35,7 @@ class Panel
 		protected readonly Config $config,
 		protected readonly Registry $registry,
 		protected readonly Locales $locales,
+		protected readonly Meta $meta = new Meta(),
 	) {
 		$this->publicPath = $config->get('path.public');
 	}
@@ -138,8 +139,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => Meta::handle($blueprint),
-				'name' => Meta::label($blueprint),
+				'slug' => $this->meta->handle($blueprint),
+				'name' => $this->meta->label($blueprint),
 			];
 		}
 
@@ -172,6 +173,7 @@ class Panel
 
 		$serializer = new Serializer(
 			$factory->hydrator(),
+			$this->meta,
 		);
 
 		return $serializer->blueprint(
@@ -197,7 +199,7 @@ class Panel
 		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
-		$store = new Store($context->db, new PathManager());
+		$store = new Store($context->db, new PathManager(), $this->meta);
 		$result = $store->save($obj, $data, $this->request, $context->locales());
 
 		return (new Response(
@@ -219,8 +221,8 @@ class Panel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new Serializer($nodeFactory->hydrator());
-		$store = new Store($context->db, new PathManager());
+		$serializer = new Serializer($nodeFactory->hydrator(), $this->meta);
+		$store = new Store($context->db, new PathManager(), $this->meta);
 		$method = $this->request->method();
 
 		$result = match ($method) {

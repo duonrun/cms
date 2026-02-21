@@ -25,12 +25,15 @@ class Factory
 	private static WeakMap $nodeState;
 
 	private readonly FieldHydrator $hydrator;
+	private readonly Meta $meta;
 
 	public function __construct(
 		private readonly Registry $registry,
 		?SchemaRegistry $schemaRegistry = null,
+		?Meta $meta = null,
 	) {
 		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
+		$this->meta = $meta ?? new Meta();
 		self::$nodeState ??= new WeakMap();
 	}
 
@@ -42,12 +45,13 @@ class Factory
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
-		$serializer = new Serializer($this->hydrator);
-		$store = new Store($context->db, new PathManager());
+		$serializer = new Serializer($this->hydrator, $this->meta);
+		$store = new Store($context->db, new PathManager(), $this->meta);
 		$templateRenderer = new TemplateRenderer(
 			$this->registry,
 			$context->factory,
 			$this->hydrator,
+			$this->meta,
 		);
 
 		$creator = new Creator($this->registry);

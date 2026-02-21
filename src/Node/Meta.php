@@ -4,93 +4,110 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Node\Schema\Registry;
+
 class Meta
 {
 	/** @var array<class-string, Schema> */
-	private static array $cache = [];
+	private array $cache = [];
 
-	/**
-	 * @param class-string $class
-	 */
-	public static function forClass(string $class): Schema
+	private readonly Registry $registry;
+
+	public function __construct(?Registry $registry = null)
 	{
-		return self::$cache[$class] ??= new Schema($class);
+		$this->registry = $registry ?? Registry::withDefaults();
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function handle(string $class): string
+	public function forClass(string $class): Schema
 	{
-		return self::forClass($class)->handle;
+		return $this->cache[$class] ??= new Schema($class, $this->registry);
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function label(string $class): string
+	public function handle(string $class): string
 	{
-		return self::forClass($class)->label;
+		return $this->forClass($class)->handle;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function route(string $class): string|array
+	public function label(string $class): string
 	{
-		return self::forClass($class)->route;
+		return $this->forClass($class)->label;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function routable(string $class): bool
+	public function route(string $class): string|array
 	{
-		return self::forClass($class)->routable;
+		return $this->forClass($class)->route;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function renderable(string $class): bool
+	public function routable(string $class): bool
 	{
-		return self::forClass($class)->renderable;
+		return $this->forClass($class)->routable;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function titleField(string $class): ?string
+	public function renderable(string $class): bool
 	{
-		return self::forClass($class)->titleField;
+		return $this->forClass($class)->renderable;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function fieldOrder(string $class): ?array
+	public function titleField(string $class): ?string
 	{
-		return self::forClass($class)->fieldOrder;
+		return $this->forClass($class)->titleField;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function deletable(string $class): bool
+	public function fieldOrder(string $class): ?array
 	{
-		return self::forClass($class)->deletable;
+		return $this->forClass($class)->fieldOrder;
 	}
 
 	/**
 	 * @param class-string $class
 	 */
-	public static function isNode(string $class): bool
+	public function deletable(string $class): bool
+	{
+		return $this->forClass($class)->deletable;
+	}
+
+	/**
+	 * @param class-string $class
+	 */
+	public function get(string $class, string $key, mixed $default = null): mixed
+	{
+		return $this->forClass($class)->get($key, $default);
+	}
+
+	/**
+	 * @param class-string $class
+	 */
+	public function isNode(string $class): bool
 	{
 		return class_exists($class);
 	}
 
-	public static function clearCache(): void
+	public function clearCache(): void
 	{
-		self::$cache = [];
+		$this->cache = [];
 	}
 }

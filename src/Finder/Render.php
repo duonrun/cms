@@ -22,6 +22,7 @@ class Render
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
+		private readonly Meta $meta,
 		string $uid,
 		private readonly array $templateContext = [],
 		?bool $deleted = false,
@@ -39,7 +40,7 @@ class Render
 			->entry($data['handle'])
 			->definition();
 
-		if (!Meta::renderable($class)) {
+		if (!$this->meta->renderable($class)) {
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 

@@ -4,121 +4,133 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
-use Duon\Cms\Schema\Deletable;
-use Duon\Cms\Schema\FieldOrder;
-use Duon\Cms\Schema\Handle;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Permission;
-use Duon\Cms\Schema\Render;
-use Duon\Cms\Schema\Route;
-use Duon\Cms\Schema\Title;
+use Duon\Cms\Node\Schema\Registry;
 use ReflectionClass;
 
 class Schema
 {
-	public readonly string $label; // The public name of the node type
-	public readonly string $handle; // Used also as slug to address the node type in the panel
+	public readonly string $label;
+	public readonly string $handle;
 	public readonly string $renderer;
 	public readonly bool $routable;
 	public readonly bool $renderable;
 	public readonly string|array $route;
 	public readonly string|array $permission;
-	public readonly ?string $titleField; // Field name from #[Title], or null
+	public readonly ?string $titleField;
+
 	/** @var string[]|null */
-	public readonly ?array $fieldOrder; // From #[FieldOrder], or null for declaration order
+	public readonly ?array $fieldOrder;
 	public readonly bool $deletable;
 
-	/**
-	 * @param class-string $nodeclass
-	 */
-	public function __construct(private readonly string $nodeClass)
-	{
-		$attributes = $this->initAttributes();
-		$handle = $attributes[Handle::class] ?? null;
-		$render = $attributes[Render::class] ?? null;
-		$route = $attributes[Route::class] ?? null;
+	/** @var array<string, mixed> */
+	private array $extra = [];
 
-		$this->label = $this->getLabel($attributes[Label::class] ?? null);
-		$this->handle = $this->getHandle($handle);
-		$this->renderer = $this->getRenderer($render, $handle);
-		$this->route = $this->getRoute($route);
-		$this->routable = $route !== null;
-		$this->renderable = $render !== null || $this->renderer !== '';
-		$this->permission = $this->getPermission($attributes[Permission::class] ?? null);
-		$this->titleField = ($attributes[Title::class] ?? null)?->field;
-		$this->fieldOrder = ($attributes[FieldOrder::class] ?? null)?->fields;
-		$this->deletable = ($attributes[Deletable::class] ?? null)?->value ?? true;
+	/**
+	 * @param class-string $nodeClass
+	 */
+	public function __construct(
+		private readonly string $nodeClass,
+		?Registry $registry = null,
+	) {
+		$resolved = $this->resolveAttributes($registry);
+		$this->applyDefaults($resolved);
 	}
 
-	private function initAttributes(): array
+	/**
+	 * Get a custom schema property by key.
+	 */
+	public function get(string $key, mixed $default = null): mixed
+	{
+		return $this->extra[$key] ?? $default;
+	}
+
+	/**
+	 * Return all schema properties (built-in + custom) as an array.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function properties(): array
+	{
+		return array_merge([
+			'label' => $this->label,
+			'handle' => $this->handle,
+			'renderer' => $this->renderer,
+			'routable' => $this->routable,
+			'renderable' => $this->renderable,
+			'route' => $this->route,
+			'permission' => $this->permission,
+			'titleField' => $this->titleField,
+			'fieldOrder' => $this->fieldOrder,
+			'deletable' => $this->deletable,
+		], $this->extra);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function resolveAttributes(?Registry $registry): array
 	{
 		$reflection = new ReflectionClass($this->nodeClass);
-		$attributes = $reflection->getAttributes();
-		$map = [];
+		$resolved = [];
 
-		foreach ($attributes as $attribute) {
+		foreach ($reflection->getAttributes() as $attribute) {
 			$instance = $attribute->newInstance();
-			$map[$instance::class] = $instance;
+			$handler = $registry?->getHandler($instance);
+
+			if ($handler !== null) {
+				$resolved = array_merge($resolved, $handler->resolve($instance, $this->nodeClass));
+			}
 		}
 
-		return $map;
+		return $resolved;
 	}
 
-	private function getLabel(?Label $label): string
+	/**
+	 * @param array<string, mixed> $resolved
+	 */
+	private function applyDefaults(array $resolved): void
 	{
-		if ($label) {
-			return $label->label;
-		}
+		$className = $this->getClassName();
 
-		return $this->getClassName();
-	}
-
-	private function getHandle(?Handle $handle): string
-	{
-		if ($handle) {
-			return $handle->value;
-		}
-
-		return ltrim(
-			strtolower(preg_replace(
-				'/[A-Z]([A-Z](?![a-z]))*/',
-				'-$0',
-				$this->getClassName(),
-			)),
-			'-',
-		);
-	}
-
-	private function getRenderer(?Render $render, ?Handle $handle): string
-	{
-		if ($render) {
-			return $render->value;
-		}
-
-		return $this->getHandle($handle);
-	}
-
-	private function getRoute(?Route $route): array|string
-	{
-		if ($route) {
-			return $route->value;
-		}
-
-		return '';
-	}
-
-	private function getPermission(?Permission $permission): array|string
-	{
-		if ($permission) {
-			return $permission->value;
-		}
-
-		return [
+		$this->handle = $resolved['handle'] ?? $this->deriveHandle($className);
+		$this->label = $resolved['label'] ?? $className;
+		$this->renderer = $resolved['renderer'] ?? $this->handle;
+		$this->route = $resolved['route'] ?? '';
+		$this->routable = $resolved['routable'] ?? false;
+		$this->renderable = $resolved['renderable'] ?? $this->renderer !== '';
+		$this->permission = $resolved['permission'] ?? [
 			'read' => 'everyone',
 			'create' => 'authenticated',
 			'change' => 'authenticated',
 			'deeete' => 'authenticated',
 		];
+		$this->titleField = $resolved['titleField'] ?? null;
+		$this->fieldOrder = $resolved['fieldOrder'] ?? null;
+		$this->deletable = $resolved['deletable'] ?? true;
+
+		// Collect any extra keys not part of the built-in set
+		$builtinKeys = [
+			'handle', 'label', 'renderer', 'route', 'routable',
+			'renderable', 'permission', 'titleField', 'fieldOrder', 'deletable',
+		];
+
+		foreach ($resolved as $key => $value) {
+			if (!in_array($key, $builtinKeys, true)) {
+				$this->extra[$key] = $value;
+			}
+		}
+	}
+
+	private function deriveHandle(string $className): string
+	{
+		return ltrim(
+			strtolower(preg_replace(
+				'/[A-Z]([A-Z](?![a-z]))*/',
+				'-$0',
+				$className,
+			)),
+			'-',
+		);
 	}
 
 	private function getClassName(): string

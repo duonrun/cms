@@ -26,6 +26,7 @@ class Plugin implements CorePlugin
 	protected readonly Database $db;
 	protected readonly Connection $connection;
 	protected readonly Routes $routes;
+	protected readonly Meta $meta;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -33,7 +34,12 @@ class Plugin implements CorePlugin
 	protected array $collections = [];
 	protected array $nodes = [];
 
-	public function __construct(protected readonly bool $sessionEnabled = false) {}
+	public function __construct(
+		protected readonly bool $sessionEnabled = false,
+		?Meta $meta = null,
+	) {
+		$this->meta = $meta ?? new Meta();
+	}
 
 	public function load(App $app): void
 	{
@@ -47,6 +53,7 @@ class Plugin implements CorePlugin
 		$this->registry->add(Connection::class, $this->connection);
 		$this->registry->add(Database::class, $this->db);
 		$this->registry->add(Factory::class, $this->factory);
+		$this->registry->add(Meta::class, $this->meta);
 
 		$this->routes = new Routes($app->config(), $this->db, $this->factory, $this->sessionEnabled);
 		$this->routes->add($app);
@@ -89,9 +96,14 @@ class Plugin implements CorePlugin
 		$this->collections[$class::handle()] = $class;
 	}
 
+	public function meta(): Meta
+	{
+		return $this->meta;
+	}
+
 	public function node(string $class): void
 	{
-		$handle = Meta::handle($class);
+		$handle = $this->meta->handle($class);
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);
