@@ -316,7 +316,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
 
 		$this->assertTrue(isset($proxy->heading));
 		$this->assertEquals('Proxy Title', (string) $proxy->heading);
@@ -332,9 +332,40 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
 
 		$this->assertEquals('Method Test', $proxy->title());
+	}
+
+	public function testNodeMetaPropertyProvidesNodeData(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'proxy-meta-1',
+			'published' => true,
+			'content' => [],
+		]);
+
+		$fieldNames = Factory::fieldNamesFor($node);
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+
+		$this->assertEquals('proxy-meta-1', $proxy->meta->uid);
+		$this->assertTrue($proxy->meta->published);
+		$this->assertEquals('Plain Page', $proxy->meta->name);
+	}
+
+	public function testNodeMetaMethodCompatibility(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'proxy-meta-2',
+			'published' => true,
+			'content' => [],
+		]);
+
+		$fieldNames = Factory::fieldNamesFor($node);
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+
+		$this->assertSame('proxy-meta-2', $proxy->meta('uid'));
+		$this->assertSame('fallback', $proxy->meta('missing', 'fallback'));
 	}
 
 	public function testNodeUnsetFieldReturnsNull(): void
@@ -345,7 +376,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator());
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
 
 		$this->assertNull($proxy->heading);
 		$this->assertFalse(isset($proxy->heading));

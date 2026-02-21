@@ -38,7 +38,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): Response {
-		$proxy = new Node($node, $fieldNames, $this->hydrator, $request);
+		$proxy = new Node($node, $fieldNames, $this->hydrator, $this->types, $request);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -74,7 +74,7 @@ class TemplateRenderer
 		Config $config,
 		array $context = [],
 	): string {
-		$proxy = new Node($node, $fieldNames, $this->hydrator, $request);
+		$proxy = new Node($node, $fieldNames, $this->hydrator, $this->types, $request);
 
 		$baseContext = array_merge([
 			'node' => $proxy,

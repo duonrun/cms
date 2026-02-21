@@ -12,7 +12,7 @@ use Duon\Cms\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
 use Duon\Cms\Tests\TestCase;
 
-final class MetaTest extends TestCase
+final class TypesTest extends TestCase
 {
 	private Types $types;
 

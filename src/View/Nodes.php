@@ -64,18 +64,18 @@ class Nodes
 				->order($query->order)
 				->deleted($query->deleted) as $node
 		) {
-			$uid = NodeFactory::meta($node, 'uid');
+			$uid = $node->meta->uid;
 			$n = [
 				'uid' => $uid,
 				'title' => $node instanceof \Duon\Cms\Node\Contract\Title ? $node->title() : (method_exists($node, 'title') ? $node->title() : ''),
-				'handle' => NodeFactory::meta($node, 'handle'),
-				'published' => NodeFactory::meta($node, 'published'),
-				'hidden' => NodeFactory::meta($node, 'hidden'),
-				'locked' => NodeFactory::meta($node, 'locked'),
-				'created' => NodeFactory::meta($node, 'created'),
-				'changed' => NodeFactory::meta($node, 'changed'),
-				'deleted' => NodeFactory::meta($node, 'deleted'),
-				'paths' => NodeFactory::meta($node, 'paths'),
+				'handle' => $node->meta->handle,
+				'published' => $node->meta->published,
+				'hidden' => $node->meta->hidden,
+				'locked' => $node->meta->locked,
+				'created' => $node->meta->created,
+				'changed' => $node->meta->changed,
+				'deleted' => $node->meta->deleted,
+				'paths' => $node->meta->paths,
 			];
 
 			foreach ($query->fields as $field) {

@@ -95,6 +95,7 @@ class Factory
 			$node,
 			self::fieldNamesFor($node),
 			$this->hydrator,
+			$this->types,
 			$request,
 		);
 	}
