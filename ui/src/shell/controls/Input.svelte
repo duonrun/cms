@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class="cms-field field"
+	class="cms-field"
 	class:required>
 	<Label
 		of={id}

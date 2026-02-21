@@ -12,7 +12,7 @@
 	let { translate = false, lang = $bindable(null), children }: Props = $props();
 </script>
 
-<div class="cms-field-label label">
+<div class="cms-field-label">
 	<div>{@render children()}</div>
 	{#if translate}
 		<LocaleTabs bind:lang />

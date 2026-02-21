@@ -15,7 +15,7 @@
 
 <label
 	for={of}
-	class="cms-field-label label">
+	class="cms-field-label">
 	<div>{@render children()}</div>
 	{#if translate}
 		<LocaleTabs bind:lang />
