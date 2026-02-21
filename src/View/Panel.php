@@ -64,6 +64,7 @@ class Panel
 			'env' => $config->env(),
 			'csrfToken' => 'TOKEN', // TODO: real token
 			'logo' => $config->get('panel.logo', null),
+			'theme' => $this->themeVariables(),
 			'api' => $config->apiPath(),
 			'assets' => $config->get('path.assets'),
 			'cache' => $config->get('path.cache'),
@@ -76,6 +77,31 @@ class Panel
 				'video' => array_merge(...array_values($config->get('upload.mimetypes.video'))),
 			],
 		];
+	}
+
+	private function themeVariables(): array
+	{
+		$theme = $this->config->get('panel.theme', null);
+
+		if (!is_array($theme)) {
+			return [];
+		}
+
+		$vars = [];
+
+		foreach ($theme as $key => $value) {
+			if (!is_string($key) || !is_string($value)) {
+				continue;
+			}
+
+			if (!str_starts_with($key, '--cms-')) {
+				continue;
+			}
+
+			$vars[$key] = $value;
+		}
+
+		return $vars;
 	}
 
 	public function index(Factory $factory): Response
