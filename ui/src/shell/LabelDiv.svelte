@@ -12,8 +12,8 @@
 	let { translate = false, lang = $bindable(null), children }: Props = $props();
 </script>
 
-<div class="label flex flex-row">
-	<div class="flex-grow">{@render children()}</div>
+<div class="cms-field-label label">
+	<div>{@render children()}</div>
 	{#if translate}
 		<LocaleTabs bind:lang />
 	{/if}

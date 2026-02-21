@@ -15,8 +15,8 @@
 
 <label
 	for={of}
-	class="flex flex-row">
-	<div class="flex-grow">{@render children()}</div>
+	class="cms-field-label label">
+	<div>{@render children()}</div>
 	{#if translate}
 		<LocaleTabs bind:lang />
 	{/if}

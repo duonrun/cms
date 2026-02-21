@@ -23,11 +23,11 @@
 		{field.label}
 	</LabelDiv>
 	{#if field.description}
-		<div class="mt-1 text-sm text-gray-400">
+		<div class="cms-field-description">
 			{field.description}
 		</div>
 	{/if}
-	<div class="mt-2">
+	<div class="cms-field-control">
 		{#if field.translate}
 			{#each $system.locales as locale (locale)}
 				{#if locale.id === lang}

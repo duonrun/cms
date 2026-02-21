@@ -17,13 +17,14 @@
 </script>
 
 <div
-	class="field"
+	class="cms-field field"
 	class:required>
 	<Label of={id}>
 		{label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		<input
+			class="cms-input"
 			{id}
 			name={id}
 			type="password"

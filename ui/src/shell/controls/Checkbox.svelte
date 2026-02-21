@@ -17,13 +17,13 @@
 </script>
 
 <Field {field}>
-	<div class="relative flex items-start">
+	<div class="cms-field-control relative flex items-start">
 		<div class="flex h-6 items-center">
 			<input
 				id={field.name}
 				name={field.name}
 				type="checkbox"
-				class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600"
+				class="cms-checkbox"
 				disabled={field.immutable}
 				bind:checked={data.value}
 				{onchange} />
@@ -31,11 +31,11 @@
 		<div class="ml-3 text-sm leading-6">
 			<label
 				for={field.name}
-				class="font-medium text-gray-900">
+				class="cms-checkbox-label">
 				{field.label}
 			</label>
 			{#if field.description}
-				<p class="text-gray-500">{field.description}</p>
+				<p class="cms-field-help">{field.description}</p>
 			{/if}
 		</div>
 	</div>
