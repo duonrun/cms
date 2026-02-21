@@ -12,7 +12,7 @@
 <span
 	class:large
 	class:published
-	class="inline-block rounded-full bg-gray-300 text-sm"
+	class="cms-published"
 	title={published ? _('veröffentlicht') : _('unveröffentlicht')}>
 	{#if large}
 		{published ? _('veröffentlicht') : _('unveröffentlicht')}
@@ -20,7 +20,11 @@
 </span>
 
 <style lang="postcss">
-	span {
+	span.cms-published {
+		display: inline-block;
+		border-radius: var(--radius-full);
+		background-color: var(--gray-300);
+		font-size: var(--font-size-sm);
 		height: 0.4rem;
 		width: 0.4rem;
 

@@ -11,21 +11,34 @@
 	let { slug, name }: Props = $props();
 </script>
 
-<div class="breadcrumbs mt-8 mb-4 flex flex-row items-center gap-3">
+<div class="breadcrumbs">
 	<IcoDocumentTree />
 	<IcoChevronRight />
 	<span>
 		<Link
 			href="collection/{slug}"
-			class="hover:underline">
+			class="cms-breadcrumb-link">
 			{name}
 		</Link>
 	</span>
 </div>
 
 <style lang="postcss">
+	.breadcrumbs {
+		margin-top: var(--s-8);
+		margin-bottom: var(--s-4);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--s-3);
+	}
+
+	:global(.cms-breadcrumb-link:hover) {
+		text-decoration: underline;
+	}
+
 	.breadcrumbs :global(svg) {
-		color: #999;
+		color: var(--gray-400);
 		display: inline-block;
 	}
 </style>

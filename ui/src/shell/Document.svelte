@@ -8,8 +8,22 @@
 	let { children }: Props = $props();
 </script>
 
-<div class="flex-1 flex-grow overflow-y-scroll">
-	<div class="mx-auto w-full max-w-7xl px-8">
+<div class="cms-document">
+	<div class="cms-document-inner">
 		{@render children()}
 	</div>
 </div>
+
+<style lang="postcss">
+	.cms-document {
+		flex: 1 1 auto;
+		overflow-y: auto;
+	}
+
+	.cms-document-inner {
+		margin: 0 auto;
+		width: 100%;
+		max-width: var(--s-7xl);
+		padding: 0 var(--s-8);
+	}
+</style>

@@ -38,23 +38,23 @@
 </script>
 
 <div
-	class="toasts fixed z-50 text-sm"
+	class="toasts"
 	class:pos-bottom={!center}
 	class:pos-center={center}>
 	{#each $toasts as toast (toast)}
 		<button
 			onclick={remove(toast)}
-			class="toast relative mb-2 block px-4 pt-4 pb-5 last:mb-4"
-			class:mr-4={!center}
-			class:bg-emerald-600={toast.kind === 'success'}
-			class:bg-rose-700={toast.kind === 'error'}
-			class:bg-yellow-500={toast.kind === 'warning'}
+			class="toast"
+			class:toast-offset={!center}
+			class:toast-success={toast.kind === 'success'}
+			class:toast-error={toast.kind === 'error'}
+			class:toast-warning={toast.kind === 'warning'}
 			animate:flip={{ duration: 150 }}
 			in:receive={{ key: toast }}
 			out:send={{ key: toast }}>
 			<Toast {toast} />
 			{#if toast.kind === 'error'}
-				<span class="absolute top-1 right-1 h-4 w-4 cursor-pointer rounded-full text-white">
+				<span class="cms-toast-close-icon">
 					<IcoTimes />
 				</span>
 			{/if}
@@ -63,9 +63,62 @@
 </div>
 
 <style lang="postcss">
+	.toasts {
+		position: fixed;
+		z-index: 50;
+		font-size: var(--font-size-sm);
+	}
+
+	.toast {
+		position: relative;
+		display: block;
+		margin-bottom: var(--s-2);
+		padding: var(--s-4) var(--s-4) var(--s-5);
+		border: none;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.toast:last-child {
+		margin-bottom: var(--s-4);
+	}
+
+	.toast-offset {
+		margin-right: var(--s-4);
+	}
+
+	.toast-success {
+		background-color: var(--color-emerald-600);
+	}
+
+	.toast-error {
+		background-color: var(--color-rose-700);
+	}
+
+	.toast-warning {
+		background-color: var(--color-orange-700);
+	}
+
+	.cms-toast-close-icon {
+		position: absolute;
+		top: var(--s-1);
+		right: var(--s-1);
+		height: var(--s-4);
+		width: var(--s-4);
+		cursor: pointer;
+		border-radius: var(--radius-full);
+		color: var(--white);
+	}
+
 	.pos-bottom {
 		bottom: 0;
 		right: 0;
 		padding-right: var(--s-8);
+	}
+
+	.pos-center {
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 </style>

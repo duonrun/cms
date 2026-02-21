@@ -4,15 +4,19 @@
 </script>
 
 <button
-	class="nav h-9 w-9 bg-white p-2"
+	class="cms-nav-toggle"
 	onclick={toggleNav}>
 	<IcoBarsCenterLeft />
 </button>
 
 <style lang="postcss">
-	button.nav {
+	button.cms-nav-toggle {
 		position: absolute;
 		left: var(--s-2);
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: var(--s-2);
+		background-color: var(--white);
 		border: 0;
 		box-shadow: none;
 		cursor: pointer;
