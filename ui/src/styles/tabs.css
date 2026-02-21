@@ -1,21 +1,37 @@
 .tabs {
-	@apply border-b border-gray-200;
+	border-bottom: 1px solid var(--gray-200);
 
 	nav {
-		@apply -mb-px flex space-x-8;
+		display: flex;
+		gap: var(--s-8);
+		margin-bottom: -1px;
 	}
 }
 
 .tab {
-	@apply border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700;
-	@apply border-b-2 px-1 py-4 text-sm font-semibold whitespace-nowrap;
-	@apply inline-flex items-center;
+	display: inline-flex;
+	align-items: center;
+	padding: var(--s-4) var(--s-1);
+	border-bottom: 2px solid transparent;
+	color: var(--gray-500);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	white-space: nowrap;
+	transition:
+		color 120ms ease,
+		border-color 120ms ease;
+
+	&:hover {
+		border-bottom-color: var(--gray-300);
+		color: var(--gray-700);
+	}
 
 	&.active {
-		@apply border-emerald-600 text-emerald-700;
+		border-bottom-color: var(--color-emerald-600);
+		color: color-mix(in srgb, var(--color-emerald-600) 75%, black);
 	}
 
 	svg + span {
-		@apply pl-2;
+		padding-left: var(--s-2);
 	}
 }

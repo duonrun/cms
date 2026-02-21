@@ -1,9 +1,4 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/typography';
-@plugin '@tailwindcss/forms';
-
-/* Safelist for dynamic grid classes - col-span-* and row-span-* */
-@source inline('{col,row}-span-{1,2,3,4,5,6,7,8,9,10,11,12}');
 
 @import './color.css';
 @import './vars.css';
@@ -18,7 +13,7 @@
 @import './modal.css';
 
 html {
-	@apply bg-gray-50;
+	background-color: var(--gray-50);
 
 	height: 100%;
 }
