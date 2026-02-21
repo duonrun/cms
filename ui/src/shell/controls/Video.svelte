@@ -19,13 +19,13 @@
 
 <Field
 	{field}
-	class="flex h-full flex-col">
+	class="cms-field-column">
 	<LabelDiv
 		translate={field.translate}
 		bind:lang>
 		{field.label}
 	</LabelDiv>
-	<div class="mt-2 flex-grow">
+	<div class="cms-field-content">
 		{#if field.translateFile}
 			{#each $system.locales as locale}
 				{#if locale.id === lang}
