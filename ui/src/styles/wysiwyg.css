@@ -21,8 +21,7 @@
 		@apply relative mt-0 p-0 shadow-xs;
 
 		&::after {
-			--tw-text-opacity: 1;
-			color: rgba(156, 163, 175, var(--tw-text-opacity));
+			color: var(--gray-400);
 			content: 'WYSIWYG';
 			display: inline-block;
 			font-size: 70%;
@@ -49,9 +48,19 @@
 	}
 
 	.wysiwyg-editor {
-		&.prose {
-			max-width: 100%;
-		}
+		max-width: 100%;
+	}
+
+	.cms-wysiwyg-source-input {
+		height: 16rem;
+		width: 100%;
+		border: 0;
+		background-color: var(--gray-700);
+		padding: var(--s-1);
+		font-family:
+			'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas',
+			'Ubuntu Mono', 'Courier New', 'andale mono', 'lucida console', monospace;
+		color: var(--white);
 	}
 
 	.wysiwyg-dropdown-button {
@@ -88,6 +97,56 @@
 		@apply px-2 py-1;
 		max-height: 60vh;
 		overflow-y: auto;
+
+		h1,
+		h2,
+		h3 {
+			font-weight: 700;
+			line-height: 1.25;
+			margin: 0 0 var(--s-3);
+		}
+
+		h1 {
+			font-size: 1.5rem;
+		}
+
+		h2 {
+			font-size: 1.25rem;
+		}
+
+		h3 {
+			font-size: 1.125rem;
+		}
+
+		p,
+		ul,
+		ol,
+		blockquote,
+		pre {
+			margin: 0 0 var(--s-3);
+		}
+
+		ul,
+		ol {
+			padding-left: var(--s-6);
+		}
+
+		blockquote {
+			border-left: var(--border-4) solid var(--gray-300);
+			padding-left: var(--s-3);
+			color: var(--gray-600);
+		}
+
+		pre {
+			padding: var(--s-3);
+			background-color: var(--gray-100);
+			border-radius: var(--radius);
+			overflow-x: auto;
+		}
+
+		> *:last-child {
+			margin-bottom: 0;
+		}
 
 		a {
 			@apply text-sky-600 underline;
