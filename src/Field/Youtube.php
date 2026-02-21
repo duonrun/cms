@@ -23,15 +23,15 @@ class Youtube extends Field implements Capability\Translatable, Capability\Allow
 		return $this->getSimpleStructure('youtube', $value);
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:youtube');
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:youtube');
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
+			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$localeValidators = [];
@@ -40,14 +40,14 @@ class Youtube extends Field implements Capability\Translatable, Capability\Allow
 					$localeValidators[] = 'required';
 				}
 
-				$i18nSchema->add($locale->id, 'text', ...$localeValidators);
+				$i18nShape->add($locale->id, 'text', ...$localeValidators);
 			}
 
-			$schema->add('value', $i18nSchema, ...$this->validators);
+			$shape->add('value', $i18nShape, ...$this->validators);
 		} else {
-			$schema->add('value', 'text', ...$this->validators);
+			$shape->add('value', 'text', ...$this->validators);
 		}
 
-		return $schema;
+		return $shape;
 	}
 }

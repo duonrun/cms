@@ -52,12 +52,12 @@ class GridItemValidator extends Shape
 				$files = $value['files'] ?? [];
 
 				if (count($files) > 0) {
-					$fileSchema = new Shape(list: true, title: _('Grid Bild'), keepUnknown: true);
-					$fileSchema->add('file', 'text', 'required');
-					$fileSchema->add('title', 'text');
-					$fileSchema->add('alt', 'text');
+					$fileShape = new Shape(list: true, title: _('Grid Bild'), keepUnknown: true);
+					$fileShape->add('file', 'text', 'required');
+					$fileShape->add('title', 'text');
+					$fileShape->add('alt', 'text');
 
-					if (!$fileSchema->validate($files)->isValid()) {
+					if (!$fileShape->validate($files)->isValid()) {
 						$this->addError('image', _('Grid Bild'), _('Attribute `file` nicht gefüllt.'));
 					}
 

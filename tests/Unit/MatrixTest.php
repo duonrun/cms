@@ -61,15 +61,15 @@ class MatrixTest extends TestCase
 		$this->assertIsArray($structure['value']);
 	}
 
-	public function testMatrixSchema(): void
+	public function testMatrixShape(): void
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
 
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
-		$schema = $matrix->schema();
+		$shape = $matrix->shape();
 
-		$this->assertInstanceOf(\Duon\Sire\Shape::class, $schema);
+		$this->assertInstanceOf(\Duon\Sire\Shape::class, $shape);
 	}
 
 	public function testMatrixSubfieldsHaveTranslateCapability(): void

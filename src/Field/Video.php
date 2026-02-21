@@ -32,33 +32,33 @@ class Video extends Field implements Capability\Translatable, Capability\FileTra
 		return $this->getFileStructure('video', $value);
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:video');
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:video');
 
 		if ($this->translateFile) {
 			// File-translatable: separate file arrays per locale
-			$subSchema = new Shape(list: true, title: $this->label, keepUnknown: true);
-			$subSchema->add('file', 'text');
-			$subSchema->add('title', 'text');
+			$subShape = new Shape(list: true, title: $this->label, keepUnknown: true);
+			$subShape->add('file', 'text');
+			$subShape->add('title', 'text');
 
-			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
+			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
 			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
-				$i18nSchema->add($locale->id, $subSchema);
+				$i18nShape->add($locale->id, $subShape);
 			}
 
-			$schema->add('files', $i18nSchema, ...$this->validators);
+			$shape->add('files', $i18nShape, ...$this->validators);
 		} elseif ($this->translate) {
 			// Text-translatable: shared files but translatable titles
-			$fileSchema = new Shape(list: true, keepUnknown: true);
-			$fileSchema->add('file', 'text', 'required');
+			$fileShape = new Shape(list: true, keepUnknown: true);
+			$fileShape->add('file', 'text', 'required');
 
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$titleSchema = new Shape(title: $this->label, keepUnknown: true);
+			$titleShape = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$localeValidators = [];
@@ -67,19 +67,19 @@ class Video extends Field implements Capability\Translatable, Capability\FileTra
 					$localeValidators[] = 'required';
 				}
 
-				$titleSchema->add($locale->id, 'text', ...$localeValidators);
+				$titleShape->add($locale->id, 'text', ...$localeValidators);
 			}
 
-			$fileSchema->add('title', $titleSchema);
-			$schema->add('files', $fileSchema, ...$this->validators);
+			$fileShape->add('title', $titleShape);
+			$shape->add('files', $fileShape, ...$this->validators);
 		} else {
 			// Non-translatable
-			$fileSchema = new Shape(list: true, keepUnknown: true);
-			$fileSchema->add('file', 'text', 'required');
-			$fileSchema->add('title', 'text');
-			$schema->add('files', $fileSchema, ...$this->validators);
+			$fileShape = new Shape(list: true, keepUnknown: true);
+			$fileShape->add('file', 'text', 'required');
+			$fileShape->add('title', 'text');
+			$shape->add('files', $fileShape, ...$this->validators);
 		}
 
-		return $schema;
+		return $shape;
 	}
 }

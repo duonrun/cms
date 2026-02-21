@@ -95,8 +95,8 @@ class Store
 	public function validate(object $node, array $data, Locales $locales, Request $request): array
 	{
 		$factory = new ValidatorFactory($node, $locales);
-		$schema = $factory->create();
-		$result = $schema->validate($data);
+		$shape = $factory->create();
+		$result = $shape->validate($data);
 
 		if (!$result->isValid()) {
 			throw new HttpBadRequest($request, payload: [

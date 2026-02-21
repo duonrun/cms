@@ -54,7 +54,7 @@ abstract class Field implements
 
 	abstract public function structure(mixed $value = null): array;
 
-	abstract public function schema(): Shape;
+	abstract public function shape(): Shape;
 
 	public function isset(): bool
 	{

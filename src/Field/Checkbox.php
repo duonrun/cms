@@ -19,12 +19,12 @@ class Checkbox extends Field
 		return $this->getSimpleStructure('checkbox', $value);
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:checkbox');
-		$schema->add('value', 'bool', ...$this->validators);
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:checkbox');
+		$shape->add('value', 'bool', ...$this->validators);
 
-		return $schema;
+		return $shape;
 	}
 }

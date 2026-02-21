@@ -53,25 +53,25 @@ class Matrix extends Field implements Capability\AllowsMultiple
 		];
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:matrix');
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:matrix');
 
-		$itemSchema = new Shape(title: $this->label, keepUnknown: true);
+		$itemShape = new Shape(title: $this->label, keepUnknown: true);
 
 		foreach ($this->subfields as $name => $subfield) {
-			$itemSchema->add($name, $subfield->schema());
+			$itemShape->add($name, $subfield->shape());
 		}
 
 		if ($this->multiple) {
-			$schema->add('value', 'list', ...$this->validators);
-			$schema->add('value.*', $itemSchema);
+			$shape->add('value', 'list', ...$this->validators);
+			$shape->add('value.*', $itemShape);
 		} else {
-			$schema->add('value', $itemSchema, ...$this->validators);
+			$shape->add('value', $itemShape, ...$this->validators);
 		}
 
-		return $schema;
+		return $shape;
 	}
 
 	public function getSubfields(): array

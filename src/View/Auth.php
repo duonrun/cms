@@ -28,9 +28,9 @@ class Auth
 
 	public function login(Request $request): Response
 	{
-		$schema = new Validation\Login();
+		$shape = new Validation\Login();
 		$response = Response::create($this->factory);
-		$result = $schema->validate($request->json());
+		$result = $shape->validate($request->json());
 
 		if ($result->isValid()) {
 			$values = $result->values();
@@ -44,7 +44,7 @@ class Auth
 			if ($user === false) {
 				return $response->json(array_merge(
 					['error' => _('Falscher Benutzername oder Passwort'), 'loginType' => 'panel'],
-					$schema->pristineValues(),
+					$shape->pristineValues(),
 				), 400);
 			}
 
@@ -64,9 +64,9 @@ class Auth
 
 	public function tokenLogin(Request $request): Response
 	{
-		$schema = new Validation\TokenLogin();
+		$shape = new Validation\TokenLogin();
 		$response = Response::create($this->factory);
-		$result = $schema->validate($request->json());
+		$result = $shape->validate($request->json());
 
 		if ($result->isValid()) {
 			$values = $result->values();

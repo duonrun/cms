@@ -19,12 +19,12 @@ class Time extends Field
 		return $this->getSimpleStructure('time', $value);
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:time');
-		$schema->add('value', 'text', ...$this->validators);
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:time');
+		$shape->add('value', 'text', ...$this->validators);
 
-		return $schema;
+		return $shape;
 	}
 }

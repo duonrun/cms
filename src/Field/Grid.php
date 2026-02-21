@@ -44,18 +44,18 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		return $result;
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:grid');
-		$schema->add('columns', 'int', 'required');
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:grid');
+		$shape->add('columns', 'int', 'required');
 
-		$itemSchema = new GridItemValidator(list: true, title: $this->label, keepUnknown: true);
+		$itemShape = new GridItemValidator(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
+			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$innerValidators = [];
@@ -64,14 +64,14 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 					$innerValidators[] = 'required';
 				}
 
-				$i18nSchema->add($locale->id, $itemSchema, ...$innerValidators);
+				$i18nShape->add($locale->id, $itemShape, ...$innerValidators);
 			}
 
-			$schema->add('value', $i18nSchema, ...$this->validators);
+			$shape->add('value', $i18nShape, ...$this->validators);
 		} else {
-			$schema->add('value', $itemSchema, ...$this->validators);
+			$shape->add('value', $itemShape, ...$this->validators);
 		}
 
-		return $schema;
+		return $shape;
 	}
 }

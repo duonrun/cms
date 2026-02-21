@@ -20,12 +20,12 @@ class Number extends Field
 		return $this->getSimpleStructure('number', $value);
 	}
 
-	public function schema(): Shape
+	public function shape(): Shape
 	{
-		$schema = new Shape(title: $this->label, keepUnknown: true);
-		$schema->add('type', 'text', 'required', 'in:number');
-		$schema->add('value', 'float', ...$this->validators);
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:number');
+		$shape->add('value', 'float', ...$this->validators);
 
-		return $schema;
+		return $shape;
 	}
 }

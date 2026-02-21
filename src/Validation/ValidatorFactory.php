@@ -12,35 +12,35 @@ use Duon\Sire\Shape;
 
 class ValidatorFactory
 {
-	protected readonly Shape $schema;
+	protected readonly Shape $shape;
 
 	public function __construct(
 		protected readonly object $node,
 		protected readonly Locales $locales,
 		private readonly FieldHydrator $hydrator = new FieldHydrator(),
 	) {
-		$this->schema = new Shape(keepUnknown: true);
-		$this->schema->add('uid', 'text', 'required', 'maxlen:64');
-		$this->schema->add('published', 'bool', 'required');
-		$this->schema->add('locked', 'bool', 'required');
-		$this->schema->add('hidden', 'bool', 'required');
+		$this->shape = new Shape(keepUnknown: true);
+		$this->shape->add('uid', 'text', 'required', 'maxlen:64');
+		$this->shape->add('published', 'bool', 'required');
+		$this->shape->add('locked', 'bool', 'required');
+		$this->shape->add('hidden', 'bool', 'required');
 	}
 
 	public function create(): Shape
 	{
-		$contentSchema = new Shape(title: 'Content', keepUnknown: true);
+		$contentShape = new Shape(title: 'Content', keepUnknown: true);
 
 		foreach (Factory::fieldNamesFor($this->node) as $fieldName) {
-			$this->add($contentSchema, $fieldName, $this->hydrator->getField($this->node, $fieldName));
+			$this->add($contentShape, $fieldName, $this->hydrator->getField($this->node, $fieldName));
 		}
 
-		$this->schema->add('content', $contentSchema);
+		$this->shape->add('content', $contentShape);
 
-		return $this->schema;
+		return $this->shape;
 	}
 
-	protected function add(Shape $schema, string $fieldName, Field $field): void
+	protected function add(Shape $shape, string $fieldName, Field $field): void
 	{
-		$schema->add($fieldName, $field->schema())->label($field->getLabel());
+		$shape->add($fieldName, $field->shape())->label($field->getLabel());
 	}
 }
