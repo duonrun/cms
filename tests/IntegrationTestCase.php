@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
@@ -312,6 +313,6 @@ class IntegrationTestCase extends TestCase
 
 	protected function createCms(): Cms
 	{
-		return new Cms($this->createContext());
+		return new Cms($this->createContext(), new Types());
 	}
 }

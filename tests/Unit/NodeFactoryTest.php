@@ -8,9 +8,9 @@ use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Serializer;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
@@ -29,16 +29,16 @@ final class NodeFactoryTest extends TestCase
 	private Context $context;
 	private \Duon\Cms\Cms $cms;
 	private Factory $factory;
-	private Meta $meta;
+	private Types $types;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->meta = new Meta();
+		$this->types = new Types();
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
-		$this->factory = new Factory($this->registry(), meta: $this->meta);
+		$this->factory = new Factory($this->registry(), types: $this->types);
 	}
 
 	private function createContext(): Context
@@ -127,7 +127,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator(), $this->types);
 		$title = $serializer->resolveTitle($node);
 		$this->assertEquals('My Title', $title);
 	}
@@ -139,7 +139,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator(), $this->types);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
 	}
@@ -222,47 +222,47 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertTrue($this->meta->routable(PlainPage::class));
+		$this->assertTrue($this->types->routable(PlainPage::class));
 	}
 
 	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertTrue($this->meta->renderable(PlainBlock::class));
+		$this->assertTrue($this->types->renderable(PlainBlock::class));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void
 	{
-		$this->assertTrue($this->meta->isNode(PlainPage::class));
+		$this->assertTrue($this->types->isNode(PlainPage::class));
 	}
 
 	public function testNodeMetaHandleForPlainPage(): void
 	{
-		$this->assertEquals('plain-page', $this->meta->handle(PlainPage::class));
+		$this->assertEquals('plain-page', $this->types->handle(PlainPage::class));
 	}
 
 	public function testNodeMetaLabelForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', $this->meta->label(PlainPage::class));
+		$this->assertEquals('Plain Page', $this->types->label(PlainPage::class));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void
 	{
-		$this->assertEquals('heading', $this->meta->titleField(PlainPage::class));
+		$this->assertEquals('heading', $this->types->titleField(PlainPage::class));
 	}
 
 	public function testNodeMetaFieldOrderForPlainPage(): void
 	{
-		$this->assertEquals(['heading', 'body'], $this->meta->fieldOrder(PlainPage::class));
+		$this->assertEquals(['heading', 'body'], $this->types->fieldOrder(PlainPage::class));
 	}
 
 	public function testNodeMetaDeletableForPlainBlock(): void
 	{
-		$this->assertFalse($this->meta->deletable(PlainBlock::class));
+		$this->assertFalse($this->types->deletable(PlainBlock::class));
 	}
 
 	public function testNodeMetaDeletableDefaultsToTrue(): void
 	{
-		$this->assertTrue($this->meta->deletable(PlainPage::class));
+		$this->assertTrue($this->types->deletable(PlainPage::class));
 	}
 
 	// -- Serializer with plain objects ------------------------------------
@@ -274,7 +274,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator(), $this->types);
 		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
@@ -289,7 +289,7 @@ final class NodeFactoryTest extends TestCase
 		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
-		$serializer = new Serializer($this->factory->hydrator());
+		$serializer = new Serializer($this->factory->hydrator(), $this->types);
 		$blueprint = $serializer->blueprint($node, $fieldNames, $locales);
 
 		$this->assertArrayHasKey('uid', $blueprint);

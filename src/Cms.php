@@ -10,7 +10,7 @@ use Duon\Cms\Finder\Node;
 use Duon\Cms\Finder\Nodes;
 use Duon\Cms\Finder\Render;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
+use Duon\Cms\Node\Types;
 
 /**
  * @psalm-property-read Nodes $nodes
@@ -20,21 +20,21 @@ use Duon\Cms\Node\Meta;
 class Cms
 {
 	private readonly Factory $nodeFactory;
-	private readonly Meta $meta;
+	private readonly Types $types;
 
 	public function __construct(
 		private readonly Context $context,
-		?Meta $meta = null,
+		Types $types,
 	) {
-		$this->meta = $meta ?? new Meta();
-		$this->nodeFactory = new Factory($context->registry, meta: $this->meta);
+		$this->types = $types;
+		$this->nodeFactory = new Factory($context->registry, types: $this->types);
 	}
 
 	public function __get($key): Nodes|Node|Menu
 	{
 		return match ($key) {
-			'nodes' => new Nodes($this->context, $this, $this->nodeFactory, $this->meta),
-			'node' => new Node($this->context, $this, $this->nodeFactory, $this->meta),
+			'nodes' => new Nodes($this->context, $this, $this->nodeFactory, $this->types),
+			'node' => new Node($this->context, $this, $this->nodeFactory, $this->types),
 			default => throw new RuntimeException('Property not supported'),
 		};
 	}
@@ -42,7 +42,7 @@ class Cms
 	public function nodes(
 		string $query = '',
 	): Nodes {
-		return (new Nodes($this->context, $this, $this->nodeFactory, $this->meta))->filter($query);
+		return (new Nodes($this->context, $this, $this->nodeFactory, $this->types))->filter($query);
 	}
 
 	public function node(
@@ -51,7 +51,7 @@ class Cms
 		int $limit = 0,
 		string $order = '',
 	): array {
-		return (new Node($this->context, $this, $this->nodeFactory, $this->meta))->find($query, $types, $limit, $order);
+		return (new Node($this->context, $this, $this->nodeFactory, $this->types))->find($query, $types, $limit, $order);
 	}
 
 	public function menu(string $menu): Menu
@@ -65,7 +65,7 @@ class Cms
 		?bool $deleted = false,
 		?bool $published = true,
 	): Render {
-		return new Render($this->context, $this, $this->nodeFactory, $this->meta, $uid, $templateContext, $deleted, $published);
+		return new Render($this->context, $this, $this->nodeFactory, $this->types, $uid, $templateContext, $deleted, $published);
 	}
 
 	public function nodeFactory(): Factory

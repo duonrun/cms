@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Schema;
 use Duon\Cms\Node\Schema\DeletableHandler;
 use Duon\Cms\Node\Schema\FieldOrderHandler;
@@ -15,6 +14,7 @@ use Duon\Cms\Node\Schema\Registry;
 use Duon\Cms\Node\Schema\RenderHandler;
 use Duon\Cms\Node\Schema\RouteHandler;
 use Duon\Cms\Node\Schema\TitleHandler;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Schema\Deletable;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Handle;
@@ -218,24 +218,24 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertEquals('star', $props['icon']);
 	}
 
-	public function testCustomAttributeAccessibleViaMeta(): void
+	public function testCustomAttributeAccessibleViaTypes(): void
 	{
 		$registry = Registry::withDefaults();
 		$registry->register(CustomIcon::class, new CustomIconHandler());
 
-		$meta = new Meta($registry);
+		$types = new Types($registry);
 
-		$this->assertEquals('star', $meta->get(NodeWithCustomAttribute::class, 'icon'));
-		$this->assertEquals('Custom Node', $meta->label(NodeWithCustomAttribute::class));
-		$this->assertTrue($meta->routable(NodeWithCustomAttribute::class));
+		$this->assertEquals('star', $types->get(NodeWithCustomAttribute::class, 'icon'));
+		$this->assertEquals('Custom Node', $types->label(NodeWithCustomAttribute::class));
+		$this->assertTrue($types->routable(NodeWithCustomAttribute::class));
 	}
 
 	public function testCustomAttributeDefaultsToNull(): void
 	{
-		$meta = new Meta();
+		$types = new Types();
 
-		$this->assertNull($meta->get(PlainPage::class, 'icon'));
-		$this->assertEquals('fallback', $meta->get(PlainPage::class, 'icon', 'fallback'));
+		$this->assertNull($types->get(PlainPage::class, 'icon'));
+		$this->assertEquals('fallback', $types->get(PlainPage::class, 'icon', 'fallback'));
 	}
 
 	public function testUnregisteredCustomAttributeIsSilentlyIgnored(): void
@@ -273,41 +273,41 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertArrayHasKey('deletable', $props);
 	}
 
-	// -- Meta with custom registry --------------------------------------------
+	// -- Types with custom registry -------------------------------------------
 
-	public function testMetaWithCustomRegistryResolvesAllAttributes(): void
+	public function testTypesWithCustomRegistryResolvesAllAttributes(): void
 	{
 		$registry = Registry::withDefaults();
 		$registry->register(CustomIcon::class, new CustomIconHandler());
 
-		$meta = new Meta($registry);
+		$types = new Types($registry);
 
 		// Built-in resolution still works
-		$this->assertEquals('plain-page', $meta->handle(PlainPage::class));
-		$this->assertEquals('Plain Page', $meta->label(PlainPage::class));
-		$this->assertTrue($meta->routable(PlainPage::class));
+		$this->assertEquals('plain-page', $types->handle(PlainPage::class));
+		$this->assertEquals('Plain Page', $types->label(PlainPage::class));
+		$this->assertTrue($types->routable(PlainPage::class));
 
 		// Custom resolution
-		$this->assertEquals('star', $meta->get(NodeWithCustomAttribute::class, 'icon'));
+		$this->assertEquals('star', $types->get(NodeWithCustomAttribute::class, 'icon'));
 	}
 
-	public function testMetaCachesSchemaInstances(): void
+	public function testTypesCachesSchemaInstances(): void
 	{
-		$meta = new Meta();
+		$types = new Types();
 
-		$schema1 = $meta->forClass(PlainPage::class);
-		$schema2 = $meta->forClass(PlainPage::class);
+		$schema1 = $types->forClass(PlainPage::class);
+		$schema2 = $types->forClass(PlainPage::class);
 
 		$this->assertSame($schema1, $schema2);
 	}
 
-	public function testMetaClearCacheRemovesCachedSchemas(): void
+	public function testTypesClearCacheRemovesCachedSchemas(): void
 	{
-		$meta = new Meta();
+		$types = new Types();
 
-		$schema1 = $meta->forClass(PlainPage::class);
-		$meta->clearCache();
-		$schema2 = $meta->forClass(PlainPage::class);
+		$schema1 = $types->forClass(PlainPage::class);
+		$types->clearCache();
+		$schema2 = $types->forClass(PlainPage::class);
 
 		$this->assertNotSame($schema1, $schema2);
 		$this->assertEquals($schema1->handle, $schema2->handle);

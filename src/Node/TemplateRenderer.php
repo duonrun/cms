@@ -20,7 +20,7 @@ class TemplateRenderer
 		private readonly Registry $registry,
 		private readonly Factory $factory,
 		private readonly FieldHydrator $hydrator,
-		private readonly Meta $meta = new Meta(),
+		private readonly Types $types,
 	) {}
 
 	/**
@@ -100,7 +100,7 @@ class TemplateRenderer
 	 */
 	public function resolveRenderer(object $node): array
 	{
-		return ['template', $this->meta->forClass($node::class)->renderer];
+		return ['template', $this->types->forClass($node::class)->renderer];
 	}
 
 	private function doRender(object $node, array $context): Response

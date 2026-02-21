@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests\Integration;
 
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\FieldOwner;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\Fixtures\Node\TestMatrix;
 use Duon\Cms\Tests\Fixtures\Node\TestNodeWithMatrix;
 use Duon\Cms\Tests\TestCase;
@@ -39,7 +40,7 @@ class MatrixIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$cms = $this->createStub(\Duon\Cms\Cms::class);
-		$nodeFactory = new Factory($this->registry());
+		$nodeFactory = new Factory($this->registry(), types: new Types());
 		$hydrator = $nodeFactory->hydrator();
 
 		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $cms, ['content' => [

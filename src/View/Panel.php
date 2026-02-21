@@ -11,11 +11,11 @@ use Duon\Cms\Context;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\PathManager;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Store;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
 use Duon\Cms\Section;
 use Duon\Core\Exception\HttpBadRequest;
@@ -35,7 +35,7 @@ class Panel
 		protected readonly Config $config,
 		protected readonly Registry $registry,
 		protected readonly Locales $locales,
-		protected readonly Meta $meta = new Meta(),
+		protected readonly Types $types,
 	) {
 		$this->publicPath = $config->get('path.public');
 	}
@@ -139,8 +139,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => $this->meta->handle($blueprint),
-				'name' => $this->meta->label($blueprint),
+				'slug' => $this->types->handle($blueprint),
+				'name' => $this->types->label($blueprint),
 			];
 		}
 
@@ -173,7 +173,7 @@ class Panel
 
 		$serializer = new Serializer(
 			$factory->hydrator(),
-			$this->meta,
+			$this->types,
 		);
 
 		return $serializer->blueprint(
@@ -199,7 +199,7 @@ class Panel
 		$class = $this->registry->tag(Plugin::NODE_TAG)->entry($type)->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
-		$store = new Store($context->db, new PathManager(), $this->meta);
+		$store = new Store($context->db, new PathManager(), $this->types);
 		$result = $store->save($obj, $data, $this->request, $context->locales());
 
 		return (new Response(
@@ -221,8 +221,8 @@ class Panel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new Serializer($nodeFactory->hydrator(), $this->meta);
-		$store = new Store($context->db, new PathManager(), $this->meta);
+		$serializer = new Serializer($nodeFactory->hydrator(), $this->types);
+		$store = new Store($context->db, new PathManager(), $this->types);
 		$method = $this->request->method();
 
 		$result = match ($method) {

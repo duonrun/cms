@@ -7,6 +7,7 @@ namespace Duon\Cms\Tests\Integration;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Serializer;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\Fixtures\Node\TestDocument;
 use Duon\Cms\Tests\Fixtures\Node\TestMediaDocument;
 use Duon\Cms\Tests\IntegrationTestCase;
@@ -19,7 +20,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->nodeFactory = new Factory($this->registry());
+		$this->nodeFactory = new Factory($this->registry(), types: new Types());
 		$this->hydrator = $this->nodeFactory->hydrator();
 	}
 
@@ -155,7 +156,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$serializer = new Serializer($this->hydrator);
+		$serializer = new Serializer($this->hydrator, new Types());
 		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertIsArray($fields);
