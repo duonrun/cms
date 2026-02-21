@@ -23,7 +23,7 @@
 <div class="grid-cell-header">
 	{@render children({ edit: () => (showSettings = !showSettings) })}
 </div>
-<div class="grid-cell-body flex-grow">
+<div class="grid-cell-body cms-grid-text-body">
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
@@ -36,6 +36,10 @@
 </div>
 
 <style lang="postcss">
+	.cms-grid-text-body {
+		flex-grow: 1;
+	}
+
 	textarea {
 		height: 100%;
 	}

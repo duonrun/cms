@@ -67,10 +67,9 @@
 </script>
 
 <div
-	class="flex flex-grow flex-row items-center gap-x-3 py-2"
-	class:justify-end={!dropdown}
-	class:mr-3={!dropdown}
-	class:justify-center={dropdown}>
+	class="cms-grid-cell-buttons"
+	class:cms-grid-cell-buttons-inline={!dropdown}
+	class:cms-grid-cell-buttons-dropdown={dropdown}>
 	<button
 		class="remove"
 		onclick={remove}>
@@ -96,6 +95,24 @@
 </div>
 
 <style lang="postcss">
+	.cms-grid-cell-buttons {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--s-3);
+		padding: var(--s-2) 0;
+	}
+
+	.cms-grid-cell-buttons-inline {
+		justify-content: flex-end;
+		margin-right: var(--s-3);
+	}
+
+	.cms-grid-cell-buttons-dropdown {
+		justify-content: center;
+	}
+
 	div button {
 		height: var(--s-4);
 		width: var(--s-4);

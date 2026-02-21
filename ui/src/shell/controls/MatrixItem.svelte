@@ -91,7 +91,7 @@
 						</div>
 					{:else}
 						<div
-							class="matrix-subfield text-gray-500"
+							class="matrix-subfield matrix-subfield-note"
 							style={widthStyle}>
 							Unknown field type: {subfield.type}
 						</div>
@@ -154,5 +154,9 @@
 	.matrix-subfield {
 		flex-shrink: 0;
 		min-width: 0;
+	}
+
+	.matrix-subfield-note {
+		color: var(--color-gray-500);
 	}
 </style>

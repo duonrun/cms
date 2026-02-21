@@ -39,7 +39,7 @@
 			<label for={field.name + '_' + index + '_ytid'}>
 				{_('Youtube-ID')}
 			</label>
-			<div class="mt-2">
+			<div class="cms-grid-youtube-field-row">
 				<input
 					id={field.name + '_' + index + '_ytid'}
 					name={field.name + '_' + index + '_ytid'}
@@ -54,7 +54,7 @@
 			<label for={field.name + '_' + index + '_x'}>
 				{_('Seitenverhältnis')}
 			</label>
-			<div class="mt-2 flex flex-row gap-4">
+			<div class="cms-grid-youtube-ratio-row">
 				<input
 					id={field.name + '_' + index + '_x'}
 					name={field.name + '_' + index + '_x'}
@@ -78,10 +78,10 @@
 	{:else}
 		<div class="youtube-container">
 			<div
-				class="relative"
+				class="cms-grid-youtube-frame"
 				style="padding-top: {percent}%">
 				<iframe
-					class="youtube absolute top-0 left-0 h-full w-full"
+					class="youtube cms-grid-youtube-iframe"
 					title="Youtube Video"
 					src="https://www.youtube.com/embed/{item.value}"
 					allowfullscreen>
@@ -90,3 +90,28 @@
 		</div>
 	{/if}
 </div>
+
+<style lang="postcss">
+	.cms-grid-youtube-field-row {
+		margin-top: var(--s-2);
+	}
+
+	.cms-grid-youtube-ratio-row {
+		display: flex;
+		flex-direction: row;
+		gap: var(--s-4);
+		margin-top: var(--s-2);
+	}
+
+	.cms-grid-youtube-frame {
+		position: relative;
+	}
+
+	.cms-grid-youtube-iframe {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+	}
+</style>
