@@ -24,7 +24,7 @@
 		bind:lang>
 		{field.label}
 	</LabelDiv>
-	<div class="mt-2">
+	<div class="cms-field-content">
 		<Upload
 			type="image"
 			multiple={true}
