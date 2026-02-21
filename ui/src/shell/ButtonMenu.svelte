@@ -10,6 +10,7 @@
 
 	type Props = {
 		class?: string;
+		variant?: 'primary' | 'secondary' | 'danger';
 		icon?: Component;
 		label: string;
 		children: Snippet<[closeMenu: () => void]>;
@@ -17,6 +18,7 @@
 
 	let {
 		class: cls = 'primary',
+		variant = 'primary',
 		icon = null,
 		label,
 		children,
@@ -24,23 +26,23 @@
 	}: Props & HTMLButtonAttributes = $props();
 </script>
 
-<div class="inline-flex rounded-md shadow-xs">
+<div class="cms-button-menu">
 	<button
 		type="button"
-		class="{cls} inline-flex items-center justify-center gap-x-2 rounded-l-md px-3.5 py-2.5 text-sm font-semibold shadow-xs focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+		class="cms-button cms-button-{variant} cms-button-menu-main {cls}"
 		{...attributes}>
 		{#if icon}
 			{@const Icon = icon}
-			<span class="-ml-0.5 h-5 w-5">
+			<span class="h-5 w-5">
 				<Icon />
 			</span>
 		{/if}
 		{label}
 	</button>
-	<div class="relative -ml-px block">
+	<div>
 		<button
 			type="button"
-			class="{cls} relative inline-flex items-center rounded-r-md border-l border-gray-300 p-2.5 text-gray-400 focus:z-10"
+			class="cms-button cms-button-{variant} cms-button-menu-toggle {cls}"
 			id="option-menu-button"
 			aria-expanded="true"
 			aria-haspopup="true"
@@ -59,13 +61,13 @@
 		</button>
 		{#if openMenu}
 			<div
-				class="button-menu {cls} absolute right-0 z-10 mt-2 -mr-1 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+				class="button-menu cms-button-menu-panel {cls}"
 				role="menu"
 				aria-orientation="vertical"
 				aria-labelledby="option-menu-button"
 				tabindex="-1">
 				<div
-					class="py-1"
+					class="cms-button-menu-list"
 					role="none">
 					{@render children(closeMenu)}
 				</div>

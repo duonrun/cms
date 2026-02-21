@@ -4,7 +4,7 @@
 	let { children, class: classes = '' }: { children: Snippet; class?: string } = $props();
 </script>
 
-<div class="modal-footer rounded-b border-t p-4 md:p-8 {classes}">
+<div class="modal-footer cms-modal-footer {classes}">
 	{@render children()}
 </div>
 

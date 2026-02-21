@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class="block px-4 py-2 text-sm"
+	class="cms-button-menu-entry"
 	role="menuitem"
 	tabindex="-1"
 	{...attributes}>
