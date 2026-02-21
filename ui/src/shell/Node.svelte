@@ -74,7 +74,7 @@
 	});
 </script>
 
-<div class="flex h-screen flex-col">
+<div class="cms-node-shell">
 	<NodeControlBar
 		bind:uid={node.uid}
 		collectionPath="collection/{collection.slug}"
@@ -118,10 +118,10 @@
 	</Document>
 </div>
 {#if showPreview}
-	<div class="preview bg-gray-800/50">
+	<div class="preview">
 		<button
 			onclick={() => (showPreview = null)}
-			class="rounded bg-rose-600 px-4 py-1 text-white">
+			class="cms-preview-close">
 			schließen
 		</button>
 		<iframe
@@ -134,6 +134,7 @@
 <style lang="postcss">
 	.preview {
 		z-index: 999;
+		background-color: color-mix(in srgb, var(--gray-900) 50%, transparent);
 		backdrop-filter: blur(0.5rem);
 		position: fixed;
 		top: 0;
@@ -153,5 +154,24 @@
 			margin-top: 5vh;
 			margin-left: 5vw;
 		}
+	}
+
+	.cms-node-shell {
+		display: flex;
+		min-height: 100vh;
+		flex-direction: column;
+	}
+
+	.cms-preview-close {
+		border: none;
+		border-radius: var(--radius);
+		background-color: var(--color-rose-700);
+		padding: var(--s-1) var(--s-4);
+		color: var(--white);
+		cursor: pointer;
+	}
+
+	.cms-preview-close:hover {
+		background-color: color-mix(in srgb, var(--color-rose-700) 86%, black);
 	}
 </style>
