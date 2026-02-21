@@ -46,13 +46,13 @@
 	}
 </script>
 
-<div class="p-4 sm:p-6 md:p-8">
+<div class="cms-settings">
 	{#if node.type.routable}
-		<div class="paths mb-8">
+		<div class="cms-settings-paths">
 			{#each $system.locales as locale (locale)}
-				<div class="path">
+				<div class="cms-settings-path">
 					<div class="cms-field-label">{locale.title}:</div>
-					<div class="value">
+					<div class="cms-settings-path-value">
 						<input
 							type="text"
 							bind:value={node.paths[locale.id]}
@@ -65,8 +65,8 @@
 		</div>
 	{/if}
 	{#if node.type.renderable}
-		<div class="max-w-xl">
-			<div class="mb-4">
+		<div class="cms-settings-renderable">
+			<div class="cms-settings-section">
 				<ToggleLine
 					title={_('Veröffentlicht')}
 					subtitle={_('Legt fest, ob die Seite für alle Besucher erreichbar ist.')}
@@ -80,36 +80,73 @@
                     )}
                     bind:value={node.locked} />
             </div>-->
-			<div class="mt-4">
+			<div class="cms-settings-section">
 				<ToggleLine
 					title={_('Versteckt')}
 					subtitle={_('Versteckte Seiten werden in Auflistungen ignoriert.')}
 					bind:value={node.hidden} />
 			</div>
-			<div class="mt-4 flex flex-row">
+			<div class="cms-settings-row">
 				<div class="cms-field-label">{_('Internal Document-ID')}:</div>
-				<div class="value pl-4">{node.uid}</div>
+				<div class="cms-settings-value">{node.uid}</div>
 			</div>
 		</div>
 	{/if}
 </div>
 
 <style lang="postcss">
-	.paths {
+	.cms-settings {
+		padding: var(--s-4);
+	}
+
+	@media (min-width: 640px) {
+		.cms-settings {
+			padding: var(--s-6);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.cms-settings {
+			padding: var(--s-8);
+		}
+	}
+
+	.cms-settings-paths {
+		margin-bottom: var(--s-8);
 		display: table;
 		width: 100%;
 	}
 
-	.path {
+	.cms-settings-path {
 		display: table-row;
 
 		& > div {
 			padding: var(--s-2);
 			display: table-cell;
 		}
+	}
 
-		.value {
-			width: 100%;
-		}
+	.cms-settings-path-value {
+		width: 100%;
+	}
+
+	.cms-settings-renderable {
+		max-width: var(--s-3xl);
+	}
+
+	.cms-settings-section + .cms-settings-section {
+		margin-top: var(--s-4);
+	}
+
+	.cms-settings-row {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		gap: var(--s-4);
+		margin-top: var(--s-4);
+	}
+
+	.cms-settings-value {
+		padding-top: var(--s-px);
 	}
 </style>
