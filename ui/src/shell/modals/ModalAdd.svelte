@@ -33,15 +33,13 @@
 	{_('Inhaltstyp hinzufügen')}
 </ModalHeader>
 <ModalBody>
-	<div class="mb-8 grid grid-cols-2 gap-4">
+	<div class="cms-modal-add-types">
 		{#if types.length > 0}
 			{#each types as t}
 				<Button
-					class="ring-1 ring-sky-800 {t.id === type
-						? 'bg-sky-800 text-white'
-						: 'bg-white text-sky-800'}"
+					class="cms-modal-add-type {t.id === type ? 'is-selected' : ''}"
 					onclick={setType(t.id)}>
-					<span class="ml-2">
+					<span>
 						{t.label}
 					</span>
 				</Button>
@@ -72,3 +70,23 @@
 		{/if}
 	</div>
 </ModalFooter>
+
+<style lang="postcss">
+	.cms-modal-add-types {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--s-4);
+		margin-bottom: var(--s-8);
+	}
+
+	:global(.cms-modal-add-type) {
+		border: 1px solid var(--color-sky-700);
+		background-color: var(--white);
+		color: var(--color-sky-700);
+	}
+
+	:global(.cms-modal-add-type.is-selected) {
+		background-color: var(--color-sky-700);
+		color: var(--white);
+	}
+</style>

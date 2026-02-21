@@ -17,22 +17,19 @@
 	type="button"
 	onclick={toggle}
 	aria-labelledby="change value"
-	class="{value
-		? 'bg-emerald-600'
-		: 'bg-gray-200'}  relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 focus:outline-none"
+	class="cms-toggle"
+	class:is-on={value}
 	role="switch"
 	aria-checked="false">
 	<span
-		class="{value
-			? 'translate-x-5'
-			: 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+		class="cms-toggle-knob"
+		class:is-on={value}>
 		<span
-			class="{value
-				? 'opacity-0 duration-100 ease-out'
-				: 'opacity-100 duration-200 ease-in'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+			class="cms-toggle-icon cms-toggle-off"
+			class:is-hidden={value}
 			aria-hidden="true">
 			<svg
-				class="h-3 w-3 text-gray-400"
+				class="cms-toggle-icon-svg"
 				fill="none"
 				viewBox="0 0 12 12">
 				<path
@@ -44,12 +41,11 @@
 			</svg>
 		</span>
 		<span
-			class="{value
-				? 'opacity-100 duration-200 ease-in'
-				: 'opacity-0 duration-100 ease-out'} absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+			class="cms-toggle-icon cms-toggle-on"
+			class:is-hidden={!value}
 			aria-hidden="true">
 			<svg
-				class="h-3 w-3 text-emerald-600"
+				class="cms-toggle-icon-svg"
 				fill="currentColor"
 				viewBox="0 0 12 12">
 				<path
@@ -58,3 +54,68 @@
 		</span>
 	</span>
 </button>
+
+<style lang="postcss">
+	.cms-toggle {
+		position: relative;
+		display: inline-flex;
+		width: 2.75rem;
+		height: 1.5rem;
+		flex-shrink: 0;
+		cursor: pointer;
+		border-radius: var(--radius-full);
+		border: 2px solid transparent;
+		background-color: var(--gray-200);
+		transition: background-color 200ms ease-in-out;
+	}
+
+	.cms-toggle.is-on {
+		background-color: var(--color-emerald-600);
+	}
+
+	.cms-toggle-knob {
+		pointer-events: none;
+		position: relative;
+		display: inline-block;
+		width: 1.25rem;
+		height: 1.25rem;
+		transform: translateX(0);
+		border-radius: var(--radius-full);
+		background-color: var(--white);
+		box-shadow: var(--shadow);
+		transition: transform 200ms ease-in-out;
+	}
+
+	.cms-toggle-knob.is-on {
+		transform: translateX(1.25rem);
+	}
+
+	.cms-toggle-icon {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		width: 100%;
+		height: 100%;
+		align-items: center;
+		justify-content: center;
+		opacity: 1;
+		transition: opacity 180ms ease-in-out;
+	}
+
+	.cms-toggle-icon.is-hidden {
+		opacity: 0;
+	}
+
+	.cms-toggle-off {
+		color: var(--gray-400);
+	}
+
+	.cms-toggle-on {
+		color: var(--color-emerald-600);
+	}
+
+	.cms-toggle-icon-svg {
+		width: 0.75rem;
+		height: 0.75rem;
+	}
+</style>

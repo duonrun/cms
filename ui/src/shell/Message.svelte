@@ -15,44 +15,46 @@
 
 	let { type, text = '', narrow = false, children }: Props = $props();
 
-	function getColor() {
+	function getToneClass() {
 		switch (type) {
 			case 'success':
-				return 'bg-emerald-50 border-emerald-400';
+				return 'cms-message-success';
 			case 'info':
-				return 'bg-sky-50 border-sky-400';
+				return 'cms-message-info';
 			case 'hint':
 			case 'warning':
-				return 'bg-yellow-50 border-yellow-400';
+				return 'cms-message-warning';
 			case 'error':
-				return 'bg-rose-50 border-rose-400';
+				return 'cms-message-error';
+			default:
+				return 'cms-message-info';
 		}
 	}
 
-	function getTextColor() {
+	function getTextToneClass() {
 		switch (type) {
 			case 'success':
-				return 'text-emerald-700';
+				return 'cms-message-text-success';
 			case 'info':
-				return 'text-sky-700';
+				return 'cms-message-text-info';
 			case 'hint':
 			case 'warning':
-				return 'text-yellow-700';
+				return 'cms-message-text-warning';
 			case 'error':
-				return 'text-rose-700';
+				return 'cms-message-text-error';
+			default:
+				return 'cms-message-text-info';
 		}
 	}
 </script>
 
 {#if type}
 	<div
-		class="message border-l-4 {getColor()}"
-		class:py-1={narrow}
-		class:px-2={narrow}
-		class:p-4={!narrow}>
-		<div class="items-top flex">
+		class="message cms-message {getToneClass()}"
+		class:narrow>
+		<div class="cms-message-row">
 			<div
-				class="flex-shrink-0 {getTextColor()}"
+				class="cms-message-icon {getTextToneClass()}"
 				style="margin-top: -0.15rem">
 				{#if type == 'success'}
 					<IcoShieldCheck />
@@ -67,9 +69,9 @@
 				{/if}
 			</div>
 			<div
-				class:ml-2={narrow}
-				class:ml-3={!narrow}>
-				<div class="text-sm {getTextColor()}">
+				class="cms-message-content"
+				class:narrow>
+				<div class="cms-message-text {getTextToneClass()}">
 					{#if text}
 						{@html text}
 					{:else}
@@ -82,6 +84,71 @@
 {/if}
 
 <style lang="postcss">
+	.cms-message {
+		border-left: var(--border-4) solid transparent;
+		padding: var(--s-4);
+	}
+
+	.cms-message.narrow {
+		padding: var(--s-1) var(--s-2);
+	}
+
+	.cms-message-row {
+		display: flex;
+	}
+
+	.cms-message-icon {
+		flex-shrink: 0;
+	}
+
+	.cms-message-content {
+		margin-left: var(--s-3);
+	}
+
+	.cms-message-content.narrow {
+		margin-left: var(--s-2);
+	}
+
+	.cms-message-text {
+		font-size: var(--font-size-sm);
+	}
+
+	.cms-message-success {
+		background-color: color-mix(in srgb, var(--color-emerald-100) 85%, white);
+		border-left-color: color-mix(in srgb, var(--color-emerald-600) 70%, white);
+	}
+
+	.cms-message-info {
+		background-color: color-mix(in srgb, var(--color-sky-700) 8%, white);
+		border-left-color: color-mix(in srgb, var(--color-sky-700) 45%, white);
+	}
+
+	.cms-message-warning {
+		background-color: color-mix(in srgb, var(--color-orange-700) 10%, white);
+		border-left-color: color-mix(in srgb, var(--color-orange-700) 45%, white);
+	}
+
+	.cms-message-error {
+		background-color: color-mix(in srgb, var(--color-rose-700) 10%, white);
+		border-left-color: color-mix(in srgb, var(--color-rose-700) 45%, white);
+	}
+
+	.cms-message-text-success {
+		color: var(--color-emerald-600);
+	}
+
+	.cms-message-text-info {
+		color: var(--color-sky-700);
+	}
+
+	.cms-message-text-warning {
+		color: var(--color-orange-700);
+	}
+
+	.cms-message-text-error {
+		color: var(--color-rose-700);
+	}
+
 	:global(.message em) {
 		white-space: nowrap;
 		font-weight: 600;
