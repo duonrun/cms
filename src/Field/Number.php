@@ -6,7 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Value\Number as NumberValue;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Number extends Field
 {
@@ -20,9 +20,9 @@ class Number extends Field
 		return $this->getSimpleStructure('number', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:number');
 		$schema->add('value', 'float', ...$this->validators);
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Value\Boolean;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Checkbox extends Field
 {
@@ -19,9 +19,9 @@ class Checkbox extends Field
 		return $this->getSimpleStructure('checkbox', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:checkbox');
 		$schema->add('value', 'bool', ...$this->validators);
 

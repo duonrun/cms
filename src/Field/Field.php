@@ -8,7 +8,7 @@ use Duon\Cms\Field\Schema\Handler;
 use Duon\Cms\Field\Schema\Registry;
 use Duon\Cms\Value\Value;
 use Duon\Cms\Value\ValueContext;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 use ReflectionProperty;
 
 abstract class Field implements
@@ -54,7 +54,7 @@ abstract class Field implements
 
 	abstract public function structure(mixed $value = null): array;
 
-	abstract public function schema(): Schema;
+	abstract public function schema(): Shape;
 
 	public function isset(): bool
 	{

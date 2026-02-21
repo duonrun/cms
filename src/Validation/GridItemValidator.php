@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Validation;
 
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 use Duon\Sire\ValidationResult;
 use Override;
 
-class GridItemValidator extends Schema
+class GridItemValidator extends Shape
 {
 	protected function rules(): void
 	{
@@ -52,7 +52,7 @@ class GridItemValidator extends Schema
 				$files = $value['files'] ?? [];
 
 				if (count($files) > 0) {
-					$fileSchema = new Schema(list: true, title: _('Grid Bild'), keepUnknown: true);
+					$fileSchema = new Shape(list: true, title: _('Grid Bild'), keepUnknown: true);
 					$fileSchema->add('file', 'text', 'required');
 					$fileSchema->add('title', 'text');
 					$fileSchema->add('alt', 'text');

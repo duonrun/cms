@@ -6,7 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Value;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Option extends Field implements Capability\Selectable
 {
@@ -32,9 +32,9 @@ class Option extends Field implements Capability\Selectable
 		return $this->getSimpleStructure('option', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:option');
 		$schema->add('value', 'text', ...$this->validators);
 

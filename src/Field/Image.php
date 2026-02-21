@@ -6,7 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Value;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Image extends Field implements Capability\Translatable, Capability\FileTranslatable, Capability\AllowsMultiple
 {
@@ -40,19 +40,19 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 		return $this->getFileStructure('image', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:image');
 
 		if ($this->translateFile) {
 			// File-translatable: separate file arrays per locale
-			$subSchema = new Schema(list: true, title: $this->label, keepUnknown: true);
+			$subSchema = new Shape(list: true, title: $this->label, keepUnknown: true);
 			$subSchema->add('file', 'text');
 			$subSchema->add('title', 'text');
 			$subSchema->add('alt', 'text');
 
-			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
+			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
 			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
@@ -62,12 +62,12 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 			$schema->add('files', $i18nSchema, ...$this->validators);
 		} elseif ($this->translate) {
 			// Text-translatable: shared files but translatable titles and alt text
-			$fileSchema = new Schema(list: true, keepUnknown: true);
+			$fileSchema = new Shape(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 
 			$locales = $this->owner->locales();
-			$titleSchema = new Schema(title: $this->label, keepUnknown: true);
-			$altSchema = new Schema(title: $this->label, keepUnknown: true);
+			$titleSchema = new Shape(title: $this->label, keepUnknown: true);
+			$altSchema = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$titleSchema->add($locale->id, 'text');
@@ -79,7 +79,7 @@ class Image extends Field implements Capability\Translatable, Capability\FileTra
 			$schema->add('files', $fileSchema, ...$this->validators);
 		} else {
 			// Non-translatable
-			$fileSchema = new Schema(list: true, keepUnknown: true);
+			$fileSchema = new Shape(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 			$fileSchema->add('title', 'text');
 			$fileSchema->add('alt', 'text');

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Validation;
 
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
-class TokenLogin extends Schema
+class TokenLogin extends Shape
 {
 	protected function rules(): void
 	{

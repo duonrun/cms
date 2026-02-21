@@ -6,7 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Value\MatrixValue;
 use Duon\Cms\Value\ValueContext;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -53,12 +53,12 @@ class Matrix extends Field implements Capability\AllowsMultiple
 		];
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:matrix');
 
-		$itemSchema = new Schema(title: $this->label, keepUnknown: true);
+		$itemSchema = new Shape(title: $this->label, keepUnknown: true);
 
 		foreach ($this->subfields as $name => $subfield) {
 			$itemSchema->add($name, $subfield->schema());

@@ -7,7 +7,7 @@ namespace Duon\Cms\Field;
 use Duon\Cms\Field\Field;
 use Duon\Cms\Validation\GridItemValidator;
 use Duon\Cms\Value\Grid as GridValue;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 use ValueError;
 
 class Grid extends Field implements Capability\Translatable, Capability\GridResizable
@@ -44,9 +44,9 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		return $result;
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:grid');
 		$schema->add('columns', 'int', 'required');
 
@@ -55,7 +55,7 @@ class Grid extends Field implements Capability\Translatable, Capability\GridResi
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
+			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$innerValidators = [];

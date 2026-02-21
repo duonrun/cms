@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Value\Time as TimeValue;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Time extends Field
 {
@@ -19,9 +19,9 @@ class Time extends Field
 		return $this->getSimpleStructure('time', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:time');
 		$schema->add('value', 'text', ...$this->validators);
 

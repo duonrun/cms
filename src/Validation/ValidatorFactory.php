@@ -8,27 +8,27 @@ use Duon\Cms\Field\Field;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Factory;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class ValidatorFactory
 {
-	protected readonly Schema $schema;
+	protected readonly Shape $schema;
 
 	public function __construct(
 		protected readonly object $node,
 		protected readonly Locales $locales,
 		private readonly FieldHydrator $hydrator = new FieldHydrator(),
 	) {
-		$this->schema = new Schema(keepUnknown: true);
+		$this->schema = new Shape(keepUnknown: true);
 		$this->schema->add('uid', 'text', 'required', 'maxlen:64');
 		$this->schema->add('published', 'bool', 'required');
 		$this->schema->add('locked', 'bool', 'required');
 		$this->schema->add('hidden', 'bool', 'required');
 	}
 
-	public function create(): Schema
+	public function create(): Shape
 	{
-		$contentSchema = new Schema(title: 'Content', keepUnknown: true);
+		$contentSchema = new Shape(title: 'Content', keepUnknown: true);
 
 		foreach (Factory::fieldNamesFor($this->node) as $fieldName) {
 			$this->add($contentSchema, $fieldName, $this->hydrator->getField($this->node, $fieldName));
@@ -39,7 +39,7 @@ class ValidatorFactory
 		return $this->schema;
 	}
 
-	protected function add(Schema $schema, string $fieldName, Field $field): void
+	protected function add(Shape $schema, string $fieldName, Field $field): void
 	{
 		$schema->add($fieldName, $field->schema())->label($field->getLabel());
 	}

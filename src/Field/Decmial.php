@@ -6,7 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Value\Decimal as DecimalValue;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class Decimal extends Field
 {
@@ -20,9 +20,9 @@ class Decimal extends Field
 		return $this->getSimpleStructure('decimal', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:decimal');
 		$schema->add('value', 'text', ...$this->validators);
 

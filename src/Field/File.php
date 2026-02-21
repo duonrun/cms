@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Value;
-use Duon\Sire\Schema;
+use Duon\Sire\Shape;
 
 class File extends Field implements Capability\Translatable, Capability\FileTranslatable, Capability\AllowsMultiple
 {
@@ -39,18 +39,18 @@ class File extends Field implements Capability\Translatable, Capability\FileTran
 		return $this->getFileStructure('file', $value);
 	}
 
-	public function schema(): Schema
+	public function schema(): Shape
 	{
-		$schema = new Schema(title: $this->label, keepUnknown: true);
+		$schema = new Shape(title: $this->label, keepUnknown: true);
 		$schema->add('type', 'text', 'required', 'in:file');
 
 		if ($this->translateFile) {
 			// File-translatable: separate file arrays per locale
-			$subSchema = new Schema(list: true, title: $this->label, keepUnknown: true);
+			$subSchema = new Shape(list: true, title: $this->label, keepUnknown: true);
 			$subSchema->add('file', 'text');
 			$subSchema->add('title', 'text');
 
-			$i18nSchema = new Schema(title: $this->label, keepUnknown: true);
+			$i18nSchema = new Shape(title: $this->label, keepUnknown: true);
 			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
@@ -60,11 +60,11 @@ class File extends Field implements Capability\Translatable, Capability\FileTran
 			$schema->add('files', $i18nSchema, ...$this->validators);
 		} elseif ($this->translate) {
 			// Text-translatable: shared files but translatable titles
-			$fileSchema = new Schema(list: true, keepUnknown: true);
+			$fileSchema = new Shape(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 
 			$locales = $this->owner->locales();
-			$titleSchema = new Schema(title: $this->label, keepUnknown: true);
+			$titleSchema = new Shape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$titleSchema->add($locale->id, 'text');
@@ -74,7 +74,7 @@ class File extends Field implements Capability\Translatable, Capability\FileTran
 			$schema->add('files', $fileSchema, ...$this->validators);
 		} else {
 			// Non-translatable
-			$fileSchema = new Schema(list: true, keepUnknown: true);
+			$fileSchema = new Shape(list: true, keepUnknown: true);
 			$fileSchema->add('file', 'text', 'required');
 			$fileSchema->add('title', 'text');
 			$schema->add('files', $fileSchema, ...$this->validators);

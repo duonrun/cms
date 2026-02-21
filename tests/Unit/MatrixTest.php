@@ -69,7 +69,7 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix('test_matrix', $owner, new \Duon\Cms\Value\ValueContext('test_matrix', []));
 		$schema = $matrix->schema();
 
-		$this->assertInstanceOf(\Duon\Sire\Schema::class, $schema);
+		$this->assertInstanceOf(\Duon\Sire\Shape::class, $schema);
 	}
 
 	public function testMatrixSubfieldsHaveTranslateCapability(): void
