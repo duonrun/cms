@@ -73,7 +73,7 @@
 </script>
 
 <div
-	class="image relative border border-gray-300 bg-gray-100 p-1 text-center {classes}"
+	class="image {classes}"
 	class:empty={!image}
 	class:upload
 	class:multiple
@@ -84,11 +84,10 @@
 		<img
 			src={thumb}
 			alt={_('Vorschau')} />
-		<div
-			class="overlay invisible absolute top-1 right-1 bottom-1 left-1 flex flex-row items-center justify-center gap-2 opacity-0">
+		<div class="overlay">
 			{#if remove}
 				<button
-					class="text-rose-700"
+					class="overlay-action overlay-action-danger"
 					onclick={remove}>
 					<span class="ico">
 						<IcoTrash />
@@ -97,7 +96,7 @@
 				</button>
 			{/if}
 			<button
-				class="text-sky-700"
+				class="overlay-action overlay-action-primary"
 				onclick={preview}>
 				<span class="ico">
 					<IcoEye />
@@ -105,7 +104,7 @@
 				<span class="icobtn">{_('Vorschau')}</span>
 			</button>
 			<button
-				class="text-sky-700"
+				class="overlay-action overlay-action-primary"
 				onclick={edit}>
 				<span class="ico">
 					<IcoPencil />
@@ -116,26 +115,57 @@
 	{/if}
 	{#if title}
 		<button
-			class="title absolute bottom-1 left-1 mb-px ml-px truncate rounded bg-white px-1 text-xs text-gray-600"
+			class="title image-title"
 			onclick={edit}>
 			{title}
 		</button>
 	{/if}
 	{#if ext}
-		<span
-			class="absolute right-1 bottom-1 mr-px mb-px rounded bg-rose-700 px-1 text-xs text-white">
+		<span class="image-ext">
 			{ext.toUpperCase()}
 		</span>
 	{/if}
 </div>
 
 <style lang="postcss">
-	button.title {
+	.image {
+		position: relative;
+		border: 1px solid var(--gray-300);
+		background-color: var(--gray-100);
+		padding: var(--s-1);
+		text-align: center;
+	}
+
+	button.image-title {
+		position: absolute;
+		left: var(--s-1);
+		bottom: var(--s-1);
+		margin-left: var(--s-px);
+		margin-bottom: var(--s-px);
+		padding: 0 var(--s-1);
+		border-radius: var(--radius);
+		background-color: var(--white);
+		font-size: var(--font-size-xs);
+		color: var(--gray-600);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		max-width: 8rem;
 	}
+
+	.image-ext {
+		position: absolute;
+		right: var(--s-1);
+		bottom: var(--s-1);
+		margin-right: var(--s-px);
+		margin-bottom: var(--s-px);
+		border-radius: var(--radius);
+		background-color: var(--color-rose-700);
+		padding: 0 var(--s-1);
+		font-size: var(--font-size-xs);
+		color: var(--white);
+	}
+
 	.image:hover .overlay,
 	.image.hover .overlay {
 		visibility: visible;
@@ -163,18 +193,38 @@
 	}
 
 	.overlay {
+		position: absolute;
+		top: var(--s-1);
+		right: var(--s-1);
+		bottom: var(--s-1);
+		left: var(--s-1);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: var(--s-2);
+		visibility: hidden;
+		opacity: 0;
 		transition:
 			visibility 0.1s,
 			opacity 0.2s linear;
 		background: rgba(0, 0, 0, 0.3);
 	}
 
-	.overlay button {
+	.overlay-action {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
+	}
+
+	.overlay-action-danger {
+		color: var(--color-rose-700);
+	}
+
+	.overlay-action-primary {
+		color: var(--color-sky-700);
 	}
 
 	.ico {

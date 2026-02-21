@@ -70,7 +70,7 @@
 
 {#if multiple && type === 'image'}
 	<div
-		class="multiple-images flex flex-row flex-wrap justify-start gap-4 py-4"
+		class="multiple-images cms-media-list cms-media-list-images"
 		bind:this={sorterElement}>
 		{#each assets as asset, index (asset)}
 			<Image
@@ -94,7 +94,7 @@
 		{loading} />
 {:else if multiple && type === 'file'}
 	<div
-		class="multiple-files mb-3 flex flex-col gap-3"
+		class="multiple-files cms-media-list cms-media-list-files"
 		bind:this={sorterElement}>
 		{#each assets as asset, index (asset)}
 			<File
@@ -121,3 +121,23 @@
 		remove={() => remove(null)}
 		edit={() => edit(0, false)} />
 {/if}
+
+<style lang="postcss">
+	.cms-media-list {
+		display: flex;
+	}
+
+	.cms-media-list-images {
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		gap: var(--s-4);
+		padding: var(--s-4) 0;
+	}
+
+	.cms-media-list-files {
+		margin-bottom: var(--s-3);
+		flex-direction: column;
+		gap: var(--s-3);
+	}
+</style>

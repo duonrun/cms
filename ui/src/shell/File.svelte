@@ -37,12 +37,11 @@
 </script>
 
 {#if asset}
-	<div
-		class="file relative flex w-full flex-row items-center rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 pl-4 text-center text-gray-600">
+	<div class="file cms-file">
 		<IcoDocument />
-		<div class="flex-grow truncate pl-3 text-left">
-			<b class="font-semibold">{asset.file}</b>
-			<span class="inline-block pl-4">{title}</span>
+		<div class="cms-file-meta">
+			<b class="cms-file-name">{asset.file}</b>
+			<span class="cms-file-title">{title}</span>
 		</div>
 		{#if loading}
 			<div>Loading ...</div>
@@ -51,24 +50,85 @@
 		<a
 			href={`${path}/${asset.file}`}
 			target="_blank"
-			class="inline-block pl-2">
+			class="cms-file-download">
 			{_('Datei herunterladen')}
 		</a>
 
 		<button
 			onclick={edit}
-			class="text-sky-800">
-			<span class="ml-4 flex h-4 w-4 items-center">
+			class="cms-file-action cms-file-action-edit">
+			<span class="cms-file-action-icon">
 				<IcoPencil />
 			</span>
 		</button>
 
 		<button
 			onclick={remove}
-			class="text-rose-800">
-			<span class="ml-4 flex h-4 w-4 items-center">
+			class="cms-file-action cms-file-action-remove">
+			<span class="cms-file-action-icon">
 				<IcoTrash />
 			</span>
 		</button>
 	</div>
 {/if}
+
+<style lang="postcss">
+	.cms-file {
+		position: relative;
+		display: flex;
+		width: 100%;
+		flex-direction: row;
+		align-items: center;
+		border: 1px solid var(--gray-300);
+		border-radius: var(--radius-lg);
+		background-color: var(--gray-100);
+		padding: var(--s-2) var(--s-4);
+		text-align: center;
+		color: var(--gray-600);
+	}
+
+	.cms-file-meta {
+		flex: 1 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		padding-left: var(--s-3);
+		text-align: left;
+	}
+
+	.cms-file-name {
+		font-weight: 600;
+	}
+
+	.cms-file-title {
+		display: inline-block;
+		padding-left: var(--s-4);
+	}
+
+	.cms-file-download {
+		display: inline-block;
+		padding-left: var(--s-2);
+	}
+
+	.cms-file-action {
+		border: none;
+		background: transparent;
+		cursor: pointer;
+	}
+
+	.cms-file-action-edit {
+		color: var(--color-sky-700);
+	}
+
+	.cms-file-action-remove {
+		color: var(--color-rose-700);
+	}
+
+	.cms-file-action-icon {
+		margin-left: var(--s-4);
+		display: flex;
+		height: var(--s-4);
+		width: var(--s-4);
+		align-items: center;
+	}
+</style>

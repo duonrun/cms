@@ -18,7 +18,7 @@
 </script>
 
 <div
-	class="video relative w-full border border-gray-300 bg-gray-100 p-1 text-center {classes}"
+	class="video {classes}"
 	class:empty={!file}
 	class:upload>
 	{#if loading}
@@ -26,34 +26,57 @@
 	{:else}
 		<video
 			controls
-			class="w-full">
+			class="cms-video-player">
 			<track kind="captions" />
 			<source
 				src="{path}/{file.file}"
 				type="video/{ext}" />
 		</video>
-		<div class="controls mt-4">
+		<div class="controls cms-video-controls">
 			{#if remove}
 				<button
-					class="text-rose-700"
+					class="cms-video-remove"
 					onclick={remove}>
-					<span class="ico flex items-center justify-center">
+					<span class="ico cms-video-ico">
 						<IcoTrash />
 					</span>
-					<span class="icobtn text-center text-xs text-white">{_('Löschen')}</span>
+					<span class="icobtn cms-video-icobtn">{_('Löschen')}</span>
 				</button>
 			{/if}
 		</div>
 	{/if}
 	{#if ext}
-		<span
-			class="absolute right-1 bottom-1 mr-px mb-px rounded bg-rose-700 px-1 text-xs text-white">
+		<span class="cms-video-ext">
 			{ext.toUpperCase()}
 		</span>
 	{/if}
 </div>
 
 <style lang="postcss">
+	.video {
+		position: relative;
+		width: 100%;
+		border: 1px solid var(--gray-300);
+		background-color: var(--gray-100);
+		padding: var(--s-1);
+		text-align: center;
+	}
+
+	.cms-video-player {
+		width: 100%;
+	}
+
+	.cms-video-controls {
+		margin-top: var(--s-4);
+	}
+
+	.cms-video-remove {
+		color: var(--color-rose-700);
+		border: none;
+		background: transparent;
+		cursor: pointer;
+	}
+
 	.ico {
 		background-color: rgba(255, 255, 255, 0.8);
 		border-radius: 100%;
@@ -66,11 +89,33 @@
 		}
 	}
 
+	.cms-video-ico {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.icobtn {
+		text-align: center;
+		font-size: var(--font-size-xs);
+		color: var(--white);
 		text-shadow:
 			-1px 0 #000,
 			0 1px #000,
 			1px 0 #000,
 			0 -1px #000;
+	}
+
+	.cms-video-ext {
+		position: absolute;
+		right: var(--s-1);
+		bottom: var(--s-1);
+		margin-right: var(--s-px);
+		margin-bottom: var(--s-px);
+		border-radius: var(--radius);
+		background-color: var(--color-rose-700);
+		padding: 0 var(--s-1);
+		font-size: var(--font-size-xs);
+		color: var(--white);
 	}
 </style>

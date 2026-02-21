@@ -4,7 +4,7 @@
 	let { image } = $props();
 </script>
 
-<div class="image-preview flex items-center justify-center">
+<div class="image-preview">
 	<img
 		src="{image}?resize=width&w=1280"
 		alt={_('Vorschau')}
@@ -12,6 +12,12 @@
 </div>
 
 <style lang="postcss">
+	.image-preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	img {
 		max-width: 100%;
 		min-width: 40rem;
