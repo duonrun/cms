@@ -8,7 +8,6 @@ use Closure;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
 
 use function Duon\Cms\Util\escape;
@@ -24,15 +23,13 @@ final class Column
 	public function __construct(
 		public readonly string $title,
 		public readonly string|Closure $field,
-		private readonly ?Meta $meta = null,
 	) {}
 
 	public static function new(
 		string|Closure $title,
 		string|Closure $field,
-		?Meta $meta = null,
 	): self {
-		return new self($title, $field, $meta);
+		return new self($title, $field);
 	}
 
 	public function bold(bool|Closure $bold): self
@@ -89,9 +86,11 @@ final class Column
 
 				return method_exists($inner, 'title') ? $inner->title() : '';
 			case 'meta.name':
-				$meta = $this->meta ?? new Meta();
+				if ($node instanceof Node) {
+					return $node->meta->name;
+				}
 
-				return $meta->label($inner::class);
+				return basename(str_replace('\\', '/', $inner::class));
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
@@ -101,7 +100,13 @@ final class Column
 			case 'meta.deleted':
 			case 'meta.content':
 			case 'meta.handle':
-				return Factory::meta($node, explode('.', $field)[1]);
+				$key = explode('.', $field)[1];
+
+				if ($node instanceof Node) {
+					return $node->meta->get($key);
+				}
+
+				return Factory::meta($node, $key);
 			case 'meta.class':
 				return $inner::class;
 			case 'meta.classname':

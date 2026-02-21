@@ -20,13 +20,11 @@ use Duon\Cms\Node\Types;
 class Cms
 {
 	private readonly Factory $nodeFactory;
-	private readonly Types $types;
 
 	public function __construct(
 		private readonly Context $context,
-		Types $types,
+		private readonly Types $types,
 	) {
-		$this->types = $types;
 		$this->nodeFactory = new Factory($context->registry, types: $this->types);
 	}
 

@@ -12,12 +12,17 @@ use Duon\Core\Request;
 
 class Node
 {
+	public readonly Meta $meta;
+
 	public function __construct(
 		private readonly object $node,
 		private readonly array $fieldNames,
 		private readonly FieldHydrator $hydrator,
+		private readonly Types $types,
 		private readonly ?Request $request = null,
-	) {}
+	) {
+		$this->meta = new Meta($this->node, $this->types);
+	}
 
 	/**
 	 * Resolve the locale-aware URL path for this node.
@@ -52,6 +57,11 @@ class Node
 	public static function unwrap(object $object): object
 	{
 		return $object instanceof self ? $object->node : $object;
+	}
+
+	public function meta(string $key, mixed $default = null): mixed
+	{
+		return $this->meta->get($key, $default);
 	}
 
 	public function __get(string $name): ?Value

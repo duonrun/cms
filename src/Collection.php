@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Finder\Nodes;
-use Duon\Cms\Node\Factory;
 
 abstract class Collection
 {
@@ -67,10 +66,10 @@ abstract class Collection
 			}
 
 			$result[] = [
-				'uid' => Factory::meta($node, 'uid'),
-				'published' => Factory::meta($node, 'published'),
-				'locked' => Factory::meta($node, 'locked'),
-				'hidden' => Factory::meta($node, 'hidden'),
+				'uid' => $node->meta->uid,
+				'published' => $node->meta->published,
+				'locked' => $node->meta->locked,
+				'hidden' => $node->meta->hidden,
 				'columns' => $columns,
 			];
 		}
