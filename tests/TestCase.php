@@ -6,10 +6,10 @@ namespace Duon\Cms\Tests;
 
 use Duon\Cms\Config;
 use Duon\Cms\Locales;
+use Duon\Container\Container;
 use Duon\Core\Factory;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Request;
-use Duon\Registry\Registry;
 use PDO;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
@@ -128,9 +128,9 @@ class TestCase extends BaseTestCase
 		return new Request($this->psrRequest());
 	}
 
-	public function registry(): Registry
+	public function registry(): Container
 	{
-		return new Registry();
+		return new Container();
 	}
 
 	/**

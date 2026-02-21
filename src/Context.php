@@ -7,10 +7,10 @@ namespace Duon\Cms;
 use Duon\Cms\Config;
 use Duon\Cms\Locale;
 use Duon\Cms\Locales;
+use Duon\Container\Container;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Quma\Database;
-use Duon\Registry\Registry;
 
 final class Context
 {
@@ -18,7 +18,7 @@ final class Context
 		public readonly Database $db,
 		public readonly Request $request,
 		public readonly Config $config,
-		public readonly Registry $registry,
+		public readonly Container $registry,
 		public readonly Factory $factory,
 	) {}
 

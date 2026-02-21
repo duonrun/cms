@@ -9,15 +9,15 @@ use Duon\Cms\Config;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Node\Contract\ProvidesRenderContext;
 use Duon\Cms\Renderer;
+use Duon\Container\Container;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
-use Duon\Registry\Registry;
 
 class TemplateRenderer
 {
 	public function __construct(
-		private readonly Registry $registry,
+		private readonly Container $registry,
 		private readonly Factory $factory,
 		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,

@@ -6,13 +6,13 @@ namespace Duon\Cms;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Types;
+use Duon\Container\Container;
+use Duon\Container\Entry;
 use Duon\Core\App;
 use Duon\Core\Factory;
 use Duon\Core\Plugin as CorePlugin;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
-use Duon\Registry\Entry;
-use Duon\Registry\Registry;
 use Duon\Router\Route;
 use PDO;
 
@@ -22,7 +22,7 @@ class Plugin implements CorePlugin
 
 	protected readonly Config $config;
 	protected readonly Factory $factory;
-	protected readonly Registry $registry;
+	protected readonly Container $registry;
 	protected readonly Database $db;
 	protected readonly Connection $connection;
 	protected readonly Routes $routes;
@@ -44,7 +44,7 @@ class Plugin implements CorePlugin
 	public function load(App $app): void
 	{
 		$this->factory = $app->factory();
-		$this->registry = $app->registry();
+		$this->registry = $app->container();
 		$this->config = $app->config();
 		$this->collect();
 		$this->database();

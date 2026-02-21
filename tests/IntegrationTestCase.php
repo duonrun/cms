@@ -8,9 +8,9 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
+use Duon\Container\Container;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
-use Duon\Registry\Registry;
 use PDO;
 use RuntimeException;
 
@@ -131,9 +131,9 @@ class IntegrationTestCase extends TestCase
 		return new Database($this->conn());
 	}
 
-	public function registry(): Registry
+	public function registry(): Container
 	{
-		$registry = new Registry();
+		$registry = new Container();
 
 		// Register test Node classes for fixture types
 		$registry->tag(Plugin::NODE_TAG)

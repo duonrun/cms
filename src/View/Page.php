@@ -15,18 +15,18 @@ use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Util\Path;
+use Duon\Container\Container;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
 use Duon\Core\Factory;
 use Duon\Core\Response;
-use Duon\Registry\Registry;
 use ReflectionMethod;
 
 class Page
 {
 	public function __construct(
 		protected readonly Factory $factory,
-		protected readonly Registry $registry,
+		protected readonly Container $registry,
 		protected readonly Types $types,
 	) {}
 

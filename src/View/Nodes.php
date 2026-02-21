@@ -12,11 +12,11 @@ use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Types;
+use Duon\Container\Container;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
-use Duon\Registry\Registry;
 use stdClass;
 
 class Nodes
@@ -24,7 +24,7 @@ class Nodes
 	public function __construct(
 		protected readonly Request $request,
 		protected readonly Config $config,
-		protected readonly Registry $registry,
+		protected readonly Container $registry,
 		protected readonly Locales $locales,
 		protected readonly Types $types,
 	) {}

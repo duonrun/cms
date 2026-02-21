@@ -18,12 +18,12 @@ use Duon\Cms\Node\Store;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
 use Duon\Cms\Section;
+use Duon\Container\Container;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
 use Duon\Core\Factory;
 use Duon\Core\Request;
 use Duon\Core\Response;
-use Duon\Registry\Registry;
 use Duon\Wire\Creator;
 
 class Panel
@@ -33,7 +33,7 @@ class Panel
 	public function __construct(
 		protected readonly Request $request,
 		protected readonly Config $config,
-		protected readonly Registry $registry,
+		protected readonly Container $registry,
 		protected readonly Locales $locales,
 		protected readonly Types $types,
 	) {

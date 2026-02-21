@@ -15,7 +15,6 @@ use Duon\Core\App;
 use Duon\Core\Factory\Laminas;
 use Duon\Core\Plugin as CorePlugin;
 use Duon\Core\Request;
-use Duon\Registry\Registry;
 use Duon\Router\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

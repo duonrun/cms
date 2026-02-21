@@ -10,10 +10,10 @@ use Duon\Cms\Context;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Field\Schema\Registry as SchemaRegistry;
 use Duon\Cms\Node\Contract\HasInit;
+use Duon\Container\Container;
 use Duon\Core\Factory as CoreFactory;
 use Duon\Core\Request;
 use Duon\Quma\Database;
-use Duon\Registry\Registry;
 use Duon\Wire\Creator;
 use WeakMap;
 
@@ -28,7 +28,7 @@ class Factory
 	private readonly Types $types;
 
 	public function __construct(
-		private readonly Registry $registry,
+		private readonly Container $registry,
 		Types $types,
 		?SchemaRegistry $schemaRegistry = null,
 	) {
@@ -61,7 +61,7 @@ class Factory
 			Request::class => $context->request,
 			Config::class => $context->config,
 			Database::class => $context->db,
-			Registry::class => $context->registry,
+			Container::class => $context->registry,
 			CoreFactory::class => $context->factory,
 			self::class => $this,
 			TemplateRenderer::class => $templateRenderer,
