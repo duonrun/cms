@@ -65,6 +65,70 @@
 		margin-bottom: 0;
 	}
 
+	.cms-wysiwyg-toolbar {
+		position: relative;
+		z-index: 10;
+	}
+
+	.cms-wysiwyg-toolbar-open {
+		display: flex;
+	}
+
+	.cms-wysiwyg-bubble {
+		border-radius: var(--radius);
+		background-color: var(--gray-600);
+		padding: 0 var(--s-1);
+		color: var(--white);
+	}
+
+	.cms-wysiwyg-extras-source {
+		text-align: right;
+	}
+
+	.cms-wysiwyg-source-btn-compact {
+		margin-top: var(--s-1);
+		margin-bottom: var(--s-1);
+		padding: var(--s-1);
+	}
+
+	.cms-wysiwyg-source-label {
+		margin-left: var(--s-1);
+	}
+
+	.cms-wysiwyg-dropdown-wrap {
+		position: relative;
+		display: inline-block;
+		text-align: left;
+	}
+
+	.cms-wysiwyg-dropdown-icon {
+		height: 1.25rem;
+		width: 1.25rem;
+		margin-left: var(--s-2);
+		margin-right: calc(-1 * var(--s-1));
+	}
+
+	.cms-wysiwyg-dropdown-items {
+		padding: var(--s-1) 0;
+	}
+
+	.cms-wysiwyg-dropdown-item-label {
+		margin-left: var(--s-2);
+	}
+
+	.cms-wysiwyg-toolbar-btns-grow {
+		flex-grow: 1;
+	}
+
+	.cms-wysiwyg-source-btn-offset {
+		margin-left: var(--s-3);
+	}
+
+	.cms-wysiwyg-layer-base {
+		position: relative;
+		z-index: 0;
+	}
+
 	.wysiwyg-editor {
 		max-width: 100%;
 	}
