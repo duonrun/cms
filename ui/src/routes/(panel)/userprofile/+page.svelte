@@ -22,10 +22,10 @@
 	}
 </script>
 
-<div class="flex h-screen flex-col">
+<div class="cms-userprofile">
 	<div class="headerbar">
 		<NavToggle />
-		<div class="controls flex flex-row justify-end gap-4 px-4 py-6">
+		<div class="controls cms-userprofile-controls">
 			<Button
 				class="primary"
 				icon={IcoSave}
@@ -35,7 +35,7 @@
 		</div>
 	</div>
 	<Document>
-		<div class="mt-8">
+		<div class="cms-userprofile-headline">
 			<Headline>{_('Benutzerprofil')}</Headline>
 		</div>
 
@@ -64,3 +64,23 @@
 		</Pane>
 	</Document>
 </div>
+
+<style lang="postcss">
+	.cms-userprofile {
+		display: flex;
+		min-height: 100vh;
+		flex-direction: column;
+	}
+
+	.cms-userprofile-controls {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		gap: var(--s-4);
+		padding: var(--s-6) var(--s-4);
+	}
+
+	.cms-userprofile-headline {
+		margin-top: var(--s-8);
+	}
+</style>
