@@ -44,21 +44,18 @@
 	});
 </script>
 
-<div class="flex h-screen flex-col">
+<div class="cms-embedded-node">
 	{#if fields.length === 0}
-		<div class="embed-control-bar sticky border-b border-gray-300 bg-white py-4">
-			<div class="mx-auto flex w-full max-w-7xl flex-row px-8">
-				<div class="embed-status-bar flex flex-grow flex-row items-center justify-start">
-					<span class="inline-flex items-center">
+		<div class="embed-control-bar cms-embedded-control-bar">
+			<div class="cms-embedded-control-inner">
+				<div class="embed-status-bar cms-embedded-status-bar">
+					<span class="cms-embedded-status-pill">
 						<Published
 							published={node.published}
 							large />
 					</span>
 					{#if $dirty}
-						<span
-							class="dirty-indicator ml-3 rounded-full bg-rose-600 px-2 pb-px text-sm font-bold text-white">
-							!
-						</span>
+						<span class="dirty-indicator cms-embedded-dirty-indicator">!</span>
 					{/if}
 				</div>
 				<ButtonMenu
@@ -81,13 +78,15 @@
 	{/if}
 	<Document>
 		{#if fields.length > 0}
-			<Pane class="mt-6">
-				<Content
-					bind:fields={node.fields}
-					visibleFields={fields}
-					bind:node />
-			</Pane>
-			<div class="-mt-4 flex justify-end gap-2">
+			<div class="cms-embedded-pane">
+				<Pane>
+					<Content
+						bind:fields={node.fields}
+						visibleFields={fields}
+						bind:node />
+				</Pane>
+			</div>
+			<div class="cms-embedded-actions">
 				<Button
 					onclick={cancel}
 					class="danger">
@@ -126,3 +125,62 @@
 		{/if}
 	</Document>
 </div>
+
+<style lang="postcss">
+	.cms-embedded-node {
+		display: flex;
+		min-height: 100vh;
+		flex-direction: column;
+	}
+
+	.cms-embedded-control-bar {
+		position: sticky;
+		top: 0;
+		border-bottom: 1px solid var(--gray-300);
+		background-color: var(--white);
+		padding: var(--s-4) 0;
+	}
+
+	.cms-embedded-control-inner {
+		margin: 0 auto;
+		display: flex;
+		width: 100%;
+		max-width: var(--s-7xl);
+		flex-direction: row;
+		padding: 0 var(--s-8);
+	}
+
+	.cms-embedded-status-bar {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+	}
+
+	.cms-embedded-status-pill {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.cms-embedded-dirty-indicator {
+		margin-left: var(--s-3);
+		border-radius: var(--radius-full);
+		background-color: var(--color-rose-700);
+		padding: 0 var(--s-2) var(--s-px);
+		font-size: var(--font-size-sm);
+		font-weight: 700;
+		color: var(--white);
+	}
+
+	.cms-embedded-pane {
+		margin-top: var(--s-6);
+	}
+
+	.cms-embedded-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--s-2);
+		margin-top: calc(var(--s-4) * -1);
+	}
+</style>
