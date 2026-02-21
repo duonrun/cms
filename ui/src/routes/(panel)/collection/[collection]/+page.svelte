@@ -79,7 +79,7 @@
 								{#each nodes as node (node)}
 									<tr>
 										{#if data.showPublished}
-											<td class="published text-center align-middle">
+											<td class="published cms-published-cell">
 												<span class="cms-published-value">
 													<Published published={node.published} />
 												</span>
@@ -224,6 +224,11 @@
 	.cms-published-value {
 		display: inline-block;
 		padding-bottom: var(--s-1);
+	}
+
+	.cms-published-cell {
+		text-align: center;
+		vertical-align: middle;
 	}
 
 	.cms-cell-bold {

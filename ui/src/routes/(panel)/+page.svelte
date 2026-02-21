@@ -7,7 +7,7 @@
 
 {#key data.pathname}
 	<div
-		class="logo-wrapper mx-auto max-w-xl"
+		class="logo-wrapper"
 		in:fade={{ duration: 300, delay: 400 }}
 		out:fade={{ duration: 300 }}>
 		<NavLogo />
@@ -16,6 +16,9 @@
 
 <style lang="postcss">
 	.logo-wrapper {
+		margin-left: auto;
+		margin-right: auto;
+		max-width: var(--s-xl);
 		margin-top: 28vh;
 	}
 </style>

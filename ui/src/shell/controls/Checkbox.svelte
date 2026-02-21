@@ -17,8 +17,8 @@
 </script>
 
 <Field {field}>
-	<div class="cms-field-control relative flex items-start">
-		<div class="flex h-6 items-center">
+	<div class="cms-field-control cms-checkbox-wrap">
+		<div class="cms-checkbox-input-wrap">
 			<input
 				id={field.name}
 				name={field.name}
@@ -28,7 +28,7 @@
 				bind:checked={data.value}
 				{onchange} />
 		</div>
-		<div class="ml-3 text-sm leading-6">
+		<div class="cms-checkbox-content">
 			<label
 				for={field.name}
 				class="cms-checkbox-label">
@@ -42,6 +42,24 @@
 </Field>
 
 <style lang="postcss">
+	.cms-checkbox-wrap {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.cms-checkbox-input-wrap {
+		display: flex;
+		height: var(--s-6);
+		align-items: center;
+	}
+
+	.cms-checkbox-content {
+		margin-left: var(--s-3);
+		font-size: var(--font-size-sm);
+		line-height: 1.5rem;
+	}
+
 	input[type='checkbox'] {
 		border-width: 1.5px;
 	}
