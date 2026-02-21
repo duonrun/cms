@@ -1,7 +1,6 @@
 import path from 'path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import tailwindcss from '@tailwindcss/vite';
 
 const panelPath = process.env.CMS_PANEL_PATH ? process.env.CMS_PANEL_PATH : 'cms';
 const devport = process.env.CMS_DEV_PORT ? parseInt(process.env.CMS_DEV_PORT, 10) : 2009;
@@ -14,7 +13,7 @@ const target = {
 };
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [sveltekit()],
 	server: {
 		port: devport,
 		host: devhost,
