@@ -266,7 +266,7 @@
 
 {#if toolbar === 'inline'}
 	<div
-		class="wysiwyg-bubble rounded bg-gray-600 px-1 text-white"
+		class="wysiwyg-bubble cms-wysiwyg-bubble"
 		bind:this={bubble}>
 		{#if $editor}
 			<button
@@ -303,21 +303,22 @@
 	{#if editor}
 		{#if toolbar !== 'inline'}
 			<div
-				class="wysiwyg-toolbar relative z-10 {!showSource && 'flex'}"
+				class="wysiwyg-toolbar cms-wysiwyg-toolbar"
+				class:cms-wysiwyg-toolbar-open={!showSource}
 				class:tooltip-b={embed}>
 				{#if showSource}
-					<div class="wysiwyg-extras text-right">
+					<div class="wysiwyg-extras cms-wysiwyg-extras-source">
 						<button
 							onclick={toggleSource}
-							class="wysiwyg-source-btn my-1 p-1">
+							class="wysiwyg-source-btn cms-wysiwyg-source-btn-compact">
 							<IcoDocument />
-							<span class="ml-1">
+							<span class="cms-wysiwyg-source-label">
 								{_('Show content')}
 							</span>
 						</button>
 					</div>
 				{:else}
-					<div class="relative inline-block text-left">
+					<div class="cms-wysiwyg-dropdown-wrap">
 						<div class="wysiwyg-dropdown">
 							<button
 								type="button"
@@ -327,7 +328,7 @@
 								onclick={clickDropdown(null)}>
 								{_('Absatz')}
 								<svg
-									class="-mr-1 ml-2 h-5 w-5"
+									class="cms-wysiwyg-dropdown-icon"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 20 20"
 									fill="currentColor"
@@ -347,7 +348,7 @@
 								aria-labelledby="menu-button"
 								tabindex="-1">
 								<div
-									class="py-1"
+									class="cms-wysiwyg-dropdown-items"
 									role="none">
 									<button
 										onclick={clickDropdown(
@@ -358,7 +359,7 @@
 										class="wysiwyg-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 1 })}>
 										<IcoH1 />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Überschrift Level 1')}
 										</span>
 									</button>
@@ -371,7 +372,7 @@
 										class="wysiwyg-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 2 })}>
 										<IcoH2 />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Überschrift Level 2')}
 										</span>
 									</button>
@@ -384,7 +385,7 @@
 										class="wysiwyg-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 3 })}>
 										<IcoH3 />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Überschrift Level 3')}
 										</span>
 									</button>
@@ -399,7 +400,7 @@
 											$editor.getAttributes('paragraph')['class'] !==
 												'large'}>
 										<IcoParagraph />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Absatz')}
 										</span>
 									</button>
@@ -420,7 +421,7 @@
 											$editor.getAttributes('paragraph')['class'] ===
 												'large'}>
 										<IcoTextHeight />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Absatz große Schrift')}
 										</span>
 									</button>
@@ -441,7 +442,7 @@
 											$editor.getAttributes('paragraph')['class'] ===
 												'small'}>
 										<IcoTextHeight />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Absatz kleine Schrift')}
 										</span>
 									</button>
@@ -453,7 +454,7 @@
 										tabindex="-1"
 										class="wysiwyg-dropdown-item">
 										<IcoRemoveFormat />
-										<span class="ml-2">
+										<span class="cms-wysiwyg-dropdown-item-label">
 											{_('Format entfernen')}
 										</span>
 									</button>
@@ -461,7 +462,7 @@
 							</div>
 						{/if}
 					</div>
-					<div class="wysiwyg-toolbar-btns flex-grow">
+					<div class="wysiwyg-toolbar-btns cms-wysiwyg-toolbar-btns-grow">
 						<button
 							class="wysiwyg-toolbar-btn"
 							title={_('Text align left')}
@@ -600,7 +601,7 @@
 						{#if editSource}
 							<button
 								onclick={toggleSource}
-								class="wysiwyg-source-btn ml-3">
+								class="wysiwyg-source-btn cms-wysiwyg-source-btn-offset">
 								<IcoCode />
 								{_('Show source')}
 							</button>
@@ -612,13 +613,13 @@
 	{/if}
 
 	<div
-		class="wysiwyg-editor cms-wysiwyg-richtext relative z-0"
+		class="wysiwyg-editor cms-wysiwyg-richtext cms-wysiwyg-layer-base"
 		bind:this={ref}
 		data-name={name}
 		class:hide={showSource}>
 	</div>
 	<div
-		class="wysiwyg-source cms-wysiwyg-source relative z-0"
+		class="wysiwyg-source cms-wysiwyg-source cms-wysiwyg-layer-base"
 		class:hide={!showSource}>
 		<textarea
 			onkeyup={changeSource}
