@@ -12,12 +12,12 @@
 </script>
 
 <div
-	class="cms-field field {classes}"
+	class="cms-field {classes}"
 	class:required={field.required}
 	data-required={field.required ? 'true' : undefined}>
 	{@render children()}
 	{#if field.description}
-		<div class="cms-field-description field-description">
+		<div class="cms-field-description">
 			{field.description}
 		</div>
 	{/if}

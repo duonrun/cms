@@ -229,7 +229,8 @@
 				ondrop={preventDefault(onFile(getFilesFromDrop))}
 				ondragover={preventDefault(startDragging)}
 				ondragleave={preventDefault(stopDragging)}>
-				<div class="label flex flex-row items-center justify-center gap-2 text-gray-600">
+				<div
+					class="cms-field-label flex flex-row items-center justify-center gap-2 text-gray-600">
 					<span class="inline-block h-6 w-6"><IcoUpload /></span>
 					{_('Neue Dateien per Drag and Drop hier einfügen oder')}
 					<u>{_('auswählen')}</u>

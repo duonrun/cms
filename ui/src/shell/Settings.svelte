@@ -51,7 +51,7 @@
 		<div class="paths mb-8">
 			{#each $system.locales as locale (locale)}
 				<div class="path">
-					<div class="label">{locale.title}:</div>
+					<div class="cms-field-label">{locale.title}:</div>
 					<div class="value">
 						<input
 							type="text"
@@ -87,7 +87,7 @@
 					bind:value={node.hidden} />
 			</div>
 			<div class="mt-4 flex flex-row">
-				<div class="label">{_('Internal Document-ID')}:</div>
+				<div class="cms-field-label">{_('Internal Document-ID')}:</div>
 				<div class="value pl-4">{node.uid}</div>
 			</div>
 		</div>

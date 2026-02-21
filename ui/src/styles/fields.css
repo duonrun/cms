@@ -2,28 +2,24 @@
 	display: block;
 }
 
-.cms-field,
-.field {
+.cms-field {
 	padding: var(--s-2) var(--s-4);
 }
 
 @media (min-width: 640px) {
-	.cms-field,
-	.field {
+	.cms-field {
 		padding: var(--s-3) var(--s-6);
 	}
 }
 
 @media (min-width: 768px) {
-	.cms-field,
-	.field {
+	.cms-field {
 		padding: var(--s-4) var(--s-8);
 	}
 }
 
 .cms-field-label,
-label,
-.label {
+label {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -34,8 +30,7 @@ label,
 }
 
 .cms-field-label div,
-label div,
-.label div {
+label div {
 	flex: 1 1 auto;
 	min-width: 0;
 }
@@ -164,8 +159,7 @@ textarea[required] {
 }
 
 .cms-field-description,
-.cms-field-help,
-.field-description {
+.cms-field-help {
 	padding-top: var(--s-1);
 	padding-left: var(--s-px);
 	font-size: var(--font-size-sm);
