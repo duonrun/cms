@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Integration;
 
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\IntegrationTestCase;
 
 final class FinderTest extends IntegrationTestCase
 {
-	private Meta $meta;
+	private Types $types;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->meta = new Meta();
+		$this->types = new Types();
 
 		$this->loadFixtures('basic-types', 'sample-nodes');
 	}
@@ -29,7 +29,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
-			$this->assertEquals('test-article', $this->meta->handle(Node::unwrap($node)::class));
+			$this->assertEquals('test-article', $this->types->handle(Node::unwrap($node)::class));
 		}
 	}
 
@@ -78,7 +78,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertNotEmpty($nodes);
 
 		foreach ($nodes as $node) {
-			$this->assertTrue($this->meta->routable(Node::unwrap($node)::class));
+			$this->assertTrue($this->types->routable(Node::unwrap($node)::class));
 		}
 	}
 
@@ -109,7 +109,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeHandles = [];
 
 		foreach ($nodes as $node) {
-			$typeHandles[] = $this->meta->handle(Node::unwrap($node)::class);
+			$typeHandles[] = $this->types->handle(Node::unwrap($node)::class);
 		}
 
 		$uniqueTypes = array_unique($typeHandles);

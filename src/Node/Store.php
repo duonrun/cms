@@ -17,7 +17,7 @@ class Store
 	public function __construct(
 		private readonly Database $db,
 		private readonly PathManager $pathManager,
-		private readonly Meta $meta = new Meta(),
+		private readonly Types $types,
 	) {}
 
 	public function save(object $node, array $data, Request $request, Locales $locales): array
@@ -112,7 +112,7 @@ class Store
 	{
 		$nodeId = $this->persistNode($node, $data, $editor);
 
-		if ($this->meta->routable($node::class)) {
+		if ($this->types->routable($node::class)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -120,7 +120,7 @@ class Store
 	private function persistNode(object $node, array $data, int $editor): int
 	{
 		$class = $node::class;
-		$handle = $this->meta->handle($class);
+		$handle = $this->types->handle($class);
 		$this->ensureTypeExists($handle);
 
 		return (int) $this->db->nodes->save([

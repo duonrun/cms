@@ -15,7 +15,7 @@ class Serializer
 {
 	public function __construct(
 		private readonly FieldHydrator $hydrator,
-		private readonly Meta $meta = new Meta(),
+		private readonly Types $types,
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array
@@ -78,7 +78,7 @@ class Serializer
 		}
 
 		$class = $node::class;
-		$schema = $this->meta->forClass($class);
+		$schema = $this->types->forClass($class);
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
@@ -140,7 +140,7 @@ class Serializer
 			return $node->title();
 		}
 
-		$titleField = $this->meta->titleField($node::class);
+		$titleField = $this->types->titleField($node::class);
 
 		if ($titleField) {
 			$field = $this->hydrator->getField($node, $titleField);
@@ -156,7 +156,7 @@ class Serializer
 	 */
 	private function order(object $node, array $fieldNames): array
 	{
-		$metaOrder = $this->meta->fieldOrder($node::class);
+		$metaOrder = $this->types->fieldOrder($node::class);
 
 		if ($metaOrder !== null) {
 			return $metaOrder;
@@ -175,7 +175,7 @@ class Serializer
 	 */
 	private function resolveType(string $class, ?string $handle = null): array
 	{
-		$schema = $this->meta->forClass($class);
+		$schema = $this->types->forClass($class);
 
 		return array_merge([
 			'handle' => $handle ?? $schema->handle,
@@ -193,6 +193,6 @@ class Serializer
 			return $method->invoke($node);
 		}
 
-		return $this->meta->deletable($node::class);
+		return $this->types->deletable($node::class);
 	}
 }

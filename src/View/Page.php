@@ -13,6 +13,7 @@ use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\TemplateRenderer;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Util\Path;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Exception\HttpNotFound;
@@ -26,6 +27,7 @@ class Page
 	public function __construct(
 		protected readonly Factory $factory,
 		protected readonly Registry $registry,
+		protected readonly Types $types,
 	) {}
 
 	public function catchall(Context $context, Cms $cms): Response
@@ -90,7 +92,7 @@ class Page
 		}
 
 		$hydrator = $cms->nodeFactory()->hydrator();
-		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator);
+		$renderer = new TemplateRenderer($this->registry, $this->factory, $hydrator, $this->types);
 
 		return $renderer->renderPage(
 			$node,
@@ -109,7 +111,7 @@ class Page
 			$data = $inner->read();
 		} else {
 			$hydrator = $cms->nodeFactory()->hydrator();
-			$serializer = new Serializer($hydrator);
+			$serializer = new Serializer($hydrator, $this->types);
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),

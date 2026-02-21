@@ -11,6 +11,7 @@ use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Factory as NodeFactory;
 use Duon\Cms\Node\Serializer;
+use Duon\Cms\Node\Types;
 use Duon\Core\Exception\HttpBadRequest;
 use Duon\Core\Factory;
 use Duon\Core\Request;
@@ -25,6 +26,7 @@ class Nodes
 		protected readonly Config $config,
 		protected readonly Registry $registry,
 		protected readonly Locales $locales,
+		protected readonly Types $types,
 	) {}
 
 	#[Permission('panel')]
@@ -53,7 +55,7 @@ class Nodes
 
 		$nodeFactory = $cms->nodeFactory();
 		$hydrator = $nodeFactory->hydrator();
-		$serializer = new Serializer($hydrator);
+		$serializer = new Serializer($hydrator, $this->types);
 		$result = [];
 
 		foreach (

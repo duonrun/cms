@@ -8,8 +8,8 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\TemplateRenderer;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
@@ -22,7 +22,7 @@ class Render
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
-		private readonly Meta $meta,
+		private readonly Types $types,
 		string $uid,
 		private readonly array $templateContext = [],
 		?bool $deleted = false,
@@ -40,7 +40,7 @@ class Render
 			->entry($data['handle'])
 			->definition();
 
-		if (!$this->meta->renderable($class)) {
+		if (!$this->types->renderable($class)) {
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 
@@ -55,6 +55,7 @@ class Render
 				$this->context->registry,
 				$this->context->factory,
 				$this->nodeFactory->hydrator(),
+				$this->types,
 			);
 
 			return $renderer->renderNode(

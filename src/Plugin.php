@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms;
 
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Meta;
+use Duon\Cms\Node\Types;
 use Duon\Core\App;
 use Duon\Core\Factory;
 use Duon\Core\Plugin as CorePlugin;
@@ -26,7 +26,7 @@ class Plugin implements CorePlugin
 	protected readonly Database $db;
 	protected readonly Connection $connection;
 	protected readonly Routes $routes;
-	protected readonly Meta $meta;
+	protected readonly Types $types;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -36,9 +36,9 @@ class Plugin implements CorePlugin
 
 	public function __construct(
 		protected readonly bool $sessionEnabled = false,
-		?Meta $meta = null,
+		?Types $types = null,
 	) {
-		$this->meta = $meta ?? new Meta();
+		$this->types = $types ?? new Types();
 	}
 
 	public function load(App $app): void
@@ -53,7 +53,7 @@ class Plugin implements CorePlugin
 		$this->registry->add(Connection::class, $this->connection);
 		$this->registry->add(Database::class, $this->db);
 		$this->registry->add(Factory::class, $this->factory);
-		$this->registry->add(Meta::class, $this->meta);
+		$this->registry->add(Types::class, $this->types);
 
 		$this->routes = new Routes($app->config(), $this->db, $this->factory, $this->sessionEnabled);
 		$this->routes->add($app);
@@ -96,14 +96,14 @@ class Plugin implements CorePlugin
 		$this->collections[$class::handle()] = $class;
 	}
 
-	public function meta(): Meta
+	public function meta(): Types
 	{
-		return $this->meta;
+		return $this->types;
 	}
 
 	public function node(string $class): void
 	{
-		$handle = $this->meta->handle($class);
+		$handle = $this->types->handle($class);
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);

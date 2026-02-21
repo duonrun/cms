@@ -7,8 +7,8 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Meta;
 use Duon\Cms\Node\Node as NodeWrapper;
+use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 
@@ -18,7 +18,7 @@ class Node
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
-		private readonly Meta $meta = new Meta(),
+		private readonly Types $types,
 	) {}
 
 	public function byPath(
@@ -65,7 +65,7 @@ class Node
 			->entry($data['handle'])
 			->definition();
 
-		if ($this->meta->isNode($class)) {
+		if ($this->types->isNode($class)) {
 			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
 
 			return $this->nodeFactory->proxy($node, $this->context->request);
