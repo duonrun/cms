@@ -19,10 +19,10 @@
 	}
 </script>
 
-<span class="locale-tabs flex-shrink">
+<span class="locale-tabs">
 	{#each locales as locale (locale)}
 		<button
-			class="locale-tab text-sm"
+			class="locale-tab"
 			class:active={locale.id === lang}
 			onclick={() => (lang = locale.id)}>
 			{locale.id.toUpperCase()}
@@ -33,6 +33,7 @@
 <style lang="postcss">
 	.locale-tab {
 		display: inline-block;
+		font-size: var(--font-size-sm);
 		box-shadow: 0;
 		padding: 0 0.5rem;
 		font-weight: normal;
@@ -42,5 +43,9 @@
 			background-color: var(--color-gray-200);
 			color: var(--color-black);
 		}
+	}
+
+	.locale-tabs {
+		flex-shrink: 0;
 	}
 </style>

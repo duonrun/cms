@@ -50,7 +50,7 @@
 
 <div class="headerbar">
 	<NavToggle />
-	<div class="controls flex flex-row justify-end gap-4 px-4 py-6">
+	<div class="controls cms-node-controls">
 		{#if deletable && !locked}
 			<Button
 				class="danger"
@@ -86,3 +86,13 @@
 		{/if}
 	</div>
 </div>
+
+<style lang="postcss">
+	.cms-node-controls {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		gap: var(--s-4);
+		padding: var(--s-6) var(--s-4);
+	}
+</style>

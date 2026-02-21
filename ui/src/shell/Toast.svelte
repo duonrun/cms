@@ -8,11 +8,24 @@
 	let { toast }: Props = $props();
 </script>
 
-<div class="text-left text-white">
+<div class="cms-toast-content">
 	{#if toast.title}
-		<h3 class="mt-3 mb-1 font-semibold">{toast.title}</h3>
+		<h3 class="cms-toast-title">{toast.title}</h3>
 	{/if}
 	{#if toast.message}
 		<p>{toast.message}</p>
 	{/if}
 </div>
+
+<style lang="postcss">
+	.cms-toast-content {
+		text-align: left;
+		color: var(--white);
+	}
+
+	.cms-toast-title {
+		margin-top: var(--s-3);
+		margin-bottom: var(--s-1);
+		font-weight: 600;
+	}
+</style>
