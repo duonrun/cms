@@ -612,19 +612,19 @@
 	{/if}
 
 	<div
-		class="wysiwyg-editor prose relative z-0"
+		class="wysiwyg-editor cms-wysiwyg-richtext relative z-0"
 		bind:this={ref}
 		data-name={name}
 		class:hide={showSource}>
 	</div>
 	<div
-		class="wysiwyg-source relative z-0"
+		class="wysiwyg-source cms-wysiwyg-source relative z-0"
 		class:hide={!showSource}>
 		<textarea
 			onkeyup={changeSource}
 			{name}
 			bind:value
-			class="h-64 w-full border-0 bg-gray-700 p-1 font-mono text-white">
+			class="cms-wysiwyg-source-input">
 		</textarea>
 	</div>
 </div>

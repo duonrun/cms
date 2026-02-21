@@ -107,7 +107,7 @@
 					</div>
 					<div class="mt-4">
 						<input
-							class="form-input"
+							class="cms-input"
 							type="text"
 							bind:value />
 					</div>
@@ -124,12 +124,12 @@
 					name="modallink_target"
 					type="checkbox"
 					bind:checked={blank}
-					class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600" />
+					class="cms-checkbox" />
 			</div>
 			<div class="ml-3 text-sm leading-6">
 				<label
 					for="modallink_target"
-					class="font-semibold text-gray-900">
+					class="cms-checkbox-label">
 					{_('In neuem Fenster öffnen')}
 				</label>
 			</div>
