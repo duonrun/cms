@@ -35,10 +35,10 @@
 	}
 </script>
 
-<div class="headerbar searchbar">
+<div class="headerbar cms-searchbar">
 	<NavToggle />
-	<div class="controls">
-		<div>
+	<div class="cms-searchbar-controls">
+		<div class="cms-searchbar-input-wrap">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 20 20"
@@ -55,6 +55,7 @@
 		</div>
 		{#if blueprints.length > 0}
 			<button
+				class="cms-searchbar-create"
 				onclick={create}
 				aria-label="create">
 				<svg
@@ -72,68 +73,68 @@
 </div>
 
 <style lang="postcss">
-	.searchbar {
+	.cms-searchbar {
 		justify-content: center;
 	}
 
-	.controls {
+	.cms-searchbar-controls {
 		display: flex;
 		width: 100%;
 		max-width: var(--s-6xl);
 		margin: 0 var(--s-4) 0 var(--s-14);
+	}
 
-		& > div {
-			display: flex;
-			flex-grow: 1;
-			align-items: center;
+	.cms-searchbar-input-wrap {
+		display: flex;
+		flex-grow: 1;
+		align-items: center;
 
-			border: var(--border);
-			border-radius: var(--radius-full);
+		border: var(--border);
+		border-radius: var(--radius-full);
 
-			svg {
-				height: var(--s-5);
-				width: var(--s-5);
-				margin-left: var(--s-3);
-				color: var(--gray-400);
-			}
-
-			input {
-				flex-grow: 1;
-				height: var(--s-10);
-				box-shadow: none;
-				border: 0;
-				border-radius: 0 var(--radius-full) var(--radius-full) 0;
-
-				&:focus {
-					outline: none;
-				}
-			}
+		svg {
+			height: var(--s-5);
+			width: var(--s-5);
+			margin-left: var(--s-3);
+			color: var(--gray-400);
 		}
 
-		button {
-			display: flex;
-			justify-content: center;
-			align-items: center;
+		input {
+			flex-grow: 1;
 			height: var(--s-10);
-			width: var(--s-10);
-			padding: 0;
-			margin-left: var(--s-2);
+			box-shadow: none;
+			border: 0;
+			border-radius: 0 var(--radius-full) var(--radius-full) 0;
 
-			border-radius: var(--radius-full);
-			border: 1px solid var(--color-gray-400);
-			color: var(--color-gray-500);
-
-			svg {
-				margin: 0;
-				box-shadow: none;
-				height: var(--s-6);
-				width: var(--s-6);
+			&:focus {
+				outline: none;
 			}
 		}
 	}
 
+	.cms-searchbar-create {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: var(--s-10);
+		width: var(--s-10);
+		padding: 0;
+		margin-left: var(--s-2);
+
+		border-radius: var(--radius-full);
+		border: 1px solid var(--color-gray-400);
+		color: var(--color-gray-500);
+
+		svg {
+			margin: 0;
+			box-shadow: none;
+			height: var(--s-6);
+			width: var(--s-6);
+		}
+	}
+
 	@media (min-width: 1024px) {
-		.controls {
+		.cms-searchbar-controls {
 			margin: 0 var(--s-16);
 		}
 	}
