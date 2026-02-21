@@ -51,20 +51,20 @@
 	let nodes = $derived(data.nodes.filter(search(searchTerm)));
 </script>
 
-<div class="flex h-full flex-col">
+<div class="cms-collection-page">
 	<Searchbar
 		bind:searchTerm
 		collectionSlug={data.slug}
 		blueprints={data.blueprints} />
-	<h1 class="px-8 py-4 text-xl font-semibold">
+	<h1 class="cms-collection-title">
 		{data.name}
 	</h1>
-	<div class="flex-1 overflow-y-auto border-gray-200 px-4 sm:px-6 lg:px-8">
-		<div class="flow-root">
-			<div class="mx-8 mb-8">
-				<div class="-mx-4 ring-1 ring-black/5 sm:-mx-6 lg:-mx-8">
-					<div class="inline-block min-w-full align-middle shadow">
-						<table class="min-w-full border-separate border-spacing-0 bg-white">
+	<div class="cms-collection-scroll">
+		<div class="cms-collection-flow">
+			<div class="cms-collection-wrap">
+				<div class="cms-collection-ring">
+					<div class="cms-collection-table-wrap">
+						<table class="cms-collection-table">
 							<thead>
 								<tr>
 									{#if data.showPublished}
@@ -80,15 +80,15 @@
 									<tr>
 										{#if data.showPublished}
 											<td class="published text-center align-middle">
-												<span class="inline-block pb-1">
+												<span class="cms-published-value">
 													<Published published={node.published} />
 												</span>
 											</td>
 										{/if}
 										{#each node.columns as column (column)}
 											<td
-												class:font-semibold={column.bold}
-												class:font-italic={column.italic}>
+												class:cms-cell-bold={column.bold}
+												class:cms-cell-italic={column.italic}>
 												<Link href="collection/{data.slug}/{node.uid}">
 													{#if column.date}
 														{fmtDate(column.value.toString())}
@@ -110,6 +110,51 @@
 </div>
 
 <style lang="postcss">
+	.cms-collection-page {
+		display: flex;
+		height: 100%;
+		flex-direction: column;
+	}
+
+	.cms-collection-title {
+		padding: var(--s-4) var(--s-8);
+		font-size: var(--text-xl);
+		font-weight: 600;
+	}
+
+	.cms-collection-scroll {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		padding: 0 var(--s-4);
+	}
+
+	.cms-collection-flow {
+		display: flow-root;
+	}
+
+	.cms-collection-wrap {
+		margin: 0 var(--s-8) var(--s-8);
+	}
+
+	.cms-collection-ring {
+		margin: 0 calc(var(--s-4) * -1);
+		border: 1px solid color-mix(in srgb, var(--color-black) 5%, transparent);
+	}
+
+	.cms-collection-table-wrap {
+		display: inline-block;
+		min-width: 100%;
+		vertical-align: middle;
+		box-shadow: var(--shadow);
+	}
+
+	.cms-collection-table {
+		min-width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		background-color: var(--white);
+	}
+
 	th,
 	td {
 		padding-left: var(--s-3);
@@ -119,6 +164,14 @@
 	}
 
 	@media (min-width: var(--breakpoint-sm)) {
+		.cms-collection-scroll {
+			padding: 0 var(--s-6);
+		}
+
+		.cms-collection-ring {
+			margin: 0 calc(var(--s-6) * -1);
+		}
+
 		th,
 		td {
 			padding-left: var(--s-4);
@@ -127,6 +180,14 @@
 	}
 
 	@media (min-width: var(--breakpoint-lg)) {
+		.cms-collection-scroll {
+			padding: 0 var(--s-8);
+		}
+
+		.cms-collection-ring {
+			margin: 0 calc(var(--s-8) * -1);
+		}
+
 		th,
 		td {
 			padding-left: var(--s-6);
@@ -158,6 +219,19 @@
 
 	.published {
 		padding-right: 0;
+	}
+
+	.cms-published-value {
+		display: inline-block;
+		padding-bottom: var(--s-1);
+	}
+
+	.cms-cell-bold {
+		font-weight: 600;
+	}
+
+	.cms-cell-italic {
+		font-style: italic;
 	}
 
 	:global(.search-hl) {
