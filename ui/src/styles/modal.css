@@ -1,45 +1,149 @@
+.cms-modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgb(0 0 0 / 20%);
+}
+
+.cms-modal-container {
+	position: relative;
+	width: 100%;
+	max-width: 48rem;
+	border-radius: var(--radius-md);
+}
+
+.cms-modal-close {
+	position: absolute;
+	top: calc(var(--s-2) * -1);
+	right: calc(var(--s-2) * -1);
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: var(--radius-full);
+	background-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	color: var(--white);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+}
+
+.cms-modal-header,
+.cms-modal-body,
+.cms-modal-footer {
+	padding: var(--s-4);
+}
+
+@media (min-width: 768px) {
+	.cms-modal-header,
+	.cms-modal-body,
+	.cms-modal-footer {
+		padding: var(--s-8);
+	}
+}
+
+.cms-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: var(--border);
+	border-top-left-radius: var(--radius-md);
+	border-top-right-radius: var(--radius-md);
+	gap: var(--s-3);
+}
+
+.cms-modal-header-title {
+	margin: 0;
+	font-size: var(--text-xl);
+	font-weight: 600;
+	line-height: 1.5;
+}
+
+.cms-modal-header-close {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: var(--radius-lg);
+	background: transparent;
+	font-size: var(--font-size-sm);
+}
+
+.cms-modal-header-close-icon {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.cms-modal-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--s-4);
+}
+
+.cms-modal-footer {
+	border-top: var(--border);
+	border-bottom-left-radius: var(--radius-md);
+	border-bottom-right-radius: var(--radius-md);
+}
+
 .modal {
 	width: 100%;
+}
 
-	h2 {
-		@apply -mx-4 -mt-4 mb-0 px-6 py-4 text-lg;
-		@apply border-b border-gray-300;
-	}
+.modal h2 {
+	margin: calc(var(--s-4) * -1) calc(var(--s-4) * -1) 0;
+	padding: var(--s-4) var(--s-6);
+	font-size: var(--text-lg);
+	border-bottom: var(--border);
+}
 
-	p {
-		@apply mb-6;
+.modal p {
+	margin-bottom: var(--s-6);
+}
 
-		&:last-child {
-			@apply mb-0;
-		}
-	}
+.modal p:last-child {
+	margin-bottom: 0;
+}
 
-	.highlight {
-		@apply text-blue-600;
-	}
+.modal .highlight {
+	color: var(--color-sky-700);
+}
 
-	.body {
-		@apply -mx-4 p-6;
-		@apply border-b border-gray-300;
-	}
+.modal .body {
+	margin-left: calc(var(--s-4) * -1);
+	margin-right: calc(var(--s-4) * -1);
+	padding: var(--s-6);
+	border-bottom: var(--border);
+}
 
-	.controls {
-		@apply -mx-4 flex flex-row justify-end gap-2 px-6 pt-6;
-	}
+.modal .controls {
+	margin-left: calc(var(--s-4) * -1);
+	margin-right: calc(var(--s-4) * -1);
+	padding: var(--s-6) var(--s-6) 0;
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--s-2);
+}
 
-	.modal-close.close {
-		@apply border-rose-600 bg-rose-600 text-white;
-		box-shadow: none;
-		top: -0.6rem;
-		right: -0.6rem;
+.modal .modal-close.close {
+	border: 1px solid var(--color-rose-700);
+	background-color: var(--color-rose-700);
+	color: var(--white);
+	box-shadow: none;
+	top: -0.6rem;
+	right: -0.6rem;
+}
 
-		&:hover {
-			@apply border-rose-500 bg-rose-500;
-		}
+.modal .modal-close.close:hover {
+	border-color: color-mix(in srgb, var(--color-rose-700) 86%, white);
+	background-color: color-mix(in srgb, var(--color-rose-700) 86%, white);
+}
 
-		&::before,
-		&::after {
-			@apply bg-white;
-		}
-	}
+.modal .modal-close.close::before,
+.modal .modal-close.close::after {
+	background-color: var(--white);
 }

@@ -1,30 +1,135 @@
-.danger {
-	@apply bg-rose-800 text-white hover:bg-rose-700;
+.cms-button,
+button.primary,
+button.secondary,
+button.danger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--s-2);
+	padding: 0.625rem 0.875rem;
+	border: 0;
+	border-radius: var(--radius-md);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	line-height: 1.25rem;
+	text-decoration: none;
+	box-shadow: var(--shadow-sm);
+	transition:
+		background-color 120ms ease,
+		color 120ms ease,
+		opacity 120ms ease,
+		transform 120ms ease;
 }
 
+.cms-button-small {
+	gap: var(--s-1-5);
+	padding: 0.5rem 0.75rem;
+}
+
+.cms-button:focus-visible,
+button.primary:focus-visible,
+button.secondary:focus-visible,
+button.danger:focus-visible {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+}
+
+.cms-button-primary,
 .primary {
-	@apply bg-emerald-800 text-white;
+	background-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
+	color: var(--white);
 }
 
+.cms-button-primary:hover,
+.primary:hover {
+	background-color: color-mix(in srgb, var(--color-emerald-600) 82%, black);
+}
+
+.cms-button-primary:focus-visible,
+button.primary:focus-visible {
+	outline-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
+}
+
+.cms-button-secondary,
 .secondary {
-	@apply bg-sky-800 text-white;
+	background-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
+	color: var(--white);
 }
 
-button {
-	&[disabled] {
-		cursor: not-allowed;
-		opacity: 0.3;
-	}
+.cms-button-secondary:hover,
+.secondary:hover {
+	background-color: color-mix(in srgb, var(--color-sky-700) 88%, black);
+}
 
-	&.danger {
-		@apply focus-visible:outline-rose-600;
-	}
+.cms-button-secondary:focus-visible,
+button.secondary:focus-visible {
+	outline-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
+}
 
-	&.primary {
-		@apply focus-visible:outline-emerald-800;
-	}
+.cms-button-danger,
+.danger {
+	background-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	color: var(--white);
+}
 
-	&.secondary {
-		@apply focus-visible:outline-sky-800;
-	}
+.cms-button-danger:hover,
+.danger:hover {
+	background-color: color-mix(in srgb, var(--color-rose-700) 88%, black);
+}
+
+.cms-button-danger:focus-visible,
+button.danger:focus-visible {
+	outline-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+}
+
+.cms-button[disabled],
+button[disabled] {
+	cursor: not-allowed;
+	opacity: 0.3;
+}
+
+.cms-button-menu {
+	position: relative;
+	display: inline-flex;
+	border-radius: var(--radius-md);
+	box-shadow: var(--shadow-sm);
+}
+
+.cms-button-menu-main {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.cms-button-menu-toggle {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	border-left: var(--border);
+	padding: 0.625rem;
+	color: var(--gray-400);
+}
+
+.cms-button-menu-panel {
+	position: absolute;
+	right: 0;
+	z-index: 10;
+	margin-top: var(--s-2);
+	margin-right: calc(var(--s-px) * -1);
+	width: 16rem;
+	transform-origin: top right;
+	border-radius: var(--radius-md);
+	background-color: var(--white);
+	box-shadow: var(--shadow-lg);
+	border: 1px solid color-mix(in srgb, var(--gray-900) 6%, transparent);
+}
+
+.cms-button-menu-list {
+	padding: var(--s-1) 0;
+}
+
+.cms-button-menu-entry {
+	display: block;
+	width: 100%;
+	padding: 0.5rem var(--s-4);
+	font-size: var(--font-size-sm);
+	text-align: left;
 }

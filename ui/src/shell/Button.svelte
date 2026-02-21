@@ -5,6 +5,7 @@
 
 	type Props = {
 		class?: string;
+		variant?: 'primary' | 'secondary' | 'danger';
 		icon?: Component;
 		disabled?: boolean;
 		type?: 'submit' | 'button' | 'reset';
@@ -14,6 +15,7 @@
 
 	let {
 		class: cls = 'primary',
+		variant = 'primary',
 		icon = null,
 		disabled = false,
 		type = 'button',
@@ -24,15 +26,13 @@
 </script>
 
 <button
-	class="{cls} {small
-		? 'gap-x-1.5 px-3 py-2'
-		: 'gap-x-2 px-3.5 py-2.5'} inline-flex items-center justify-center rounded-md text-sm font-semibold shadow-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+	class="cms-button cms-button-{variant} {small ? 'cms-button-small' : ''} {cls}"
 	{type}
 	{...attributes}
 	{disabled}>
 	{#if icon}
 		{@const Icon = icon}
-		<span class="-ml-0.5 h-5 w-5">
+		<span class="h-5 w-5">
 			<Icon />
 		</span>
 	{/if}

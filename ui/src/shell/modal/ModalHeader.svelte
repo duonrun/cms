@@ -12,18 +12,18 @@
 	} = $props();
 </script>
 
-<div class="modal-header flex items-center justify-between rounded-t border-b p-4 md:p-8 {classes}">
-	<h3 class="modal-header-title text-xl font-semibold">
+<div class="modal-header cms-modal-header {classes}">
+	<h3 class="modal-header-title cms-modal-header-title">
 		{@render children()}
 	</h3>
 	{#if close}
 		<button
 			type="button"
-			class="modal-close-button ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm"
+			class="modal-close-button cms-modal-header-close"
 			data-modal-hide="default-modal"
 			onclick={close}>
 			<svg
-				class="h-3 w-3"
+				class="cms-modal-header-close-icon"
 				aria-hidden="true"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -45,7 +45,7 @@
 		color: var(--muted-text-color);
 
 		&:hover {
-			brightnetss: filter(90%);
+			filter: brightness(90%);
 		}
 	}
 </style>

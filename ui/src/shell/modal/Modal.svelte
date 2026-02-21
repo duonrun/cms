@@ -26,17 +26,16 @@
 </script>
 
 {#if Content}
-	<div
-		class="modal fixed top-0 right-0 bottom-0 left-0 z-50 flex items-center justify-center bg-black/20">
+	<div class="modal cms-modal-overlay">
 		<div
-			class="modal-container relative w-full max-w-3xl rounded-md"
+			class="modal-container cms-modal-container"
 			style={css}>
 			{#if !options.hideClose}
 				<button
+					class="cms-modal-close"
 					onclick={close}
 					aria-label="close">
-					<span
-						class="absolute -top-2 -right-2 h-6 w-6 cursor-pointer rounded-full bg-red-600 text-white">
+					<span>
 						<IcoTimes />
 					</span>
 				</button>
