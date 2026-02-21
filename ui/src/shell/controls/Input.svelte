@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class="field"
+	class="cms-field field"
 	class:required>
 	<Label
 		of={id}
@@ -37,11 +37,12 @@
 		bind:lang>
 		{label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		{#if translate}
 			{#each $system.locales as locale}
 				{#if locale.id === lang}
 					<input
+						class="cms-input"
 						{id}
 						name={id}
 						type="text"
@@ -53,6 +54,7 @@
 			{/each}
 		{:else}
 			<input
+				class="cms-input"
 				{id}
 				name={id}
 				type="text"
@@ -63,7 +65,7 @@
 		{/if}
 	</div>
 	{#if description}
-		<div class="mt-1 text-sm text-gray-400">
+		<div class="cms-field-description">
 			{description}
 		</div>
 	{/if}

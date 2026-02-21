@@ -27,12 +27,12 @@
 		bind:lang>
 		{field.label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		{#if field.translate}
 			{#each $system.locales as locale}
 				{#if locale.id === lang}
 					<textarea
-						class="iframe"
+						class="cms-textarea iframe"
 						id={field.name}
 						name={field.name}
 						required={field.required}
@@ -43,7 +43,7 @@
 			{/each}
 		{:else}
 			<textarea
-				class="iframe"
+				class="cms-textarea iframe"
 				id={field.name}
 				name={field.name}
 				required={field.required}

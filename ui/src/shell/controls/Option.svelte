@@ -22,8 +22,9 @@
 	<Label of={field.name}>
 		{field.label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		<select
+			class="cms-select"
 			id={field.name}
 			name={field.name}
 			required={field.required}

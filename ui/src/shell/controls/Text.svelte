@@ -28,11 +28,12 @@
 		bind:lang>
 		{field.label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		{#if field.translate}
 			{#each $system.locales as locale}
 				{#if locale.id === lang}
 					<input
+						class="cms-input"
 						id={field.name}
 						name={field.name}
 						type="text"
@@ -44,6 +45,7 @@
 			{/each}
 		{:else}
 			<input
+				class="cms-input"
 				id={field.name}
 				name={field.name}
 				type="text"

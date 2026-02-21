@@ -22,8 +22,9 @@
 	<Label of={field.name}>
 		{field.label}
 	</Label>
-	<div class="mt-2">
+	<div class="cms-field-control">
 		<input
+			class="cms-input"
 			id={field.name}
 			name={field.name}
 			type="date"
