@@ -45,6 +45,12 @@
 
 	function createDefaultValue(subfield: FieldType): GenericFieldData {
 		const isTranslatable = subfield.translate === true;
+		const codeSyntaxes =
+			'syntaxes' in subfield &&
+			Array.isArray(subfield.syntaxes) &&
+			subfield.syntaxes.length > 0
+				? subfield.syntaxes
+				: ['plaintext'];
 
 		// Return appropriate default structure based on field type
 		const typeMap: Record<string, () => GenericFieldData> = {
@@ -58,6 +64,11 @@
 			}),
 			'Duon\\Cms\\Field\\RichText': () => ({
 				type: 'richtext',
+				value: isTranslatable ? createTranslatableValue() : '',
+			}),
+			'Duon\\Cms\\Field\\Code': () => ({
+				type: 'code',
+				syntax: codeSyntaxes[0],
 				value: isTranslatable ? createTranslatableValue() : '',
 			}),
 			'Duon\\Cms\\Field\\Checkbox': () => ({ type: 'checkbox', value: false }),

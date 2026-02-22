@@ -29,4 +29,8 @@ export interface MatrixField extends SimpleField {
 	subfields: Field[];
 }
 
-export type Field = ImageField | FileField | GridField | MatrixField | SimpleField;
+export interface CodeField extends SimpleField {
+	syntaxes: string[];
+}
+
+export type Field = ImageField | FileField | GridField | MatrixField | CodeField | SimpleField;
