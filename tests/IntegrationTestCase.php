@@ -172,6 +172,8 @@ class IntegrationTestCase extends TestCase
 			->add('update-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
 			->add('delete-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+		$container->tag(Plugin::NODE_TAG)
+			->add('renderable-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 
 		return $container;
 	}

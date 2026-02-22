@@ -84,9 +84,15 @@ final class FinderTest extends IntegrationTestCase
 
 	public function testFinderFiltersByRenderableBuiltin(): void
 	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$this->createTestNode([
+			'uid' => 'finder-renderable-node',
+			'type' => $typeId,
+		]);
+
 		$finder = $this->createCms();
 		$renderable = iterator_to_array($finder->nodes()
-			->types('test-article')
+			->types('renderable-test-page', 'test-article')
 			->published(null)
 			->filter('renderable = true'));
 		$notRenderable = iterator_to_array($finder->nodes()
@@ -95,7 +101,7 @@ final class FinderTest extends IntegrationTestCase
 			->filter('renderable = false'));
 
 		$this->assertNotEmpty($renderable);
-		$this->assertEmpty($notRenderable);
+		$this->assertNotEmpty($notRenderable);
 	}
 
 	public function testFinderSupportsMultipleTypes(): void
