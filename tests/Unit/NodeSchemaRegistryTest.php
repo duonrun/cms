@@ -315,14 +315,25 @@ final class NodeSchemaRegistryTest extends TestCase
 
 	// -- Derived properties ---------------------------------------------------
 
-	public function testRenderableIsDerivedFromNonEmptyRenderer(): void
+	public function testRenderableDefaultsToRoutable(): void
 	{
 		$registry = Registry::withDefaults();
 
-		// NodeWithHandleAttribute has #[Handle] but no #[Render].
-		// Renderer defaults to handle, which is non-empty => renderable = true
+		// NodeWithHandleAttribute has #[Handle] but no #[Render] or #[Route].
+		// renderable defaults to routable, which is false => renderable = false
 		$schema = new Schema(NodeWithHandleAttribute::class, $registry);
-		$this->assertTrue($schema->renderable);
+		$this->assertFalse($schema->renderable);
 		$this->assertEquals('node-with-custom-handle-attribute', $schema->renderer);
+	}
+
+	public function testRoutableNodeIsRenderableWithoutRenderAttribute(): void
+	{
+		$registry = Registry::withDefaults();
+
+		// NodeWithRouteAttribute has #[Route] but no #[Render].
+		// renderable defaults to routable => true
+		$schema = new Schema(NodeWithRouteAttribute::class, $registry);
+		$this->assertTrue($schema->routable);
+		$this->assertTrue($schema->renderable);
 	}
 }

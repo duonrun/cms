@@ -239,9 +239,9 @@ final class NodeFactoryTest extends TestCase
 		$this->assertTrue((bool) $this->types->get(PlainPage::class, 'routable', false));
 	}
 
-	public function testNodeMetaRenderableForPlainBlock(): void
+	public function testNodeMetaNotRenderableForPlainBlock(): void
 	{
-		$this->assertTrue((bool) $this->types->get(PlainBlock::class, 'renderable', false));
+		$this->assertFalse((bool) $this->types->get(PlainBlock::class, 'renderable', false));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void

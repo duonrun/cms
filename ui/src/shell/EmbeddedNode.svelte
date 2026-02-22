@@ -49,11 +49,13 @@
 		<div class="embed-control-bar cms-embedded-control-bar">
 			<div class="cms-embedded-control-inner">
 				<div class="embed-status-bar cms-embedded-status-bar">
-					<span class="cms-embedded-status-pill">
-						<Published
-							published={node.published}
-							large />
-					</span>
+					{#if node.type.renderable}
+						<span class="cms-embedded-status-pill">
+							<Published
+								published={node.published}
+								large />
+						</span>
+					{/if}
 					{#if $dirty}
 						<span class="dirty-indicator cms-embedded-dirty-indicator">!</span>
 					{/if}

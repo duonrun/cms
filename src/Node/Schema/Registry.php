@@ -93,7 +93,7 @@ class Registry
 		$this->default('renderer', static fn(string $nodeClass, array $properties): string => (string) ($properties['handle'] ?? ''));
 		$this->default('route', static fn(string $nodeClass, array $properties): string => '');
 		$this->default('routable', static fn(string $nodeClass, array $properties): bool => false);
-		$this->default('renderable', static fn(string $nodeClass, array $properties): bool => ($properties['renderer'] ?? '') !== '');
+		$this->default('renderable', static fn(string $nodeClass, array $properties): bool => ($properties['routable'] ?? false));
 		$this->default('permission', static fn(string $nodeClass, array $properties): array => [
 			'read' => 'everyone',
 			'create' => 'authenticated',

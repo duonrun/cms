@@ -56,9 +56,9 @@ final class TypesTest extends TestCase
 		$this->assertEquals('template-defined-by-render-attribute', $this->types->schemaOf(NodeWithRenderAttribute::class)->renderer);
 	}
 
-	public function testRenderableUsesRenderAttributeOrHandleFallback(): void
+	public function testRenderableRequiresRenderOrRouteAttribute(): void
 	{
-		$this->assertTrue((bool) $this->types->get(NodeWithNameAttribute::class, 'renderable', false));
+		$this->assertFalse((bool) $this->types->get(NodeWithNameAttribute::class, 'renderable', false));
 		$this->assertTrue((bool) $this->types->get(NodeWithRenderAttribute::class, 'renderable', false));
 	}
 
