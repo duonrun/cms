@@ -60,5 +60,9 @@
 	"overrides": {
 		"cookie": "^0.7.0",
 		"minimatch": "^10.2.1"
-	}
+	},
+	"trustedDependencies": [
+		"svelte-preprocess",
+		"unrs-resolver"
+	]
 }
