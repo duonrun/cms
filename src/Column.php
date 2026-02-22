@@ -126,7 +126,7 @@ final class Column
 				$fieldObj = $hydrator->getField($inner, $field);
 				$value = $fieldObj->value();
 
-				return $value->isset() ? $value : null;
+				return $value->isset() ? (string) $value : null;
 		}
 	}
 }
