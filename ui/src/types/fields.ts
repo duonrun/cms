@@ -30,7 +30,7 @@ export interface MatrixField extends SimpleField {
 }
 
 export interface CodeField extends SimpleField {
-	syntaxes: string[];
+	syntaxes?: string[];
 }
 
 export type Field = ImageField | FileField | GridField | MatrixField | CodeField | SimpleField;
