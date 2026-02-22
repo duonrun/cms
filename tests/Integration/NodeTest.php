@@ -65,6 +65,35 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertEquals(1, $node['editor']); // System user
 	}
 
+	public function testNodeContentPersistsCodeSyntaxAlongsideValue(): void
+	{
+		$typeId = $this->createTestType('code-test-page');
+		$content = [
+			'code' => [
+				'type' => 'code',
+				'syntax' => 'php',
+				'value' => ['de' => '<?php echo "Hallo";', 'en' => '<?php echo "Hello";'],
+			],
+		];
+
+		$nodeId = $this->createTestNode([
+			'uid' => 'code-test-node-1',
+			'type' => $typeId,
+			'content' => $content,
+		]);
+
+		$node = $this->db()->execute(
+			'SELECT content FROM cms.nodes WHERE node = :id',
+			['id' => $nodeId],
+		)->one();
+
+		$contentData = json_decode($node['content'], true);
+		$this->assertSame('code', $contentData['code']['type']);
+		$this->assertSame('php', $contentData['code']['syntax']);
+		$this->assertSame('<?php echo "Hallo";', $contentData['code']['value']['de']);
+		$this->assertSame('<?php echo "Hello";', $contentData['code']['value']['en']);
+	}
+
 	public function testUpdateNodeContent(): void
 	{
 		$typeId = $this->createTestType('update-test-page');
