@@ -1,6 +1,8 @@
 import { EditorState, type Command, type Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { history } from 'prosemirror-history';
+import { baseKeymap } from 'prosemirror-commands';
+import { keymap } from 'prosemirror-keymap';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { gapCursor } from 'prosemirror-gapcursor';
 import { schema, parser, serializer } from './schema';
@@ -43,6 +45,7 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 	const plugins: Plugin[] = [
 		buildInputRules(),
 		buildKeymap(),
+		keymap(baseKeymap),
 		history(),
 		dropCursor(),
 		gapCursor(),
