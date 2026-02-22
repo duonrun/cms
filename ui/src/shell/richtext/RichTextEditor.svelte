@@ -1,25 +1,44 @@
 <script lang="ts">
 	import type { ModalFunctions } from '$shell/modal';
+	import type { EditorState } from 'prosemirror-state';
 
 	import { getContext } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
-	import type { Readable } from 'svelte/store';
-
-	import { Editor, type Extensions } from '@tiptap/core';
-	import StarterKit from '@tiptap/starter-kit';
-	import BubbleMenu from '@tiptap/extension-bubble-menu';
-	import DropCursor from '@tiptap/extension-dropcursor';
-	import HorizontalRule from '@tiptap/extension-horizontal-rule';
-	import Link from '@tiptap/extension-link';
-	import Paragraph from '@tiptap/extension-paragraph';
-	import SubScript from '@tiptap/extension-subscript';
-	import SuperScript from '@tiptap/extension-superscript';
-	import TextAlign from '@tiptap/extension-text-align';
 
 	import { setDirty } from '$lib/state';
 	import { _ } from '$lib/locale';
 	import ModalLink from '$shell/modals/ModalLink.svelte';
-	import createEditor from './editor';
+	import createEditor, { type CmsEditor } from './editor';
+	import { schema } from './schema';
+	import {
+		isMarkActive,
+		isNodeActive,
+		getActiveTextAlign,
+		getMarkAttributes,
+		getBlockAttributes,
+	} from './state-helpers';
+	import {
+		toggleBold,
+		toggleItalic,
+		toggleStrike,
+		toggleSubscript,
+		toggleSuperscript,
+		toggleBulletList,
+		toggleOrderedList,
+		toggleBlockquote,
+		setTextAlign,
+		unsetTextAlign,
+		setParagraphClass,
+		setHeading,
+		setParagraph,
+		insertHorizontalRule,
+		insertHardBreak,
+		setLink,
+		unsetLink,
+		clearMarks,
+		clearNodes,
+	} from './commands';
+	import { undo, redo } from 'prosemirror-history';
 
 	import IcoH1 from '$shell/icons/IcoH1.svelte';
 	import IcoH2 from '$shell/icons/IcoH2.svelte';
@@ -53,7 +72,7 @@
 		name: string;
 		editSource?: boolean;
 		required?: boolean;
-		toolbar?: string;
+		toolbar?: 'default' | 'inline';
 		embed?: boolean;
 	};
 
@@ -68,14 +87,14 @@
 	let { open, close } = getContext<ModalFunctions>('modal');
 	let ref = $state<HTMLElement>();
 	let bubble = $state<HTMLElement>();
-	let editor = $state() as Readable<Editor>;
+	let editor = $state<CmsEditor>();
 	let editorState = $state({
 		bold: false,
 		heading1: false,
 		heading2: false,
 		heading3: false,
+		paragraphDefault: false,
 		paragraphLarge: false,
-		paragraphRegular: false,
 		paragraphSmall: false,
 		center: false,
 		right: false,
@@ -92,138 +111,71 @@
 	let showSource = $state(false);
 	let showDropdown = $state(false);
 
-	function fireUpdate() {
-		setDirty();
+	function updateEditorState(state: EditorState) {
+		editorState.bold = isMarkActive(state, schema.marks.bold);
+		editorState.heading1 = isNodeActive(state, schema.nodes.heading, { level: 1 });
+		editorState.heading2 = isNodeActive(state, schema.nodes.heading, { level: 2 });
+		editorState.heading3 = isNodeActive(state, schema.nodes.heading, { level: 3 });
+		const paragraphAttrs = getBlockAttributes(state, schema.nodes.paragraph);
+		editorState.paragraphDefault =
+			isNodeActive(state, schema.nodes.paragraph) &&
+			(!paragraphAttrs || paragraphAttrs.class === 'default');
+		editorState.paragraphLarge =
+			isNodeActive(state, schema.nodes.paragraph) && paragraphAttrs?.class === 'large';
+		editorState.paragraphSmall =
+			isNodeActive(state, schema.nodes.paragraph) && paragraphAttrs?.class === 'small';
+		editorState.center = getActiveTextAlign(state) === 'center';
+		editorState.right = getActiveTextAlign(state) === 'right';
+		editorState.justify = getActiveTextAlign(state) === 'justify';
+		editorState.italic = isMarkActive(state, schema.marks.italic);
+		editorState.strike = isMarkActive(state, schema.marks.strike);
+		editorState.bulletList = isNodeActive(state, schema.nodes.bulletList);
+		editorState.orderedList = isNodeActive(state, schema.nodes.orderedList);
+		editorState.subscript = isMarkActive(state, schema.marks.subscript);
+		editorState.superscript = isMarkActive(state, schema.marks.superscript);
+		editorState.blockquote = isNodeActive(state, schema.nodes.blockquote);
+		editorState.link = isMarkActive(state, schema.marks.link);
 	}
 
-	const CustomParagraph = Paragraph.extend({
-		addAttributes() {
-			return {
-				class: {
-					default: 'default',
-				},
-			};
-		},
-	});
-
-	const CustomLink = Link.extend({
-		addAttributes() {
-			return {
-				...this.parent?.(),
-				target: {
-					default: undefined,
-				},
-				class: {
-					default: undefined,
-				},
-				rel: {
-					default: 'noopener noreferrer nofollow',
-				},
-			};
-		},
-	});
-	const CustomHorizontalRule = HorizontalRule.extend({
-		addAttributes() {
-			return {
-				...this.parent?.(),
-				class: {
-					default: undefined,
-				},
-			};
-		},
-	});
-
 	onMount(() => {
-		let extensions: Extensions;
+		if (!ref) return;
 
-		if (toolbar === 'inline') {
-			extensions = [
-				StarterKit,
-				BubbleMenu.configure({
-					element: bubble,
-				}),
-			];
-		} else {
-			extensions = [
-				StarterKit,
-				CustomParagraph,
-				TextAlign.configure({
-					types: ['heading', 'paragraph'],
-				}),
-				DropCursor,
-				CustomLink.configure({
-					openOnClick: false,
-				}),
-				CustomHorizontalRule,
-				SubScript,
-				SuperScript,
-			];
-		}
-
-		editor = createEditor(
-			{
-				element: ref,
-				extensions,
-				content: value,
-				onUpdate: ({ editor }) => {
-					let html = editor.getHTML();
-					fireUpdate();
-					value = html;
-				},
+		editor = createEditor({
+			element: ref,
+			content: value,
+			mode: toolbar,
+			bubbleElement: bubble,
+			onUpdate: html => {
+				setDirty();
+				value = html;
 			},
-			(ed: Editor) => {
-				editorState.bold = ed.isActive('bold');
-				editorState.heading1 = ed.isActive('heading', { level: 1 });
-				editorState.heading2 = ed.isActive('heading', { level: 2 });
-				editorState.heading3 = ed.isActive('heading', { level: 3 });
-				editorState.paragraphLarge =
-					ed.isActive('paragraph') && ed.getAttributes('paragraph')['class'] !== 'large';
-				editorState.paragraphRegular =
-					ed.isActive('paragraph') && ed.getAttributes('paragraph')['class'] === 'large';
-				editorState.paragraphSmall =
-					ed.isActive('paragraph') && ed.getAttributes('paragraph')['class'] === 'small';
-				editorState.center = ed.isActive({ textAlign: 'center' });
-				editorState.right = ed.isActive({ textAlign: 'right' });
-				editorState.justify = ed.isActive({ textAlign: 'justify' });
-				editorState.italic = ed.isActive('italic');
-				editorState.strike = ed.isActive('strike');
-				editorState.bulletList = ed.isActive('bulletList');
-				editorState.orderedList = ed.isActive('orderedList');
-				editorState.subscript = ed.isActive('subscript');
-				editorState.superscript = ed.isActive('superscript');
-				editorState.blockquote = ed.isActive('blockquote');
-				editorState.link = ed.isActive('link');
-			},
-		);
+			onStateChange: updateEditorState,
+		});
 	});
 
 	onDestroy(() => {
-		if ($editor) {
-			$editor.destroy();
-		}
+		editor?.destroy();
 	});
 
 	function changeSource(event: KeyboardEvent) {
 		const target = event.target as HTMLTextAreaElement;
 
-		fireUpdate();
-		$editor.commands.setContent(target.value);
+		setDirty();
+		editor?.setContent(target.value);
 		value = target.value;
 	}
 
-	function clickDropdown(fn: () => void) {
+	function run(command: (state: any, dispatch?: any, view?: any) => boolean) {
 		return () => {
-			if (fn) {
-				fn();
-			}
-			showDropdown = !showDropdown;
+			showDropdown = false;
+			editor?.run(command);
 		};
 	}
 
-	function clickToolbar(fn: () => void) {
+	function runDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
 		return () => {
-			showDropdown = false;
-			fn();
+			editor?.run(command);
+			showDropdown = !showDropdown;
 		};
 	}
 
@@ -233,30 +185,30 @@
 	}
 
 	function addLink(url: string, blank: boolean) {
-		if (url) {
-			$editor
-				.chain()
-				.focus()
-				.extendMarkRange('link')
-				.setLink({
+		if (url && editor) {
+			editor.run(
+				setLink({
 					href: url,
 					target: blank ? '_blank' : '',
 					class: undefined,
-				})
-				.run();
+				}),
+			);
 		}
 	}
 
 	function openAddLinkModal() {
-		const value = $editor.isActive('link') ? $editor.getAttributes('link').href : '';
-		const target = $editor.isActive('link') ? $editor.getAttributes('link').target : '';
+		if (!editor) return;
+		const state = editor.view.state;
+		const linkAttrs = getMarkAttributes(state, schema.marks.link);
+		const href = linkAttrs?.href ?? '';
+		const target = linkAttrs?.target ?? '';
 
 		open(
 			ModalLink,
 			{
 				add: addLink,
 				close,
-				value,
+				value: href,
 				blank: target === '_blank',
 			},
 			{},
@@ -268,28 +220,28 @@
 	<div
 		class="richtext-bubble cms-richtext-bubble"
 		bind:this={bubble}>
-		{#if $editor}
+		{#if editor}
 			<button
 				class="richtext-toolbar-btn"
-				onclick={clickToolbar($editor.chain().focus().toggleBold().run)}
+				onclick={run(toggleBold())}
 				class:active={editorState.bold}>
 				<IcoBold />
 			</button>
 			<button
 				class="richtext-toolbar-btn"
-				onclick={clickToolbar($editor.chain().focus().toggleItalic().run)}
-				class:active={$editor.isActive('italic')}>
+				onclick={run(toggleItalic())}
+				class:active={editorState.italic}>
 				<IcoItalic />
 			</button>
 			<button
 				class="richtext-toolbar-btn"
-				onclick={clickToolbar($editor.chain().focus().toggleStrike().run)}
-				class:active={$editor.isActive('strike')}>
+				onclick={run(toggleStrike())}
+				class:active={editorState.strike}>
 				<IcoStrikethrough />
 			</button>
 			<button
 				class="richtext-toolbar-btn"
-				onclick={clickToolbar($editor.chain().focus().unsetAllMarks().run)}>
+				onclick={run(clearMarks())}>
 				<IcoRemoveFormat />
 			</button>
 		{/if}
@@ -325,7 +277,7 @@
 								class="richtext-dropdown-button"
 								aria-expanded="true"
 								aria-haspopup="true"
-								onclick={clickDropdown(null)}>
+								onclick={() => (showDropdown = !showDropdown)}>
 								{_('Absatz')}
 								<svg
 									class="cms-richtext-dropdown-icon"
@@ -351,105 +303,73 @@
 									class="cms-richtext-dropdown-items"
 									role="none">
 									<button
-										onclick={clickDropdown(
-											$editor.chain().focus().toggleHeading({ level: 1 }).run,
-										)}
+										onclick={runDropdown(setHeading(1))}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('heading', { level: 1 })}>
+										class:active={editorState.heading1}>
 										<IcoH1 />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 1')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor.chain().focus().toggleHeading({ level: 2 }).run,
-										)}
+										onclick={runDropdown(setHeading(2))}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('heading', { level: 2 })}>
+										class:active={editorState.heading2}>
 										<IcoH2 />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 2')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor.chain().focus().toggleHeading({ level: 3 }).run,
-										)}
+										onclick={runDropdown(setHeading(3))}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('heading', { level: 3 })}>
+										class:active={editorState.heading3}>
 										<IcoH3 />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 3')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor.chain().focus().setParagraph().run,
-										)}
+										onclick={runDropdown(setParagraph())}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('paragraph') &&
-											$editor.getAttributes('paragraph')['class'] !==
-												'large'}>
+										class:active={editorState.paragraphDefault}>
 										<IcoParagraph />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor
-												.chain()
-												.focus()
-												.setParagraph()
-												.updateAttributes('paragraph', {
-													class: 'large',
-												}).run,
-										)}
+										onclick={runDropdown(setParagraphClass('large'))}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('paragraph') &&
-											$editor.getAttributes('paragraph')['class'] ===
-												'large'}>
+										class:active={editorState.paragraphLarge}>
 										<IcoTextHeight />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz große Schrift')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor
-												.chain()
-												.focus()
-												.setParagraph()
-												.updateAttributes('paragraph', {
-													class: 'small',
-												}).run,
-										)}
+										onclick={runDropdown(setParagraphClass('small'))}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={$editor.isActive('paragraph') &&
-											$editor.getAttributes('paragraph')['class'] ===
-												'small'}>
+										class:active={editorState.paragraphSmall}>
 										<IcoTextHeight />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz kleine Schrift')}
 										</span>
 									</button>
 									<button
-										onclick={clickDropdown(
-											$editor.chain().focus().clearNodes().run,
-										)}
+										onclick={runDropdown(clearNodes())}
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item">
@@ -466,96 +386,90 @@
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Text align left')}
-							onclick={clickToolbar($editor.chain().focus().unsetTextAlign().run)}>
+							onclick={run(unsetTextAlign())}>
 							<IcoAlignLeft />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Text align center')}
-							onclick={clickToolbar(
-								$editor.chain().focus().setTextAlign('center').run,
-							)}
-							class:active={$editor.isActive({ textAlign: 'center' })}>
+							onclick={run(setTextAlign('center'))}
+							class:active={editorState.center}>
 							<IcoAlignCenter />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Text align right')}
-							onclick={clickToolbar(
-								$editor.chain().focus().setTextAlign('right').run,
-							)}
-							class:active={$editor.isActive({ textAlign: 'right' })}>
+							onclick={run(setTextAlign('right'))}
+							class:active={editorState.right}>
 							<IcoAlignRight />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Justify text')}
-							onclick={clickToolbar(
-								$editor.chain().focus().setTextAlign('justify').run,
-							)}
-							class:active={$editor.isActive({ textAlign: 'justify' })}>
+							onclick={run(setTextAlign('justify'))}
+							class:active={editorState.justify}>
 							<IcoAlignJustify />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Bold text')}
-							onclick={clickToolbar($editor.chain().focus().toggleBold().run)}
+							onclick={run(toggleBold())}
 							class:active={editorState.bold}>
 							<IcoBold />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Italic text')}
-							onclick={clickToolbar($editor.chain().focus().toggleItalic().run)}
-							class:active={$editor.isActive('italic')}>
+							onclick={run(toggleItalic())}
+							class:active={editorState.italic}>
 							<IcoItalic />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Strike through')}
-							onclick={clickToolbar($editor.chain().focus().toggleStrike().run)}
-							class:active={$editor.isActive('strike')}>
+							onclick={run(toggleStrike())}
+							class:active={editorState.strike}>
 							<IcoStrikethrough />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Bulleted list')}
-							onclick={clickToolbar($editor.chain().focus().toggleBulletList().run)}
-							class:active={$editor.isActive('bulletList')}>
+							onclick={run(toggleBulletList())}
+							class:active={editorState.bulletList}>
 							<IcoListUl />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Numbered list')}
-							onclick={clickToolbar($editor.chain().focus().toggleOrderedList().run)}
-							class:active={$editor.isActive('orderedList')}>
+							onclick={run(toggleOrderedList())}
+							class:active={editorState.orderedList}>
 							<IcoListOl />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Subscript')}
-							onclick={clickToolbar($editor.chain().focus().toggleSubscript().run)}
-							class:active={$editor.isActive('subscript')}>
+							onclick={run(toggleSubscript())}
+							class:active={editorState.subscript}>
 							<IcoSubscript />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Superscript')}
-							onclick={clickToolbar($editor.chain().focus().toggleSuperscript().run)}
-							class:active={$editor.isActive('superscript')}>
+							onclick={run(toggleSuperscript())}
+							class:active={editorState.superscript}>
 							<IcoSuperscript />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Block quote')}
-							onclick={clickToolbar($editor.chain().focus().toggleBlockquote().run)}
-							class:active={$editor.isActive('blockquote')}>
+							onclick={run(toggleBlockquote())}
+							class:active={editorState.blockquote}>
 							<IcoBlockQuoteRight />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Horizontal line')}
-							onclick={clickToolbar($editor.chain().focus().setHorizontalRule().run)}>
+							onclick={run(insertHorizontalRule())}>
 							<IcoHorizontalRule />
 						</button>
 						<button
@@ -564,24 +478,24 @@
 							onclick={openAddLinkModal}>
 							<IcoLink />
 						</button>
-						{#if $editor.isActive('link')}
+						{#if editorState.link}
 							<button
 								class="richtext-toolbar-btn"
 								title={_('Remove link')}
-								onclick={clickToolbar($editor.chain().focus().unsetLink().run)}>
+								onclick={run(unsetLink())}>
 								<IcoUnlink />
 							</button>
 						{/if}
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Add a hard line break')}
-							onclick={clickToolbar($editor.chain().focus().setHardBreak().run)}>
+							onclick={run(insertHardBreak())}>
 							<IcoLineBreak />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Remove formats')}
-							onclick={clickToolbar($editor.chain().focus().unsetAllMarks().run)}>
+							onclick={run(clearMarks())}>
 							<IcoRemoveFormat />
 						</button>
 					</div>
@@ -589,13 +503,13 @@
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Undo last action')}
-							onclick={clickToolbar($editor.chain().focus().undo().run)}>
+							onclick={run(undo)}>
 							<IcoUndo />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Redo last undo')}
-							onclick={clickToolbar($editor.chain().focus().redo().run)}>
+							onclick={run(redo)}>
 							<IcoRedo />
 						</button>
 						{#if editSource}
