@@ -214,6 +214,7 @@
 		padding: var(--cms-space-1) var(--cms-space-2);
 		max-height: 60vh;
 		overflow-y: auto;
+		white-space: pre-wrap;
 
 		h1,
 		h2,

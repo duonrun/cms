@@ -4,7 +4,6 @@ import {
 	exitCode,
 	joinDown,
 	joinUp,
-	lift,
 	selectParentNode,
 	toggleMark,
 } from 'prosemirror-commands';
