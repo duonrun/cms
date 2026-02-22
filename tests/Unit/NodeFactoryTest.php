@@ -11,6 +11,7 @@ use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Types;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithInjectedType;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
@@ -99,6 +100,18 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$this->assertInstanceOf(TestPage::class, $node);
+	}
+
+	public function testCreateNodeWithInjectedType(): void
+	{
+		$node = $this->factory->create(NodeWithInjectedType::class, $this->context, $this->cms, [
+			'uid' => 'typed-node-1',
+			'content' => [],
+		]);
+
+		$this->assertInstanceOf(NodeWithInjectedType::class, $node);
+		$this->assertSame('Type Injected Node', $node->title());
+		$this->assertSame('node-with-injected-type', $node->typeHandle());
 	}
 
 	// -- Field hydration ------------------------------------------------------

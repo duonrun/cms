@@ -55,6 +55,7 @@ class Factory
 		);
 
 		$creator = new Creator($this->container);
+		$type = new Type($class, $this->types);
 		$node = $creator->create($class, predefinedTypes: [
 			Context::class => $context,
 			Cms::class => $cms,
@@ -64,6 +65,7 @@ class Factory
 			Container::class => $context->container,
 			CoreFactory::class => $context->factory,
 			self::class => $this,
+			Type::class => $type,
 			TemplateRenderer::class => $templateRenderer,
 			Serializer::class => $serializer,
 			Store::class => $store,
