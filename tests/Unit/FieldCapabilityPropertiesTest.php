@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Field\Code;
 use Duon\Cms\Field\Grid;
 use Duon\Cms\Field\Image;
 use Duon\Cms\Field\Option;
@@ -68,6 +69,11 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createOptionField(string $name = 'option'): Option
 	{
 		return new Option($name, $this->createOwner(), new ValueContext($name, []));
+	}
+
+	private function createCodeField(string $name = 'code'): Code
+	{
+		return new Code($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	private function applyAndGetProperties(object $meta, $field): array
@@ -236,5 +242,15 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('syntaxes', $properties);
 		$this->assertEquals(['php', 'javascript'], $properties['syntaxes']);
+	}
+
+	public function testCodeFieldPropertiesAlwaysExposeDefaultSyntaxes(): void
+	{
+		$field = $this->createCodeField();
+
+		$properties = $field->properties();
+
+		$this->assertArrayHasKey('syntaxes', $properties);
+		$this->assertEquals(['plaintext'], $properties['syntaxes']);
 	}
 }
