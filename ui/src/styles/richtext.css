@@ -275,6 +275,26 @@
 		border: 0;
 		outline: none;
 	}
+
+	.ProseMirror-gapcursor {
+		display: none;
+		pointer-events: none;
+		position: absolute;
+
+		&::after {
+			content: '';
+			display: block;
+			position: absolute;
+			top: -2px;
+			width: 20px;
+			border-top: 1px solid var(--cms-color-neutral-900);
+			animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+		}
+	}
+
+	.ProseMirror-focused .ProseMirror-gapcursor {
+		display: block;
+	}
 }
 
 .grid-field .richtext {
