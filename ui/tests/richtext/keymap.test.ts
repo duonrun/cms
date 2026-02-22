@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { EditorState } from 'prosemirror-state';
-import { schema } from './schema';
-import { buildKeymap, buildInputRules } from './keymap';
+import { schema } from '$shell/richtext/schema';
+import { buildKeymap, buildInputRules } from '$shell/richtext/keymap';
 
 describe('buildKeymap', () => {
 	test('returns a valid plugin', () => {

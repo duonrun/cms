@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { EditorState, TextSelection } from 'prosemirror-state';
 import type { Node as PmNode } from 'prosemirror-model';
-import { schema, parser, serializer } from './schema';
+import { schema, parser, serializer } from '$shell/richtext/schema';
 import {
 	setTextAlign,
 	unsetTextAlign,
@@ -18,7 +18,7 @@ import {
 	toggleItalic,
 	toggleStrike,
 	toggleBlockquote,
-} from './commands';
+} from '$shell/richtext/commands';
 
 function parseHTML(html: string): PmNode {
 	const div = document.createElement('div');

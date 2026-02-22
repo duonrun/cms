@@ -1,13 +1,13 @@
 import { describe, test, expect } from 'vitest';
 import { EditorState, TextSelection } from 'prosemirror-state';
-import { schema, parser } from './schema';
+import { schema, parser } from '$shell/richtext/schema';
 import {
 	isMarkActive,
 	isNodeActive,
 	getBlockAttributes,
 	getActiveTextAlign,
 	getMarkAttributes,
-} from './state-helpers';
+} from '$shell/richtext/state-helpers';
 
 function createState(html: string, cursorPos?: number): EditorState {
 	const div = document.createElement('div');
