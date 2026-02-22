@@ -103,7 +103,7 @@ class Plugin implements CorePlugin
 
 	public function node(string $class): void
 	{
-		$handle = $this->types->handle($class);
+		$handle = (string) $this->types->get($class, 'handle');
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);

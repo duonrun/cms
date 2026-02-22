@@ -40,7 +40,7 @@ class Render
 			->entry($data['handle'])
 			->definition();
 
-		if (!$this->types->renderable($class)) {
+		if (!(bool) $this->types->get($class, 'renderable', false)) {
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 

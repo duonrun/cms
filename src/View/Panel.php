@@ -140,8 +140,8 @@ class Panel
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
-				'slug' => $this->types->handle($blueprint),
-				'name' => $this->types->label($blueprint),
+				'slug' => (string) $this->types->get($blueprint, 'handle'),
+				'name' => (string) $this->types->get($blueprint, 'label'),
 			];
 		}
 

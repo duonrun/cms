@@ -42,10 +42,10 @@ final class Nodes implements Iterator
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
 			'routable' => $this->typeFlagExpression(
-				fn(string $class): bool => $this->types->routable($class),
+				fn(string $class): bool => (bool) $this->types->get($class, 'routable', false),
 			),
 			'renderable' => $this->typeFlagExpression(
-				fn(string $class): bool => $this->types->renderable($class),
+				fn(string $class): bool => (bool) $this->types->get($class, 'renderable', false),
 			),
 			'type' => 't.handle',
 			'handle' => 't.handle',
@@ -194,7 +194,7 @@ final class Nodes implements Iterator
 
 		foreach ($types as $type) {
 			if (class_exists($type)) {
-				$type = $this->types->handle($type);
+				$type = (string) $this->types->get($type, 'handle');
 			}
 
 			$result[] = 't.handle = ' . $this->context->db->quote($type);

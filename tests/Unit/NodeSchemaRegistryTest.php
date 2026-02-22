@@ -226,8 +226,8 @@ final class NodeSchemaRegistryTest extends TestCase
 		$types = new Types($registry);
 
 		$this->assertEquals('star', $types->get(NodeWithCustomAttribute::class, 'icon'));
-		$this->assertEquals('Custom Node', $types->label(NodeWithCustomAttribute::class));
-		$this->assertTrue($types->routable(NodeWithCustomAttribute::class));
+		$this->assertEquals('Custom Node', $types->get(NodeWithCustomAttribute::class, 'label'));
+		$this->assertTrue((bool) $types->get(NodeWithCustomAttribute::class, 'routable', false));
 	}
 
 	public function testCustomAttributeDefaultsToNull(): void
@@ -283,9 +283,9 @@ final class NodeSchemaRegistryTest extends TestCase
 		$types = new Types($registry);
 
 		// Built-in resolution still works
-		$this->assertEquals('plain-page', $types->handle(PlainPage::class));
-		$this->assertEquals('Plain Page', $types->label(PlainPage::class));
-		$this->assertTrue($types->routable(PlainPage::class));
+		$this->assertEquals('plain-page', $types->get(PlainPage::class, 'handle'));
+		$this->assertEquals('Plain Page', $types->get(PlainPage::class, 'label'));
+		$this->assertTrue((bool) $types->get(PlainPage::class, 'routable', false));
 
 		// Custom resolution
 		$this->assertEquals('star', $types->get(NodeWithCustomAttribute::class, 'icon'));

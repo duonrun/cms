@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
+use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Factory;
@@ -235,12 +236,12 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaRoutableForPlainPage(): void
 	{
-		$this->assertTrue($this->types->routable(PlainPage::class));
+		$this->assertTrue((bool) $this->types->get(PlainPage::class, 'routable', false));
 	}
 
 	public function testNodeMetaRenderableForPlainBlock(): void
 	{
-		$this->assertTrue($this->types->renderable(PlainBlock::class));
+		$this->assertTrue((bool) $this->types->get(PlainBlock::class, 'renderable', false));
 	}
 
 	public function testNodeMetaIsNodeForPlainPage(): void
@@ -250,32 +251,32 @@ final class NodeFactoryTest extends TestCase
 
 	public function testNodeMetaHandleForPlainPage(): void
 	{
-		$this->assertEquals('plain-page', $this->types->handle(PlainPage::class));
+		$this->assertEquals('plain-page', $this->types->get(PlainPage::class, 'handle'));
 	}
 
 	public function testNodeMetaLabelForPlainPage(): void
 	{
-		$this->assertEquals('Plain Page', $this->types->label(PlainPage::class));
+		$this->assertEquals('Plain Page', $this->types->get(PlainPage::class, 'label'));
 	}
 
 	public function testNodeMetaTitleFieldForPlainPage(): void
 	{
-		$this->assertEquals('heading', $this->types->titleField(PlainPage::class));
+		$this->assertEquals('heading', $this->types->get(PlainPage::class, 'titleField'));
 	}
 
 	public function testNodeMetaFieldOrderForPlainPage(): void
 	{
-		$this->assertEquals(['heading', 'body'], $this->types->fieldOrder(PlainPage::class));
+		$this->assertEquals(['heading', 'body'], $this->types->get(PlainPage::class, 'fieldOrder'));
 	}
 
 	public function testNodeMetaDeletableForPlainBlock(): void
 	{
-		$this->assertFalse($this->types->deletable(PlainBlock::class));
+		$this->assertFalse((bool) $this->types->get(PlainBlock::class, 'deletable', true));
 	}
 
 	public function testNodeMetaDeletableDefaultsToTrue(): void
 	{
-		$this->assertTrue($this->types->deletable(PlainPage::class));
+		$this->assertTrue((bool) $this->types->get(PlainPage::class, 'deletable', true));
 	}
 
 	// -- Serializer with plain objects ------------------------------------
@@ -379,6 +380,25 @@ final class NodeFactoryTest extends TestCase
 
 		$this->assertSame('proxy-meta-2', $proxy->meta('uid'));
 		$this->assertSame('fallback', $proxy->meta('missing', 'fallback'));
+	}
+
+	public function testNodeMetaPropertyFailsFastForUnknownKey(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'proxy-meta-3',
+			'published' => true,
+			'content' => [],
+		]);
+
+		$fieldNames = Factory::fieldNamesFor($node);
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+
+		$this->assertFalse(isset($proxy->meta->missing));
+		$this->assertNull($proxy->meta->get('missing'));
+		$this->assertSame('fallback', $proxy->meta->get('missing', 'fallback'));
+
+		$this->throws(NoSuchProperty::class, "The node '" . PlainPage::class . "' doesn't have the meta property 'missing'");
+		$proxy->meta->missing;
 	}
 
 	public function testNodeUnsetFieldReturnsNull(): void

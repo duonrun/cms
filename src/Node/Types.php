@@ -29,65 +29,9 @@ class Types
 	/**
 	 * @param class-string $class
 	 */
-	public function handle(string $class): string
+	public function typeOf(string $class): Type
 	{
-		return $this->schemaOf($class)->handle;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function label(string $class): string
-	{
-		return $this->schemaOf($class)->label;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function route(string $class): string|array
-	{
-		return $this->schemaOf($class)->route;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function routable(string $class): bool
-	{
-		return $this->schemaOf($class)->routable;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function renderable(string $class): bool
-	{
-		return $this->schemaOf($class)->renderable;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function titleField(string $class): ?string
-	{
-		return $this->schemaOf($class)->titleField;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function fieldOrder(string $class): ?array
-	{
-		return $this->schemaOf($class)->fieldOrder;
-	}
-
-	/**
-	 * @param class-string $class
-	 */
-	public function deletable(string $class): bool
-	{
-		return $this->schemaOf($class)->deletable;
+		return new Type($class, $this);
 	}
 
 	/**

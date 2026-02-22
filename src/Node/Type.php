@@ -4,22 +4,12 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Exception\NoSuchProperty;
+
 class Type
 {
 	public readonly string $class;
 	public readonly string $classname;
-	public readonly string $label;
-	public readonly string $handle;
-	public readonly string $renderer;
-	public readonly bool $routable;
-	public readonly bool $renderable;
-	public readonly string|array $route;
-	public readonly string|array $permission;
-	public readonly ?string $titleField;
-
-	/** @var string[]|null */
-	public readonly ?array $fieldOrder;
-	public readonly bool $deletable;
 
 	private readonly Schema $schema;
 
@@ -33,16 +23,20 @@ class Type
 		$this->class = $class;
 		$this->classname = basename(str_replace('\\', '/', $class));
 		$this->schema = $types->schemaOf($class);
-		$this->label = $this->schema->label;
-		$this->handle = $this->schema->handle;
-		$this->renderer = $this->schema->renderer;
-		$this->routable = $this->schema->routable;
-		$this->renderable = $this->schema->renderable;
-		$this->route = $this->schema->route;
-		$this->permission = $this->schema->permission;
-		$this->titleField = $this->schema->titleField;
-		$this->fieldOrder = $this->schema->fieldOrder;
-		$this->deletable = $this->schema->deletable;
+	}
+
+	public function __get(string $key): mixed
+	{
+		if (!$this->has($key)) {
+			throw new NoSuchProperty("The node type '{$this->class}' doesn't have the property '{$key}'");
+		}
+
+		return $this->get($key);
+	}
+
+	public function __isset(string $key): bool
+	{
+		return $this->has($key) && $this->get($key) !== null;
 	}
 
 	public function get(string $key, mixed $default = null): mixed
@@ -50,17 +44,15 @@ class Type
 		return match ($key) {
 			'class' => $this->class,
 			'classname' => $this->classname,
-			'label' => $this->label,
-			'handle' => $this->handle,
-			'renderer' => $this->renderer,
-			'routable' => $this->routable,
-			'renderable' => $this->renderable,
-			'route' => $this->route,
-			'permission' => $this->permission,
-			'titleField' => $this->titleField,
-			'fieldOrder' => $this->fieldOrder,
-			'deletable' => $this->deletable,
 			default => $this->schema->get($key, $default),
+		};
+	}
+
+	public function has(string $key): bool
+	{
+		return match ($key) {
+			'class', 'classname' => true,
+			default => $this->schema->has($key),
 		};
 	}
 
