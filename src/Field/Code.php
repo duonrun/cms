@@ -62,4 +62,12 @@ class Code extends Field implements Capability\Translatable, Syntaxable
 
 		return $shape;
 	}
+
+	public function properties(): array
+	{
+		$result = parent::properties();
+		$result['syntaxes'] = $this->getSyntaxes();
+
+		return $result;
+	}
 }
