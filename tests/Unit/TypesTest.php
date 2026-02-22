@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Node\Schema\Registry;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithPermissionAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
+use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
+use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\TestCase;
 
 final class TypesTest extends TestCase
@@ -69,5 +72,48 @@ final class TypesTest extends TestCase
 		$this->assertEquals([
 			'read' => 'me',
 		], $this->types->schemaOf(NodeWithPermissionAttribute::class)->permission);
+	}
+
+	public function testSchemaMagicAccessCoversAllBuiltinKeys(): void
+	{
+		$registry = Registry::withDefaults();
+		$types = new Types($registry);
+		$schema = $types->schemaOf(PlainPage::class);
+
+		foreach ($registry->defaultKeys() as $key) {
+			$this->assertArrayHasKey($key, $schema->properties());
+			$this->assertSame($schema->get($key), $schema->{$key});
+		}
+
+		$this->assertFalse(isset($schema->missing));
+		$this->assertNull($schema->missing);
+	}
+
+	public function testTypeMagicAccessCoversAllBuiltinKeys(): void
+	{
+		$registry = Registry::withDefaults();
+		$types = new Types($registry);
+		$type = $types->typeOf(PlainPage::class);
+
+		foreach ($registry->defaultKeys() as $key) {
+			$this->assertArrayHasKey($key, $type->all());
+			$this->assertSame($type->get($key), $type->{$key});
+		}
+
+		$this->assertSame(PlainPage::class, $type->class);
+		$this->assertSame('PlainPage', $type->classname);
+		$this->assertFalse(isset($type->missing));
+		$this->assertNull($type->missing);
+	}
+
+	public function testMagicIssetIsFalseForNullBuiltinValues(): void
+	{
+		$schema = $this->types->schemaOf(NodeWithNameAttribute::class);
+		$type = $this->types->typeOf(NodeWithNameAttribute::class);
+
+		$this->assertFalse(isset($schema->titleField));
+		$this->assertFalse(isset($type->titleField));
+
+		$this->assertFalse($this->types->typeOf(PlainBlock::class)->deletable);
 	}
 }
