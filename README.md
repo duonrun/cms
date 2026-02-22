@@ -102,14 +102,6 @@ return [
 ];
 ```
 
-The panel no longer depends on Tailwind. To prevent accidental reintroduction,
-run the guard check:
-
-```bash
-cd ui
-npm run check:tailwind
-```
-
 Test database:
 
 ```bash

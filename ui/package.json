@@ -8,8 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-check",
-		"format": "prettier -w .",
-		"check:tailwind": "node scripts/check-no-tailwind.mjs"
+		"format": "prettier -w ."
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
