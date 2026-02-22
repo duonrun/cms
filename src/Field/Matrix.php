@@ -40,8 +40,25 @@ class Matrix extends Field implements Capability\AllowsMultiple
 			$itemStructure = [];
 
 			foreach ($this->subfields as $name => $subfield) {
-				$subfieldData = $itemData[$name]['value'] ?? null;
-				$itemStructure[$name] = $subfield->structure($subfieldData);
+				$subfieldData = $itemData[$name] ?? null;
+				$subfieldValue = is_array($subfieldData) ? ($subfieldData['value'] ?? null) : null;
+				$subfieldStructure = $subfield->structure($subfieldValue);
+
+				if (is_array($subfieldData)) {
+					$itemStructure[$name] = $subfieldStructure;
+
+					foreach ($subfieldData as $key => $subfieldMetaValue) {
+						if ($key === 'type' || $key === 'value') {
+							continue;
+						}
+
+						$itemStructure[$name][$key] = $subfieldMetaValue;
+					}
+
+					continue;
+				}
+
+				$itemStructure[$name] = $subfieldStructure;
 			}
 
 			$structures[] = $itemStructure;

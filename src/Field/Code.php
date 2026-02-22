@@ -1,0 +1,65 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Duon\Cms\Field;
+
+use Duon\Cms\Field\Capability\IsSyntaxable;
+use Duon\Cms\Field\Capability\Syntaxable;
+use Duon\Cms\Value\Code as CodeValue;
+use Duon\Sire\Shape;
+
+class Code extends Field implements Capability\Translatable, Syntaxable
+{
+	use Capability\IsTranslatable;
+	use IsSyntaxable;
+
+	public function value(): CodeValue
+	{
+		return new CodeValue($this->owner, $this, $this->valueContext);
+	}
+
+	public function structure(mixed $value = null): array
+	{
+		$syntax = $this->valueContext->data['syntax'] ?? $this->getDefaultSyntax();
+
+		if (is_array($value) && array_key_exists('value', $value)) {
+			$syntax = is_string($value['syntax'] ?? null) ? $value['syntax'] : $syntax;
+			$value = $value['value'];
+		}
+
+		$result = $this->getTranslatableStructure('code', $value);
+		$result['syntax'] = $syntax;
+
+		return $result;
+	}
+
+	public function shape(): Shape
+	{
+		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape->add('type', 'text', 'required', 'in:code');
+		$shape->add('syntax', 'text', 'required', 'in:' . implode(',', $this->getSyntaxes()));
+
+		if ($this->translate) {
+			$locales = $this->owner->locales();
+			$defaultLocale = $locales->getDefault()->id;
+			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
+
+			foreach ($locales as $locale) {
+				$localeValidators = [];
+
+				if ($this->isRequired() && $locale->id === $defaultLocale) {
+					$localeValidators[] = 'required';
+				}
+
+				$i18nShape->add($locale->id, 'text', ...$localeValidators);
+			}
+
+			$shape->add('value', $i18nShape, ...$this->validators);
+		} else {
+			$shape->add('value', 'text', ...$this->validators);
+		}
+
+		return $shape;
+	}
+}
