@@ -61,7 +61,7 @@
 		</button>
 		{#if openMenu}
 			<div
-				class="button-menu cms-button-menu-panel {cls}"
+				class="button-menu cms-button-menu-panel"
 				role="menu"
 				aria-orientation="vertical"
 				aria-labelledby="option-menu-button"
