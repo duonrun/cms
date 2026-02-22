@@ -266,29 +266,29 @@
 
 {#if toolbar === 'inline'}
 	<div
-		class="wysiwyg-bubble cms-wysiwyg-bubble"
+		class="richtext-bubble cms-richtext-bubble"
 		bind:this={bubble}>
 		{#if $editor}
 			<button
-				class="wysiwyg-toolbar-btn"
+				class="richtext-toolbar-btn"
 				onclick={clickToolbar($editor.chain().focus().toggleBold().run)}
 				class:active={editorState.bold}>
 				<IcoBold />
 			</button>
 			<button
-				class="wysiwyg-toolbar-btn"
+				class="richtext-toolbar-btn"
 				onclick={clickToolbar($editor.chain().focus().toggleItalic().run)}
 				class:active={$editor.isActive('italic')}>
 				<IcoItalic />
 			</button>
 			<button
-				class="wysiwyg-toolbar-btn"
+				class="richtext-toolbar-btn"
 				onclick={clickToolbar($editor.chain().focus().toggleStrike().run)}
 				class:active={$editor.isActive('strike')}>
 				<IcoStrikethrough />
 			</button>
 			<button
-				class="wysiwyg-toolbar-btn"
+				class="richtext-toolbar-btn"
 				onclick={clickToolbar($editor.chain().focus().unsetAllMarks().run)}>
 				<IcoRemoveFormat />
 			</button>
@@ -297,38 +297,38 @@
 {/if}
 
 <div
-	class="wysiwyg wysiwyg-{toolbar}"
+	class="richtext richtext-{toolbar}"
 	class:required
 	class:embed>
 	{#if editor}
 		{#if toolbar !== 'inline'}
 			<div
-				class="wysiwyg-toolbar cms-wysiwyg-toolbar"
-				class:cms-wysiwyg-toolbar-open={!showSource}
+				class="richtext-toolbar cms-richtext-toolbar"
+				class:cms-richtext-toolbar-open={!showSource}
 				class:tooltip-b={embed}>
 				{#if showSource}
-					<div class="wysiwyg-extras cms-wysiwyg-extras-source">
+					<div class="richtext-extras cms-richtext-extras-source">
 						<button
 							onclick={toggleSource}
-							class="wysiwyg-source-btn cms-wysiwyg-source-btn-compact">
+							class="richtext-source-btn cms-richtext-source-btn-compact">
 							<IcoDocument />
-							<span class="cms-wysiwyg-source-label">
+							<span class="cms-richtext-source-label">
 								{_('Show content')}
 							</span>
 						</button>
 					</div>
 				{:else}
-					<div class="cms-wysiwyg-dropdown-wrap">
-						<div class="wysiwyg-dropdown">
+					<div class="cms-richtext-dropdown-wrap">
+						<div class="richtext-dropdown">
 							<button
 								type="button"
-								class="wysiwyg-dropdown-button"
+								class="richtext-dropdown-button"
 								aria-expanded="true"
 								aria-haspopup="true"
 								onclick={clickDropdown(null)}>
 								{_('Absatz')}
 								<svg
-									class="cms-wysiwyg-dropdown-icon"
+									class="cms-richtext-dropdown-icon"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 20 20"
 									fill="currentColor"
@@ -342,13 +342,13 @@
 						</div>
 						{#if showDropdown}
 							<div
-								class="wysiwyg-dropdown-menu"
+								class="richtext-dropdown-menu"
 								role="menu"
 								aria-orientation="vertical"
 								aria-labelledby="menu-button"
 								tabindex="-1">
 								<div
-									class="cms-wysiwyg-dropdown-items"
+									class="cms-richtext-dropdown-items"
 									role="none">
 									<button
 										onclick={clickDropdown(
@@ -356,10 +356,10 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 1 })}>
 										<IcoH1 />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 1')}
 										</span>
 									</button>
@@ -369,10 +369,10 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 2 })}>
 										<IcoH2 />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 2')}
 										</span>
 									</button>
@@ -382,10 +382,10 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('heading', { level: 3 })}>
 										<IcoH3 />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Überschrift Level 3')}
 										</span>
 									</button>
@@ -395,12 +395,12 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('paragraph') &&
 											$editor.getAttributes('paragraph')['class'] !==
 												'large'}>
 										<IcoParagraph />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz')}
 										</span>
 									</button>
@@ -416,12 +416,12 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('paragraph') &&
 											$editor.getAttributes('paragraph')['class'] ===
 												'large'}>
 										<IcoTextHeight />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz große Schrift')}
 										</span>
 									</button>
@@ -437,12 +437,12 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item"
+										class="richtext-dropdown-item"
 										class:active={$editor.isActive('paragraph') &&
 											$editor.getAttributes('paragraph')['class'] ===
 												'small'}>
 										<IcoTextHeight />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz kleine Schrift')}
 										</span>
 									</button>
@@ -452,9 +452,9 @@
 										)}
 										role="menuitem"
 										tabindex="-1"
-										class="wysiwyg-dropdown-item">
+										class="richtext-dropdown-item">
 										<IcoRemoveFormat />
-										<span class="cms-wysiwyg-dropdown-item-label">
+										<span class="cms-richtext-dropdown-item-label">
 											{_('Format entfernen')}
 										</span>
 									</button>
@@ -462,15 +462,15 @@
 							</div>
 						{/if}
 					</div>
-					<div class="wysiwyg-toolbar-btns cms-wysiwyg-toolbar-btns-grow">
+					<div class="richtext-toolbar-btns cms-richtext-toolbar-btns-grow">
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Text align left')}
 							onclick={clickToolbar($editor.chain().focus().unsetTextAlign().run)}>
 							<IcoAlignLeft />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Text align center')}
 							onclick={clickToolbar(
 								$editor.chain().focus().setTextAlign('center').run,
@@ -479,7 +479,7 @@
 							<IcoAlignCenter />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Text align right')}
 							onclick={clickToolbar(
 								$editor.chain().focus().setTextAlign('right').run,
@@ -488,7 +488,7 @@
 							<IcoAlignRight />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Justify text')}
 							onclick={clickToolbar(
 								$editor.chain().focus().setTextAlign('justify').run,
@@ -497,103 +497,103 @@
 							<IcoAlignJustify />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Bold text')}
 							onclick={clickToolbar($editor.chain().focus().toggleBold().run)}
 							class:active={editorState.bold}>
 							<IcoBold />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Italic text')}
 							onclick={clickToolbar($editor.chain().focus().toggleItalic().run)}
 							class:active={$editor.isActive('italic')}>
 							<IcoItalic />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Strike through')}
 							onclick={clickToolbar($editor.chain().focus().toggleStrike().run)}
 							class:active={$editor.isActive('strike')}>
 							<IcoStrikethrough />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Bulleted list')}
 							onclick={clickToolbar($editor.chain().focus().toggleBulletList().run)}
 							class:active={$editor.isActive('bulletList')}>
 							<IcoListUl />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Numbered list')}
 							onclick={clickToolbar($editor.chain().focus().toggleOrderedList().run)}
 							class:active={$editor.isActive('orderedList')}>
 							<IcoListOl />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Subscript')}
 							onclick={clickToolbar($editor.chain().focus().toggleSubscript().run)}
 							class:active={$editor.isActive('subscript')}>
 							<IcoSubscript />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Superscript')}
 							onclick={clickToolbar($editor.chain().focus().toggleSuperscript().run)}
 							class:active={$editor.isActive('superscript')}>
 							<IcoSuperscript />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Block quote')}
 							onclick={clickToolbar($editor.chain().focus().toggleBlockquote().run)}
 							class:active={$editor.isActive('blockquote')}>
 							<IcoBlockQuoteRight />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Horizontal line')}
 							onclick={clickToolbar($editor.chain().focus().setHorizontalRule().run)}>
 							<IcoHorizontalRule />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Add link to page')}
 							onclick={openAddLinkModal}>
 							<IcoLink />
 						</button>
 						{#if $editor.isActive('link')}
 							<button
-								class="wysiwyg-toolbar-btn"
+								class="richtext-toolbar-btn"
 								title={_('Remove link')}
 								onclick={clickToolbar($editor.chain().focus().unsetLink().run)}>
 								<IcoUnlink />
 							</button>
 						{/if}
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Add a hard line break')}
 							onclick={clickToolbar($editor.chain().focus().setHardBreak().run)}>
 							<IcoLineBreak />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Remove formats')}
 							onclick={clickToolbar($editor.chain().focus().unsetAllMarks().run)}>
 							<IcoRemoveFormat />
 						</button>
 					</div>
-					<div class="wysiwyg-extras">
+					<div class="richtext-extras">
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Undo last action')}
 							onclick={clickToolbar($editor.chain().focus().undo().run)}>
 							<IcoUndo />
 						</button>
 						<button
-							class="wysiwyg-toolbar-btn"
+							class="richtext-toolbar-btn"
 							title={_('Redo last undo')}
 							onclick={clickToolbar($editor.chain().focus().redo().run)}>
 							<IcoRedo />
@@ -601,7 +601,7 @@
 						{#if editSource}
 							<button
 								onclick={toggleSource}
-								class="wysiwyg-source-btn cms-wysiwyg-source-btn-offset">
+								class="richtext-source-btn cms-richtext-source-btn-offset">
 								<IcoCode />
 								{_('Show source')}
 							</button>
@@ -613,19 +613,19 @@
 	{/if}
 
 	<div
-		class="wysiwyg-editor cms-wysiwyg-richtext cms-wysiwyg-layer-base"
+		class="richtext-editor cms-richtext-content cms-richtext-layer-base"
 		bind:this={ref}
 		data-name={name}
 		class:hide={showSource}>
 	</div>
 	<div
-		class="wysiwyg-source cms-wysiwyg-source cms-wysiwyg-layer-base"
+		class="richtext-source cms-richtext-source cms-richtext-layer-base"
 		class:hide={!showSource}>
 		<textarea
 			onkeyup={changeSource}
 			{name}
 			bind:value
-			class="cms-wysiwyg-source-input">
+			class="cms-richtext-source-input">
 		</textarea>
 	</div>
 </div>

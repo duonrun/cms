@@ -49,7 +49,7 @@
 		iframe: GridIframe,
 	};
 	const types = [
-		{ id: 'html', label: 'Formatierter Text (wysiwyg)' },
+		{ id: 'html', label: 'Formatierter Text (richtext)' },
 		{ id: 'text', label: 'Einfacher Text' },
 		{ id: 'image', label: 'Einzelbild' },
 		{ id: 'youtube', label: 'Youtube-Video' },

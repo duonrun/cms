@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { system, systemLocale } from '$lib/sys';
 	import Field from '$shell/Field.svelte';
-	import Wysiwyg from '$shell/wysiwyg/Wysiwyg.svelte';
+	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 	import LabelDiv from '$shell/LabelDiv.svelte';
 	import type { TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
@@ -31,14 +31,14 @@
 		{#if field.translate}
 			{#each $system.locales as locale (locale)}
 				{#if locale.id === lang}
-					<Wysiwyg
+					<RichTextEditor
 						name={field.name}
 						required={field.required}
 						bind:value={data.value[locale.id]} />
 				{/if}
 			{/each}
 		{:else}
-			<Wysiwyg
+			<RichTextEditor
 				name={field.name}
 				required={field.required}
 				bind:value={data.value} />

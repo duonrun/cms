@@ -3,7 +3,7 @@
 	import type { GridHtml } from '$types/data';
 	import type { GridField } from '$types/fields';
 
-	import Wysiwyg from '$shell/wysiwyg/Wysiwyg.svelte';
+	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {
 		field: GridField;
@@ -24,7 +24,7 @@
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
-		<Wysiwyg
+		<RichTextEditor
 			required={false}
 			name={field.name + '_' + index}
 			bind:value={item.value} />
