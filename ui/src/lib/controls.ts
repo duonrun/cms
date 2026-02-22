@@ -1,4 +1,5 @@
 import Checkbox from '$shell/controls/Checkbox.svelte';
+import Code from '$shell/controls/Code.svelte';
 import Date from '$shell/controls/Date.svelte';
 import File from '$shell/controls/File.svelte';
 import Grid from '$shell/controls/Grid.svelte';
@@ -15,6 +16,7 @@ import Time from '$shell/controls/Time.svelte';
 
 export default {
 	'Duon\\Cms\\Field\\Checkbox': Checkbox,
+	'Duon\\Cms\\Field\\Code': Code,
 	'Duon\\Cms\\Field\\Date': Date,
 	'Duon\\Cms\\Field\\File': File,
 	'Duon\\Cms\\Field\\Grid': Grid,

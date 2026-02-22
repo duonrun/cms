@@ -26,6 +26,12 @@ export interface TextData {
 	value?: string | Record<string, string>;
 }
 
+export interface CodeData {
+	type: 'code';
+	syntax: string;
+	value?: string | Record<string, string>;
+}
+
 export interface NumberData {
 	type: 'number';
 	value?: number;
@@ -39,6 +45,7 @@ export interface BooleanData {
 export interface GenericFieldData {
 	type: string;
 	value?: unknown;
+	syntax?: string;
 	files?: FileItem[] | Record<string, TranslatedFile[]>;
 	columns?: number;
 }
@@ -120,7 +127,7 @@ export interface MatrixData {
 	value: MatrixItemData[];
 }
 
-export type Data = TextData | FileData | GridData | NumberData | MatrixData;
+export type Data = TextData | CodeData | FileData | GridData | NumberData | MatrixData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 
