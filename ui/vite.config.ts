@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from 'path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
@@ -37,5 +38,9 @@ export default defineConfig({
 			$types: path.resolve('./src/types'),
 			$shell: path.resolve('./src/shell'),
 		},
+	},
+	test: {
+		environment: 'jsdom',
+		include: ['src/**/*.test.ts'],
 	},
 });
