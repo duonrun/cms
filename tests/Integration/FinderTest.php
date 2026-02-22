@@ -29,7 +29,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
-			$this->assertEquals('test-article', $this->types->handle(Node::unwrap($node)::class));
+			$this->assertEquals('test-article', $this->types->get(Node::unwrap($node)::class, 'handle'));
 		}
 	}
 
@@ -78,7 +78,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertNotEmpty($nodes);
 
 		foreach ($nodes as $node) {
-			$this->assertTrue($this->types->routable(Node::unwrap($node)::class));
+			$this->assertTrue((bool) $this->types->get(Node::unwrap($node)::class, 'routable', false));
 		}
 	}
 
@@ -109,7 +109,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeHandles = [];
 
 		foreach ($nodes as $node) {
-			$typeHandles[] = $this->types->handle(Node::unwrap($node)::class);
+			$typeHandles[] = $this->types->get(Node::unwrap($node)::class, 'handle');
 		}
 
 		$uniqueTypes = array_unique($typeHandles);

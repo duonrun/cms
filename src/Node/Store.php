@@ -112,7 +112,7 @@ class Store
 	{
 		$nodeId = $this->persistNode($node, $data, $editor);
 
-		if ($this->types->routable($node::class)) {
+		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -120,7 +120,7 @@ class Store
 	private function persistNode(object $node, array $data, int $editor): int
 	{
 		$class = $node::class;
-		$handle = $this->types->handle($class);
+		$handle = (string) $this->types->get($class, 'handle');
 		$this->ensureTypeExists($handle);
 
 		return (int) $this->db->nodes->save([

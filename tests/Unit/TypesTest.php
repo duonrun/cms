@@ -24,26 +24,26 @@ final class TypesTest extends TestCase
 
 	public function testLabelAttributeSet(): void
 	{
-		$this->assertEquals('NodeWithHandleAttribute', $this->types->label(NodeWithHandleAttribute::class));
-		$this->assertEquals('Node With Custom Name Attribute', $this->types->label(NodeWithNameAttribute::class));
+		$this->assertEquals('NodeWithHandleAttribute', $this->types->get(NodeWithHandleAttribute::class, 'label'));
+		$this->assertEquals('Node With Custom Name Attribute', $this->types->get(NodeWithNameAttribute::class, 'label'));
 	}
 
 	public function testHandleAttributeSet(): void
 	{
-		$this->assertEquals('node-with-name-attribute', $this->types->handle(NodeWithNameAttribute::class));
-		$this->assertEquals('node-with-custom-handle-attribute', $this->types->handle(NodeWithHandleAttribute::class));
+		$this->assertEquals('node-with-name-attribute', $this->types->get(NodeWithNameAttribute::class, 'handle'));
+		$this->assertEquals('node-with-custom-handle-attribute', $this->types->get(NodeWithHandleAttribute::class, 'handle'));
 	}
 
 	public function testRouteAttributeSet(): void
 	{
-		$this->assertEquals('', $this->types->route(NodeWithNameAttribute::class));
-		$this->assertEquals('/node-with-custom/{route}', $this->types->route(NodeWithRouteAttribute::class));
+		$this->assertEquals('', $this->types->get(NodeWithNameAttribute::class, 'route'));
+		$this->assertEquals('/node-with-custom/{route}', $this->types->get(NodeWithRouteAttribute::class, 'route'));
 	}
 
 	public function testRoutableIsDerivedFromRouteAttribute(): void
 	{
-		$this->assertFalse($this->types->routable(NodeWithNameAttribute::class));
-		$this->assertTrue($this->types->routable(NodeWithRouteAttribute::class));
+		$this->assertFalse((bool) $this->types->get(NodeWithNameAttribute::class, 'routable', false));
+		$this->assertTrue((bool) $this->types->get(NodeWithRouteAttribute::class, 'routable', false));
 	}
 
 	public function testRenderAttributeSet(): void
@@ -54,8 +54,8 @@ final class TypesTest extends TestCase
 
 	public function testRenderableUsesRenderAttributeOrHandleFallback(): void
 	{
-		$this->assertTrue($this->types->renderable(NodeWithNameAttribute::class));
-		$this->assertTrue($this->types->renderable(NodeWithRenderAttribute::class));
+		$this->assertTrue((bool) $this->types->get(NodeWithNameAttribute::class, 'renderable', false));
+		$this->assertTrue((bool) $this->types->get(NodeWithRenderAttribute::class, 'renderable', false));
 	}
 
 	public function testPermissionAttributeSet(): void

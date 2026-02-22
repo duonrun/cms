@@ -8,6 +8,7 @@ class Meta
 {
 	private readonly object $node;
 	public readonly string $uid;
+	public readonly Type $type;
 
 	public function __construct(
 		object $node,
@@ -15,6 +16,7 @@ class Meta
 	) {
 		$this->node = Node::unwrap($node);
 		$this->uid = (string) (Factory::meta($this->node, 'uid') ?? '');
+		$this->type = $this->types->typeOf($this->node::class);
 	}
 
 	public function __get(string $name): mixed
@@ -34,9 +36,11 @@ class Meta
 			return $data[$name] !== null;
 		}
 
-		$schema = $this->types->schemaOf($this->node::class)->properties();
+		if ($this->type->has($name)) {
+			return $this->type->get($name) !== null;
+		}
 
-		return array_key_exists($name, $schema) && $schema[$name] !== null;
+		return false;
 	}
 
 	public function get(string $key, mixed $default = null): mixed
@@ -47,13 +51,11 @@ class Meta
 			return $data[$key];
 		}
 
-		$schema = $this->types->schemaOf($this->node::class);
-
 		return match ($key) {
-			'name' => $schema->label,
+			'name' => $this->type->label,
 			'class' => $this->node::class,
 			'classname' => basename(str_replace('\\', '/', $this->node::class)),
-			default => $schema->properties()[$key] ?? $default,
+			default => $this->type->get($key, $default),
 		};
 	}
 
@@ -62,11 +64,9 @@ class Meta
 	 */
 	public function all(): array
 	{
-		$schema = $this->types->schemaOf($this->node::class)->properties();
-
-		return array_merge($schema, Factory::dataFor($this->node), [
+		return array_merge($this->type->all(), Factory::dataFor($this->node), [
 			'uid' => $this->uid,
-			'name' => $schema['label'],
+			'name' => $this->type->label,
 			'class' => $this->node::class,
 			'classname' => basename(str_replace('\\', '/', $this->node::class)),
 		]);

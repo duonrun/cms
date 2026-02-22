@@ -140,7 +140,7 @@ class Serializer
 			return $node->title();
 		}
 
-		$titleField = $this->types->titleField($node::class);
+		$titleField = $this->types->get($node::class, 'titleField');
 
 		if ($titleField) {
 			$field = $this->hydrator->getField($node, $titleField);
@@ -156,7 +156,7 @@ class Serializer
 	 */
 	private function order(object $node, array $fieldNames): array
 	{
-		$metaOrder = $this->types->fieldOrder($node::class);
+		$metaOrder = $this->types->get($node::class, 'fieldOrder');
 
 		if ($metaOrder !== null) {
 			return $metaOrder;
@@ -193,6 +193,6 @@ class Serializer
 			return $method->invoke($node);
 		}
 
-		return $this->types->deletable($node::class);
+		return (bool) $this->types->get($node::class, 'deletable', true);
 	}
 }
