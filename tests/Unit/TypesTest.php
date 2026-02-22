@@ -48,8 +48,8 @@ final class TypesTest extends TestCase
 
 	public function testRenderAttributeSet(): void
 	{
-		$this->assertEquals('node-with-name-attribute', $this->types->forClass(NodeWithNameAttribute::class)->renderer);
-		$this->assertEquals('template-defined-by-render-attribute', $this->types->forClass(NodeWithRenderAttribute::class)->renderer);
+		$this->assertEquals('node-with-name-attribute', $this->types->schemaOf(NodeWithNameAttribute::class)->renderer);
+		$this->assertEquals('template-defined-by-render-attribute', $this->types->schemaOf(NodeWithRenderAttribute::class)->renderer);
 	}
 
 	public function testRenderableUsesRenderAttributeOrHandleFallback(): void
@@ -65,9 +65,9 @@ final class TypesTest extends TestCase
 			'create' => 'authenticated',
 			'change' => 'authenticated',
 			'deeete' => 'authenticated',
-		], $this->types->forClass(NodeWithNameAttribute::class)->permission);
+		], $this->types->schemaOf(NodeWithNameAttribute::class)->permission);
 		$this->assertEquals([
 			'read' => 'me',
-		], $this->types->forClass(NodeWithPermissionAttribute::class)->permission);
+		], $this->types->schemaOf(NodeWithPermissionAttribute::class)->permission);
 	}
 }

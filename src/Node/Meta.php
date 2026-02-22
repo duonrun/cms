@@ -34,7 +34,7 @@ class Meta
 			return $data[$name] !== null;
 		}
 
-		$schema = $this->types->forClass($this->node::class)->properties();
+		$schema = $this->types->schemaOf($this->node::class)->properties();
 
 		return array_key_exists($name, $schema) && $schema[$name] !== null;
 	}
@@ -47,7 +47,7 @@ class Meta
 			return $data[$key];
 		}
 
-		$schema = $this->types->forClass($this->node::class);
+		$schema = $this->types->schemaOf($this->node::class);
 
 		return match ($key) {
 			'name' => $schema->label,
@@ -62,7 +62,7 @@ class Meta
 	 */
 	public function all(): array
 	{
-		$schema = $this->types->forClass($this->node::class)->properties();
+		$schema = $this->types->schemaOf($this->node::class)->properties();
 
 		return array_merge($schema, Factory::dataFor($this->node), [
 			'uid' => $this->uid,

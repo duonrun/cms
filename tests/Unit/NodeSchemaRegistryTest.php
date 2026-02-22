@@ -295,8 +295,8 @@ final class NodeSchemaRegistryTest extends TestCase
 	{
 		$types = new Types();
 
-		$schema1 = $types->forClass(PlainPage::class);
-		$schema2 = $types->forClass(PlainPage::class);
+		$schema1 = $types->schemaOf(PlainPage::class);
+		$schema2 = $types->schemaOf(PlainPage::class);
 
 		$this->assertSame($schema1, $schema2);
 	}
@@ -305,9 +305,9 @@ final class NodeSchemaRegistryTest extends TestCase
 	{
 		$types = new Types();
 
-		$schema1 = $types->forClass(PlainPage::class);
+		$schema1 = $types->schemaOf(PlainPage::class);
 		$types->clearCache();
-		$schema2 = $types->forClass(PlainPage::class);
+		$schema2 = $types->schemaOf(PlainPage::class);
 
 		$this->assertNotSame($schema1, $schema2);
 		$this->assertEquals($schema1->handle, $schema2->handle);

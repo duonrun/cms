@@ -100,7 +100,7 @@ class TemplateRenderer
 	 */
 	public function resolveRenderer(object $node): array
 	{
-		return ['template', $this->types->forClass($node::class)->renderer];
+		return ['template', $this->types->schemaOf($node::class)->renderer];
 	}
 
 	private function doRender(object $node, array $context): Response

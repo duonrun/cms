@@ -32,7 +32,7 @@ class Type
 	) {
 		$this->class = $class;
 		$this->classname = basename(str_replace('\\', '/', $class));
-		$this->schema = $types->forClass($class);
+		$this->schema = $types->schemaOf($class);
 		$this->label = $this->schema->label;
 		$this->handle = $this->schema->handle;
 		$this->renderer = $this->schema->renderer;

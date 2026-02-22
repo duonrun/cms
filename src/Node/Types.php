@@ -21,7 +21,7 @@ class Types
 	/**
 	 * @param class-string $class
 	 */
-	public function forClass(string $class): Schema
+	public function schemaOf(string $class): Schema
 	{
 		return $this->cache[$class] ??= new Schema($class, $this->registry);
 	}
@@ -31,7 +31,7 @@ class Types
 	 */
 	public function handle(string $class): string
 	{
-		return $this->forClass($class)->handle;
+		return $this->schemaOf($class)->handle;
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Types
 	 */
 	public function label(string $class): string
 	{
-		return $this->forClass($class)->label;
+		return $this->schemaOf($class)->label;
 	}
 
 	/**
@@ -47,7 +47,7 @@ class Types
 	 */
 	public function route(string $class): string|array
 	{
-		return $this->forClass($class)->route;
+		return $this->schemaOf($class)->route;
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Types
 	 */
 	public function routable(string $class): bool
 	{
-		return $this->forClass($class)->routable;
+		return $this->schemaOf($class)->routable;
 	}
 
 	/**
@@ -63,7 +63,7 @@ class Types
 	 */
 	public function renderable(string $class): bool
 	{
-		return $this->forClass($class)->renderable;
+		return $this->schemaOf($class)->renderable;
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Types
 	 */
 	public function titleField(string $class): ?string
 	{
-		return $this->forClass($class)->titleField;
+		return $this->schemaOf($class)->titleField;
 	}
 
 	/**
@@ -79,7 +79,7 @@ class Types
 	 */
 	public function fieldOrder(string $class): ?array
 	{
-		return $this->forClass($class)->fieldOrder;
+		return $this->schemaOf($class)->fieldOrder;
 	}
 
 	/**
@@ -87,7 +87,7 @@ class Types
 	 */
 	public function deletable(string $class): bool
 	{
-		return $this->forClass($class)->deletable;
+		return $this->schemaOf($class)->deletable;
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Types
 	 */
 	public function get(string $class, string $key, mixed $default = null): mixed
 	{
-		return $this->forClass($class)->get($key, $default);
+		return $this->schemaOf($class)->get($key, $default);
 	}
 
 	/**

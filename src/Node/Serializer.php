@@ -78,7 +78,7 @@ class Serializer
 		}
 
 		$class = $node::class;
-		$schema = $this->types->forClass($class);
+		$schema = $this->types->schemaOf($class);
 
 		foreach ($locales as $locale) {
 			$paths[$locale->id] = '';
@@ -175,7 +175,7 @@ class Serializer
 	 */
 	private function resolveType(string $class, ?string $handle = null): array
 	{
-		$schema = $this->types->forClass($class);
+		$schema = $this->types->schemaOf($class);
 
 		return array_merge([
 			'handle' => $handle ?? $schema->handle,
