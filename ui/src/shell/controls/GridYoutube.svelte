@@ -93,14 +93,14 @@
 
 <style lang="postcss">
 	.cms-grid-youtube-field-row {
-		margin-top: var(--s-2);
+		margin-top: var(--cms-space-2);
 	}
 
 	.cms-grid-youtube-ratio-row {
 		display: flex;
 		flex-direction: row;
-		gap: var(--s-4);
-		margin-top: var(--s-2);
+		gap: var(--cms-space-4);
+		margin-top: var(--cms-space-2);
 	}
 
 	.cms-grid-youtube-frame {

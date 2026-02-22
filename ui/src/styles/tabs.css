@@ -1,9 +1,9 @@
 .tabs {
-	border-bottom: 1px solid var(--gray-200);
+	border-bottom: 1px solid var(--cms-color-neutral-200);
 
 	nav {
 		display: flex;
-		gap: var(--s-8);
+		gap: var(--cms-space-8);
 		margin-bottom: -1px;
 	}
 }
@@ -11,10 +11,10 @@
 .tab {
 	display: inline-flex;
 	align-items: center;
-	padding: var(--s-4) var(--s-1);
+	padding: var(--cms-space-4) var(--cms-space-1);
 	border-bottom: 2px solid transparent;
-	color: var(--gray-500);
-	font-size: var(--font-size-sm);
+	color: var(--cms-color-neutral-500);
+	font-size: var(--cms-font-size-sm);
 	font-weight: 600;
 	white-space: nowrap;
 	transition:
@@ -22,16 +22,16 @@
 		border-color 120ms ease;
 
 	&:hover {
-		border-bottom-color: var(--gray-300);
-		color: var(--gray-700);
+		border-bottom-color: var(--cms-color-neutral-300);
+		color: var(--cms-color-neutral-700);
 	}
 
 	&.active {
-		border-bottom-color: var(--color-emerald-600);
-		color: color-mix(in srgb, var(--color-emerald-600) 75%, black);
+		border-bottom-color: var(--cms-color-success-600);
+		color: color-mix(in srgb, var(--cms-color-success-600) 75%, black);
 	}
 
 	svg + span {
-		padding-left: var(--s-2);
+		padding-left: var(--cms-space-2);
 	}
 }

@@ -10,6 +10,6 @@
 
 <style lang="postcss">
 	.modal-footer {
-		border-color: var(--border-color);
+		border-color: var(--cms-border-color);
 	}
 </style>

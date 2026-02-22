@@ -9,7 +9,7 @@
 @import './modal.css';
 
 html {
-	background-color: var(--gray-50);
+	background-color: var(--cms-color-neutral-50);
 
 	height: 100%;
 }
@@ -28,7 +28,7 @@ body {
 	top: 0;
 	left: 0;
 	/* fix end */
-	font-family: var(--font);
+	font-family: var(--cms-font-sans);
 	overflow: hidden;
 }
 
@@ -55,10 +55,10 @@ body {
 	flex-direction: row;
 	justify-content: flex-end;
 	align-items: center;
-	height: var(--s-16);
+	height: var(--cms-space-16);
 
-	background-color: var(--white);
-	border-bottom: var(--border);
+	background-color: var(--cms-color-white);
+	border-bottom: var(--cms-border);
 }
 
 a,
@@ -69,5 +69,5 @@ a:focus {
 
 a:visited {
 	text-decoration: underline;
-	color: var(--high-dark);
+	color: var(--cms-color-high-dark);
 }

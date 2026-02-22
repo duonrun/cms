@@ -123,8 +123,8 @@
 		flex: 1 1 auto;
 		flex-direction: row;
 		align-items: center;
-		gap: var(--s-3);
-		padding: var(--s-2) 0;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-2) 0;
 	}
 
 	.cms-grid-size-buttons-inline {
@@ -137,11 +137,11 @@
 
 	div button {
 		position: relative;
-		height: var(--s-4);
-		width: var(--s-4);
+		height: var(--cms-space-4);
+		width: var(--cms-space-4);
 
 		&[disabled] {
-			color: var(--color-gray-300);
+			color: var(--cms-color-neutral-300);
 		}
 	}
 

@@ -40,14 +40,14 @@
 	}
 
 	.cms-toggle-line-title {
-		font-size: var(--font-size-sm);
+		font-size: var(--cms-font-size-sm);
 		line-height: 1.5rem;
 		font-weight: 600;
-		color: var(--gray-900);
+		color: var(--cms-color-neutral-900);
 	}
 
 	.cms-toggle-line-subtitle {
-		font-size: var(--font-size-sm);
-		color: var(--gray-500);
+		font-size: var(--cms-font-size-sm);
+		color: var(--cms-color-neutral-500);
 	}
 </style>

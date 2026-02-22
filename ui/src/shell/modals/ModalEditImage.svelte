@@ -55,7 +55,7 @@
 	.cms-modal-edit-image-fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--s-4);
-		margin-bottom: var(--s-8);
+		gap: var(--cms-space-4);
+		margin-bottom: var(--cms-space-8);
 	}
 </style>

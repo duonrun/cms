@@ -131,13 +131,13 @@
 		flex-direction: row;
 		flex-wrap: wrap;
 		justify-content: flex-start;
-		gap: var(--s-4);
-		padding: var(--s-4) 0;
+		gap: var(--cms-space-4);
+		padding: var(--cms-space-4) 0;
 	}
 
 	.cms-media-list-files {
-		margin-bottom: var(--s-3);
+		margin-bottom: var(--cms-space-3);
 		flex-direction: column;
-		gap: var(--s-3);
+		gap: var(--cms-space-3);
 	}
 </style>

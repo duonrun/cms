@@ -48,6 +48,6 @@
 
 <style lang="postcss">
 	.modal-container {
-		background-color: var(--mogal-bg-color, #fff);
+		background-color: var(--cms-color-white, #fff);
 	}
 </style>

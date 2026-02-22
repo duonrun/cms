@@ -105,7 +105,7 @@
 <style lang="postcss">
 	.matrix-item {
 		background: white;
-		border: 1px solid var(--color-gray-300);
+		border: 1px solid var(--cms-color-neutral-300);
 		border-radius: 0.375rem;
 		overflow: hidden;
 	}
@@ -116,8 +116,8 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.5rem 0.75rem;
-		background: var(--color-gray-50);
-		border-bottom: 1px solid var(--color-gray-200);
+		background: var(--cms-color-neutral-50);
+		border-bottom: 1px solid var(--cms-color-neutral-200);
 	}
 
 	.item-title {
@@ -131,17 +131,17 @@
 		cursor: pointer;
 
 		&:hover {
-			color: var(--color-sky-700);
+			color: var(--cms-color-info-700);
 		}
 	}
 
 	.item-number {
 		font-weight: 600;
-		color: var(--color-gray-500);
+		color: var(--cms-color-neutral-500);
 	}
 
 	.item-label {
-		color: var(--color-gray-700);
+		color: var(--cms-color-neutral-700);
 	}
 
 	.matrix-item-body {
@@ -157,6 +157,6 @@
 	}
 
 	.matrix-subfield-note {
-		color: var(--color-gray-500);
+		color: var(--cms-color-neutral-500);
 	}
 </style>

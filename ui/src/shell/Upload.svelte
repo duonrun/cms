@@ -255,7 +255,7 @@
 		flex-direction: column;
 
 		&.upload-inline {
-			margin-top: var(--s-6);
+			margin-top: var(--cms-space-6);
 		}
 
 		&.upload-multiple {
@@ -263,13 +263,13 @@
 		}
 
 		&.required .dragdrop {
-			border-left-width: var(--border-4);
-			border-left-color: var(--color-rose-700);
+			border-left-width: 4px;
+			border-left-color: var(--cms-color-danger-700);
 			border-left-style: solid;
 		}
 	}
 
-	@media (min-width: var(--breakpoint-md)) {
+	@media (min-width: var(--cms-breakpoint-md)) {
 		.upload {
 			flex-direction: row;
 		}
@@ -281,17 +281,21 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		border: 2px dashed var(--gray-300);
-		border-radius: var(--radius-md);
-		background-color: var(--gray-100);
-		padding: var(--s-4) var(--s-2);
+		border: 2px dashed var(--cms-color-neutral-300);
+		border-radius: var(--cms-radius-md);
+		background-color: var(--cms-color-neutral-100);
+		padding: var(--cms-space-4) var(--cms-space-2);
 		text-align: center;
 		vertical-align: middle;
 	}
 
 	.dragdrop.dragging {
-		border-color: var(--color-sky-700);
-		background-color: color-mix(in srgb, var(--color-sky-700) 10%, var(--gray-100));
+		border-color: var(--cms-color-info-700);
+		background-color: color-mix(
+			in srgb,
+			var(--cms-color-info-700) 10%,
+			var(--cms-color-neutral-100)
+		);
 	}
 
 	.upload-drop-label {
@@ -299,14 +303,14 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
-		gap: var(--s-2);
-		color: var(--gray-600);
+		gap: var(--cms-space-2);
+		color: var(--cms-color-neutral-600);
 	}
 
 	.upload-drop-icon {
 		display: inline-block;
-		width: var(--s-6);
-		height: var(--s-6);
+		width: var(--cms-space-6);
+		height: var(--cms-space-6);
 	}
 
 	.upload input {
@@ -325,22 +329,22 @@
 
 	:global(.dragdrop > .upload-drop-label svg) {
 		display: inline;
-		margin-bottom: var(--s-2);
+		margin-bottom: var(--cms-space-2);
 	}
 	:global(.dragdrop > .upload-drop-label u) {
-		color: var(--color-sky-700);
+		color: var(--cms-color-info-700);
 	}
 
 	.dragdrop > div.file-extensions {
 		font-weight: normal;
-		font-size: var(--text-xs);
-		color: var(--gray-400);
-		margin-top: var(--s-1);
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-neutral-400);
+		margin-top: var(--cms-space-1);
 	}
 
-	@media (min-width: var(--breakpoint-md)) {
+	@media (min-width: var(--cms-breakpoint-md)) {
 		:global(.upload-image .preview) {
-			width: var(--fraction-2-5);
+			width: var(--cms-fraction-2-5);
 		}
 	}
 </style>

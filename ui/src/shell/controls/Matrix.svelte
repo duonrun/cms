@@ -144,9 +144,9 @@
 <style lang="postcss">
 	.matrix-field {
 		margin-top: 0.5rem;
-		border: 1px solid var(--color-gray-300);
+		border: 1px solid var(--cms-color-neutral-300);
 		border-radius: 0.375rem;
-		background: var(--color-gray-200);
+		background: var(--cms-color-neutral-200);
 		padding: 0.75rem;
 	}
 
@@ -161,7 +161,7 @@
 		justify-content: center;
 		margin-top: 0.75rem;
 		padding-top: 0.75rem;
-		border-top: 1px dashed var(--color-gray-300);
+		border-top: 1px dashed var(--cms-color-neutral-300);
 	}
 
 	.matrix-empty {

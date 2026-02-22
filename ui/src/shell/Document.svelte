@@ -23,7 +23,7 @@
 	.cms-document-inner {
 		margin: 0 auto;
 		width: 100%;
-		max-width: var(--s-7xl);
-		padding: 0 var(--s-8);
+		max-width: var(--cms-size-7xl);
+		padding: 0 var(--cms-space-8);
 	}
 </style>

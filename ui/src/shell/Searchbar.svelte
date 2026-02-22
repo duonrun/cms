@@ -80,8 +80,8 @@
 	.cms-searchbar-controls {
 		display: flex;
 		width: 100%;
-		max-width: var(--s-6xl);
-		margin: 0 var(--s-4) 0 var(--s-14);
+		max-width: var(--cms-size-6xl);
+		margin: 0 var(--cms-space-4) 0 var(--cms-space-14);
 	}
 
 	.cms-searchbar-input-wrap {
@@ -89,22 +89,22 @@
 		flex-grow: 1;
 		align-items: center;
 
-		border: var(--border);
-		border-radius: var(--radius-full);
+		border: var(--cms-border);
+		border-radius: var(--cms-radius-full);
 
 		svg {
-			height: var(--s-5);
-			width: var(--s-5);
-			margin-left: var(--s-3);
-			color: var(--gray-400);
+			height: var(--cms-space-5);
+			width: var(--cms-space-5);
+			margin-left: var(--cms-space-3);
+			color: var(--cms-color-neutral-400);
 		}
 
 		input {
 			flex-grow: 1;
-			height: var(--s-10);
+			height: var(--cms-space-10);
 			box-shadow: none;
 			border: 0;
-			border-radius: 0 var(--radius-full) var(--radius-full) 0;
+			border-radius: 0 var(--cms-radius-full) var(--cms-radius-full) 0;
 
 			&:focus {
 				outline: none;
@@ -116,26 +116,26 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: var(--s-10);
-		width: var(--s-10);
+		height: var(--cms-space-10);
+		width: var(--cms-space-10);
 		padding: 0;
-		margin-left: var(--s-2);
+		margin-left: var(--cms-space-2);
 
-		border-radius: var(--radius-full);
-		border: 1px solid var(--color-gray-400);
-		color: var(--color-gray-500);
+		border-radius: var(--cms-radius-full);
+		border: 1px solid var(--cms-color-neutral-400);
+		color: var(--cms-color-neutral-500);
 
 		svg {
 			margin: 0;
 			box-shadow: none;
-			height: var(--s-6);
-			width: var(--s-6);
+			height: var(--cms-space-6);
+			width: var(--cms-space-6);
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.cms-searchbar-controls {
-			margin: 0 var(--s-16);
+			margin: 0 var(--cms-space-16);
 		}
 	}
 </style>

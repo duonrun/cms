@@ -177,34 +177,34 @@
 <style lang="postcss">
 	.cms-grid-field {
 		display: grid;
-		gap: var(--s-3);
-		padding: var(--s-3);
-		border-radius: var(--radius);
-		border: var(--border);
-		background-color: var(--gray-200);
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-3);
+		border-radius: var(--cms-radius);
+		border: var(--cms-border);
+		background-color: var(--cms-color-neutral-200);
 	}
 
 	.cms-grid-item {
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		border-radius: var(--radius);
-		border: var(--border);
-		background-color: var(--white);
-		padding: 0 var(--s-2) var(--s-2);
+		border-radius: var(--cms-radius);
+		border: var(--cms-border);
+		background-color: var(--cms-color-white);
+		padding: 0 var(--cms-space-2) var(--cms-space-2);
 	}
 
 	.cms-grid-empty {
 		grid-column: 1 / -1;
 		display: flex;
 		justify-content: center;
-		padding: var(--s-4);
+		padding: var(--cms-space-4);
 	}
 
 	.cms-grid-empty-icon {
 		display: inline-flex;
 		width: 1.25rem;
 		height: 1.25rem;
-		margin-right: var(--s-2);
+		margin-right: var(--cms-space-2);
 	}
 </style>

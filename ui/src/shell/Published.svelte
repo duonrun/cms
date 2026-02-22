@@ -22,22 +22,22 @@
 <style lang="postcss">
 	span.cms-published {
 		display: inline-block;
-		border-radius: var(--radius-full);
-		background-color: var(--gray-300);
-		font-size: var(--font-size-sm);
+		border-radius: var(--cms-radius-full);
+		background-color: var(--cms-color-neutral-300);
+		font-size: var(--cms-font-size-sm);
 		height: 0.4rem;
 		width: 0.4rem;
 
 		&.large {
-			padding-left: var(--s-2);
-			padding-right: var(--s-2);
+			padding-left: var(--cms-space-2);
+			padding-right: var(--cms-space-2);
 			height: auto;
 			width: auto;
 		}
 
 		&.published {
-			background-color: var(--color-emerald-600);
-			color: var(--color-white);
+			background-color: var(--cms-color-success-600);
+			color: var(--cms-color-white);
 		}
 	}
 </style>

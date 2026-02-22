@@ -12,11 +12,11 @@
 <style lang="postcss">
 	button.cms-nav-toggle {
 		position: absolute;
-		left: var(--s-2);
+		left: var(--cms-space-2);
 		width: 2.25rem;
 		height: 2.25rem;
-		padding: var(--s-2);
-		background-color: var(--white);
+		padding: var(--cms-space-2);
+		background-color: var(--cms-color-white);
 		border: 0;
 		box-shadow: none;
 		cursor: pointer;

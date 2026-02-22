@@ -35,9 +35,9 @@
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color: var(--white);
-		border-right: var(--border);
-		padding: 0 var(--s-6) var(--s-6);
+		background-color: var(--cms-color-white);
+		border-right: var(--cms-border);
+		padding: 0 var(--cms-space-6) var(--cms-space-6);
 		box-sizing: border-box;
 		transition: all 0.15s ease-in-out;
 
@@ -47,8 +47,8 @@
 
 		:global(a),
 		button {
-			font-size: var(--font-size-sm);
-			color: var(--high);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-high);
 		}
 
 		button {
@@ -57,13 +57,13 @@
 	}
 
 	.cms-nav-section-title {
-		margin-top: var(--s-6);
-		font-size: var(--font-size-sm);
+		margin-top: var(--cms-space-6);
+		font-size: var(--cms-font-size-sm);
 		font-weight: 600;
 	}
 
 	.cms-nav-link-row {
-		margin-top: var(--s-1);
-		padding-left: var(--s-4);
+		margin-top: var(--cms-space-1);
+		padding-left: var(--cms-space-4);
 	}
 </style>

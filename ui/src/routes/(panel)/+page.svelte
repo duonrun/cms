@@ -18,7 +18,7 @@
 	.logo-wrapper {
 		margin-left: auto;
 		margin-right: auto;
-		max-width: var(--s-xl);
+		max-width: var(--cms-size-xl);
 		margin-top: 28vh;
 	}
 </style>

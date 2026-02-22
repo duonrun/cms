@@ -66,54 +66,54 @@
 	.toasts {
 		position: fixed;
 		z-index: 50;
-		font-size: var(--font-size-sm);
+		font-size: var(--cms-font-size-sm);
 	}
 
 	.toast {
 		position: relative;
 		display: block;
-		margin-bottom: var(--s-2);
-		padding: var(--s-4) var(--s-4) var(--s-5);
+		margin-bottom: var(--cms-space-2);
+		padding: var(--cms-space-4) var(--cms-space-4) var(--cms-space-5);
 		border: none;
 		text-align: left;
 		cursor: pointer;
 	}
 
 	.toast:last-child {
-		margin-bottom: var(--s-4);
+		margin-bottom: var(--cms-space-4);
 	}
 
 	.toast-offset {
-		margin-right: var(--s-4);
+		margin-right: var(--cms-space-4);
 	}
 
 	.toast-success {
-		background-color: var(--color-emerald-600);
+		background-color: var(--cms-color-success-600);
 	}
 
 	.toast-error {
-		background-color: var(--color-rose-700);
+		background-color: var(--cms-color-danger-700);
 	}
 
 	.toast-warning {
-		background-color: var(--color-orange-700);
+		background-color: var(--cms-color-warning-700);
 	}
 
 	.cms-toast-close-icon {
 		position: absolute;
-		top: var(--s-1);
-		right: var(--s-1);
-		height: var(--s-4);
-		width: var(--s-4);
+		top: var(--cms-space-1);
+		right: var(--cms-space-1);
+		height: var(--cms-space-4);
+		width: var(--cms-space-4);
 		cursor: pointer;
-		border-radius: var(--radius-full);
-		color: var(--white);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-white);
 	}
 
 	.pos-bottom {
 		bottom: 0;
 		right: 0;
-		padding-right: var(--s-8);
+		padding-right: var(--cms-space-8);
 	}
 
 	.pos-center {

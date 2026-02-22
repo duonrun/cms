@@ -134,7 +134,7 @@
 <style lang="postcss">
 	.preview {
 		z-index: 999;
-		background-color: color-mix(in srgb, var(--gray-900) 50%, transparent);
+		background-color: color-mix(in srgb, var(--cms-color-neutral-900) 50%, transparent);
 		backdrop-filter: blur(0.5rem);
 		position: fixed;
 		top: 0;
@@ -164,14 +164,14 @@
 
 	.cms-preview-close {
 		border: none;
-		border-radius: var(--radius);
-		background-color: var(--color-rose-700);
-		padding: var(--s-1) var(--s-4);
-		color: var(--white);
+		border-radius: var(--cms-radius);
+		background-color: var(--cms-color-danger-700);
+		padding: var(--cms-space-1) var(--cms-space-4);
+		color: var(--cms-color-white);
 		cursor: pointer;
 	}
 
 	.cms-preview-close:hover {
-		background-color: color-mix(in srgb, var(--color-rose-700) 86%, black);
+		background-color: color-mix(in srgb, var(--cms-color-danger-700) 86%, black);
 	}
 </style>
