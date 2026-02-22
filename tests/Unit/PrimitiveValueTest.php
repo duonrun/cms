@@ -7,6 +7,7 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestCheckbox;
+use Duon\Cms\Tests\Fixtures\Field\TestCode;
 use Duon\Cms\Tests\Fixtures\Field\TestNumber;
 use Duon\Cms\Tests\Fixtures\Field\TestRichText;
 use Duon\Cms\Tests\Fixtures\Field\TestText;
@@ -118,6 +119,81 @@ final class PrimitiveValueTest extends TestCase
 		$value = $field->value();
 		$this->assertSame('Hello World', $value->excerpt(2));
 		$this->assertStringContainsString('Hello', $value->clean());
+	}
+
+	public function testCodeValueFallsBackToDefaultLocaleAndKeepsSyntax(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new TestCode('snippet', $owner, new ValueContext('snippet', [
+			'value' => ['en' => '<?php echo 1;', 'de' => null],
+			'syntax' => 'php',
+		]));
+		$field->translate();
+		$field->syntaxes(['php', 'javascript']);
+
+		$context->request->set('locale', $context->locales()->get('de'));
+		$value = $field->value();
+
+		$this->assertSame('<?php echo 1;', $value->unwrap());
+		$this->assertSame('php', $value->syntax());
+		$this->assertSame('&lt;?php echo 1;', (string) $value);
+		$this->assertTrue($value->isset());
+	}
+
+	public function testCodeValueUsesConfiguredDefaultSyntax(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new TestCode('snippet', $owner, new ValueContext('snippet', [
+			'value' => 'const answer = 42;',
+		]));
+		$field->syntaxes(['javascript', 'php']);
+
+		$value = $field->value();
+
+		$this->assertSame('const answer = 42;', $value->unwrap());
+		$this->assertSame('javascript', $value->syntax());
+	}
+
+	public function testCodeStructureContainsSharedSyntaxAndLocaleValues(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new TestCode('snippet', $owner, new ValueContext('snippet', []));
+		$field->translate();
+		$field->syntaxes(['php', 'javascript']);
+
+		$structure = $field->structure();
+
+		$this->assertSame('code', $structure['type']);
+		$this->assertSame('php', $structure['syntax']);
+		$this->assertIsArray($structure['value']);
+		$this->assertArrayHasKey('en', $structure['value']);
+		$this->assertArrayHasKey('de', $structure['value']);
+	}
+
+	public function testCodeShapeRejectsUnsupportedSyntax(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new TestCode('snippet', $owner, new ValueContext('snippet', []));
+		$field->syntaxes(['php', 'javascript']);
+
+		$shape = $field->shape();
+		$valid = $shape->validate([
+			'type' => 'code',
+			'syntax' => 'php',
+			'value' => '<?php echo 1;',
+		]);
+		$invalid = $shape->validate([
+			'type' => 'code',
+			'syntax' => 'ruby',
+			'value' => 'puts 1',
+		]);
+
+		$this->assertTrue($valid->isValid());
+		$this->assertFalse($invalid->isValid());
 	}
 
 	public function testNumberValueCastsNumeric(): void
