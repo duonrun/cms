@@ -34,7 +34,7 @@ BEGIN
                 )
             ),
             'content', jsonb_build_object(
-                'type', 'html',
+                'type', 'richtext',
                 'value', jsonb_build_object(
                     'de', '<p>Willkommen auf der Testseite</p>',
                     'en', '<p>Welcome to the test page</p>'
@@ -75,7 +75,7 @@ BEGIN
                 )
             ),
             'body', jsonb_build_object(
-                'type', 'html',
+                'type', 'richtext',
                 'value', jsonb_build_object(
                     'de', '<p>Inhalt des ersten Testartikels</p>',
                     'en', '<p>Content of the first test article</p>'
@@ -105,7 +105,7 @@ BEGIN
                 )
             ),
             'body', jsonb_build_object(
-                'type', 'html',
+                'type', 'richtext',
                 'value', jsonb_build_object(
                     'de', '<p>Dies ist ein unveröffentlichter Artikel</p>',
                     'en', '<p>This is an unpublished article</p>'
@@ -128,7 +128,7 @@ BEGIN
         1,
         jsonb_build_object(
             'content', jsonb_build_object(
-                'type', 'html',
+                'type', 'richtext',
                 'value', jsonb_build_object(
                     'de', '<div class="test-block">Testblock Inhalt</div>',
                     'en', '<div class="test-block">Test block content</div>'

@@ -56,8 +56,8 @@
 				type: 'text',
 				value: isTranslatable ? createTranslatableValue() : '',
 			}),
-			'Duon\\Cms\\Field\\Html': () => ({
-				type: 'html',
+			'Duon\\Cms\\Field\\RichText': () => ({
+				type: 'richtext',
 				value: isTranslatable ? createTranslatableValue() : '',
 			}),
 			'Duon\\Cms\\Field\\Checkbox': () => ({ type: 'checkbox', value: false }),

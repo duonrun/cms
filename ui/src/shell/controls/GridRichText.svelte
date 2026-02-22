@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { GridHtml } from '$types/data';
+	import type { GridRichText } from '$types/data';
 	import type { GridField } from '$types/fields';
 
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {
 		field: GridField;
-		item: GridHtml;
+		item: GridRichText;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};

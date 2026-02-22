@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Value\Html as HtmlValue;
+use Duon\Cms\Value\RichText as RichTextValue;
 use Duon\Sire\Shape;
 
-class Html extends Field implements Capability\Translatable
+class RichText extends Field implements Capability\Translatable
 {
 	use Capability\IsTranslatable;
 
-	public function value(): HtmlValue
+	public function value(): RichTextValue
 	{
-		return new HtmlValue($this->owner, $this, $this->valueContext);
+		return new RichTextValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
 	{
-		return $this->getTranslatableStructure('html', $value);
+		return $this->getTranslatableStructure('richtext', $value);
 	}
 
 	public function shape(): Shape
 	{
 		$shape = new Shape(title: $this->label, keepUnknown: true);
-		$shape->add('type', 'text', 'required', 'in:html');
+		$shape->add('type', 'text', 'required', 'in:richtext');
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();

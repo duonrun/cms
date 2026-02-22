@@ -7,7 +7,7 @@ namespace Duon\Cms\Value;
 use Duon\Cms\Util\Html as HtmlUtil;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
-class Html extends Text
+class RichText extends Text
 {
 	public function __toString(): string
 	{

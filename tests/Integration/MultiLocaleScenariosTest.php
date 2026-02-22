@@ -72,7 +72,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 					],
 				],
 				'body' => [
-					'type' => 'html',
+					'type' => 'richtext',
 					'value' => [
 						'en' => '<p>English content</p>',
 						'de' => '<p>Deutscher Inhalt</p>',
@@ -260,7 +260,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 							],
 						],
 						[
-							'type' => 'html',
+							'type' => 'richtext',
 							'rowspan' => 1,
 							'colspan' => 6,
 							'value' => [

@@ -7,8 +7,8 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Context;
 use Duon\Cms\Node\FieldOwner;
 use Duon\Cms\Tests\Fixtures\Field\TestCheckbox;
-use Duon\Cms\Tests\Fixtures\Field\TestHtml;
 use Duon\Cms\Tests\Fixtures\Field\TestNumber;
+use Duon\Cms\Tests\Fixtures\Field\TestRichText;
 use Duon\Cms\Tests\Fixtures\Field\TestText;
 use Duon\Cms\Tests\TestCase;
 use Duon\Cms\Value\ValueContext;
@@ -106,11 +106,11 @@ final class PrimitiveValueTest extends TestCase
 		$value->missing;
 	}
 
-	public function testHtmlValueUsesExcerptAndSanitizedOutput(): void
+	public function testRichTextValueUsesExcerptAndSanitizedOutput(): void
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new TestHtml('body', $owner, new ValueContext('body', [
+		$field = new TestRichText('body', $owner, new ValueContext('body', [
 			'value' => ['en' => '<p>Hello <strong>World</strong></p>'],
 		]));
 		$field->translate();

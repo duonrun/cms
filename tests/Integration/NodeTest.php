@@ -17,7 +17,7 @@ final class NodeTest extends IntegrationTestCase
 				'value' => ['de' => 'Testseite', 'en' => 'Test Page'],
 			],
 			'body' => [
-				'type' => 'html',
+				'type' => 'richtext',
 				'value' => ['de' => '<p>Deutscher Inhalt</p>', 'en' => '<p>English content</p>'],
 			],
 		];

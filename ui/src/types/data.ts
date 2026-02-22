@@ -22,7 +22,7 @@ export interface TranslatedFile {
 }
 
 export interface TextData {
-	type: 'text' | 'html' | 'hidden' | 'date' | 'time' | 'datetime' | 'option' | 'iframe';
+	type: 'text' | 'richtext' | 'hidden' | 'date' | 'time' | 'datetime' | 'option' | 'iframe';
 	value?: string | Record<string, string>;
 }
 
@@ -69,8 +69,8 @@ export interface GridText extends GridBase {
 	value: string;
 }
 
-export interface GridHtml extends GridBase {
-	type: 'html';
+export interface GridRichText extends GridBase {
+	type: 'richtext';
 	value: string;
 }
 
@@ -96,9 +96,9 @@ export interface GridYoutube extends GridBase {
 	aspectRatioY: number;
 }
 
-export type GridType = 'text' | 'html' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
+export type GridType = 'text' | 'richtext' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
 
-export type GridItem = GridText | GridHtml | GridImage | GridYoutube | GridVideo | GridIframe;
+export type GridItem = GridText | GridRichText | GridImage | GridYoutube | GridVideo | GridIframe;
 
 export interface LocalizedGridValue {
 	[key: string]: GridItem[];

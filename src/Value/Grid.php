@@ -136,7 +136,7 @@ class Grid extends Value
 		$i = 0;
 
 		foreach ($this->preparedData as $value) {
-			if ($value->type === 'html') {
+			if ($value->type === 'richtext') {
 				$i++;
 
 				if ($i === $index) {
@@ -206,7 +206,7 @@ class Grid extends Value
 		$out = '<div class="' . $prefix . '-' . $value->type
 			. ' ' . $colspan . ' ' . $rowspan . $class . '">';
 		$out .= match ($value->type) {
-			'html' => $value->data['value'],
+			'richtext' => $value->data['value'],
 			'text' => $value->data['value'],
 			'h1' => '<h1>' . $value->data['value'] . '</h1>',
 			'h2' => '<h2>' . $value->data['value'] . '</h2>',

@@ -12,7 +12,7 @@ class GridItemValidator extends Shape
 {
 	protected function rules(): void
 	{
-		$this->add('type', 'text', 'required', 'in:text,html,image,youtube,images,video,iframe');
+		$this->add('type', 'text', 'required', 'in:text,richtext,image,youtube,images,video,iframe');
 		$this->add('rowspan', 'int', 'required');
 		$this->add('colspan', 'int', 'required');
 		$this->add('colstart', 'int');
@@ -81,7 +81,7 @@ class GridItemValidator extends Shape
 				if (!$aspectRatioY || !is_numeric($aspectRatioY)) {
 					$this->addError('aspectRatioY', _('Youtube Seitenverhältnis Höhe'), _('Bitte gültige Zahl eingeben.'));
 				}
-			} elseif ($type === 'html' || $type === 'text') {
+			} elseif ($type === 'richtext' || $type === 'text') {
 				if (!($value['value'] ?? null)) {
 					$this->addError('value', _('Grid Text'), _('Bitte Textfeld ausfüllen oder Block löschen.'));
 				}

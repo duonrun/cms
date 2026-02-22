@@ -3,7 +3,7 @@
 		GridItem,
 		GridBase,
 		GridText as GridTextData,
-		GridHtml as GridHtmlData,
+		GridRichText as GridRichTextData,
 		GridImage as GridImageData,
 		GridYoutube as GridYoutubeData,
 		GridIframe as GridIframeData,
@@ -23,7 +23,7 @@
 	import GridControls from './GridControls.svelte';
 	import GridImage from './GridImage.svelte';
 	import GridImages from './GridImages.svelte';
-	import GridHtml from './GridHtml.svelte';
+	import GridRichText from './GridRichText.svelte';
 	import GridText from './GridText.svelte';
 	import GridYoutube from './GridYoutube.svelte';
 	import GridIframe from './GridIframe.svelte';
@@ -41,7 +41,7 @@
 
 	const controls = {
 		image: GridImage,
-		html: GridHtml,
+		richtext: GridRichText,
 		text: GridText,
 		youtube: GridYoutube,
 		images: GridImages,
@@ -49,7 +49,7 @@
 		iframe: GridIframe,
 	};
 	const types = [
-		{ id: 'html', label: 'Formatierter Text (richtext)' },
+		{ id: 'richtext', label: 'Formatierter Text' },
 		{ id: 'text', label: 'Einfacher Text' },
 		{ id: 'image', label: 'Einzelbild' },
 		{ id: 'youtube', label: 'Youtube-Video' },
@@ -65,8 +65,8 @@
 			rowspan: 1,
 			colstart: null,
 		};
-		if (type === 'html') {
-			(content as GridHtmlData).value = '';
+		if (type === 'richtext') {
+			(content as GridRichTextData).value = '';
 		} else if (type === 'text') {
 			(content as GridTextData).value = '';
 		} else if (type === 'image' || type === 'images') {

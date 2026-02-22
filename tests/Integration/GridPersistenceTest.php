@@ -37,7 +37,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 						'value' => 'First text block',
 					],
 					[
-						'type' => 'html',
+						'type' => 'richtext',
 						'rowspan' => 1,
 						'colspan' => 6,
 						'colstart' => 7,
@@ -61,7 +61,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 		$content = json_decode($node['content'], true);
 		$this->assertCount(2, $content['grid']['items']);
 		$this->assertEquals('text', $content['grid']['items'][0]['type']);
-		$this->assertEquals('html', $content['grid']['items'][1]['type']);
+		$this->assertEquals('richtext', $content['grid']['items'][1]['type']);
 	}
 
 	public function testGridWithImageItems(): void
@@ -158,7 +158,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 				'type' => 'grid',
 				'items' => [
 					['type' => 'text', 'rowspan' => 1, 'colspan' => 4, 'value' => 'Text'],
-					['type' => 'html', 'rowspan' => 1, 'colspan' => 4, 'value' => '<p>HTML</p>'],
+					['type' => 'richtext', 'rowspan' => 1, 'colspan' => 4, 'value' => '<p>HTML</p>'],
 					['type' => 'image', 'rowspan' => 1, 'colspan' => 4, 'files' => [['file' => 'img.jpg']]],
 					['type' => 'youtube', 'rowspan' => 1, 'colspan' => 12, 'id' => 'abc123', 'aspectRatioX' => 16, 'aspectRatioY' => 9],
 				],
@@ -181,7 +181,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 
 		$this->assertCount(4, $items);
 		$this->assertEquals('text', $items[0]['type']);
-		$this->assertEquals('html', $items[1]['type']);
+		$this->assertEquals('richtext', $items[1]['type']);
 		$this->assertEquals('image', $items[2]['type']);
 		$this->assertEquals('youtube', $items[3]['type']);
 	}
@@ -204,7 +204,7 @@ final class GridPersistenceTest extends IntegrationTestCase
 						],
 					],
 					[
-						'type' => 'html',
+						'type' => 'richtext',
 						'rowspan' => 1,
 						'colspan' => 6,
 						'value' => [
@@ -269,8 +269,8 @@ final class GridPersistenceTest extends IntegrationTestCase
 				'type' => 'grid',
 				'items' => [
 					['type' => 'text', 'rowspan' => 1, 'colspan' => 12, 'colstart' => 1, 'value' => 'Full width header'],
-					['type' => 'html', 'rowspan' => 1, 'colspan' => 6, 'colstart' => 1, 'value' => '<p>Left column</p>'],
-					['type' => 'html', 'rowspan' => 1, 'colspan' => 6, 'colstart' => 7, 'value' => '<p>Right column</p>'],
+					['type' => 'richtext', 'rowspan' => 1, 'colspan' => 6, 'colstart' => 1, 'value' => '<p>Left column</p>'],
+					['type' => 'richtext', 'rowspan' => 1, 'colspan' => 6, 'colstart' => 7, 'value' => '<p>Right column</p>'],
 					['type' => 'image', 'rowspan' => 1, 'colspan' => 4, 'colstart' => 1, 'files' => [['file' => '1.jpg']]],
 					['type' => 'image', 'rowspan' => 1, 'colspan' => 4, 'colstart' => 5, 'files' => [['file' => '2.jpg']]],
 					['type' => 'image', 'rowspan' => 1, 'colspan' => 4, 'colstart' => 9, 'files' => [['file' => '3.jpg']]],

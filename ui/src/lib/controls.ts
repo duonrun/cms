@@ -3,7 +3,7 @@ import Date from '$shell/controls/Date.svelte';
 import File from '$shell/controls/File.svelte';
 import Grid from '$shell/controls/Grid.svelte';
 import Hidden from '$shell/controls/Hidden.svelte';
-import Html from '$shell/controls/Html.svelte';
+import RichText from '$shell/controls/RichText.svelte';
 import Image from '$shell/controls/Image.svelte';
 import Matrix from '$shell/controls/Matrix.svelte';
 import Number from '$shell/controls/Number.svelte';
@@ -19,7 +19,7 @@ export default {
 	'Duon\\Cms\\Field\\File': File,
 	'Duon\\Cms\\Field\\Grid': Grid,
 	'Duon\\Cms\\Field\\Hidden': Hidden,
-	'Duon\\Cms\\Field\\Html': Html,
+	'Duon\\Cms\\Field\\RichText': RichText,
 	'Duon\\Cms\\Field\\Image': Image,
 	'Duon\\Cms\\Field\\Matrix': Matrix,
 	'Duon\\Cms\\Field\\Number': Number,
