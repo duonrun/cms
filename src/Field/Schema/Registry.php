@@ -15,6 +15,7 @@ use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Required;
 use Duon\Cms\Schema\Rows;
+use Duon\Cms\Schema\Syntax;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\TranslateFile;
 use Duon\Cms\Schema\Validate;
@@ -54,6 +55,7 @@ class Registry
 		$registry->register(Options::class, new OptionsHandler());
 		$registry->register(Multiple::class, new MultipleHandler());
 		$registry->register(Fulltext::class, new FulltextHandler());
+		$registry->register(Syntax::class, new SyntaxHandler());
 
 		return $registry;
 	}
