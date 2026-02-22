@@ -19,6 +19,7 @@ use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Required;
 use Duon\Cms\Schema\Rows;
+use Duon\Cms\Schema\Syntax;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\TranslateFile;
 use Duon\Cms\Schema\Validate;
@@ -222,5 +223,18 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertArrayHasKey('validators', $properties);
 		$this->assertContains('minLength:5', $properties['validators']);
 		$this->assertContains('maxLength:100', $properties['validators']);
+	}
+
+	public function testSyntaxCapabilityReturnsSyntaxesProperty(): void
+	{
+		$field = new class ('code', $this->createOwner(), new ValueContext('code', [])) extends Text implements \Duon\Cms\Field\Capability\Syntaxable {
+			use \Duon\Cms\Field\Capability\IsSyntaxable;
+		};
+		$meta = new Syntax('php', 'javascript', 'php');
+
+		$properties = $this->applyAndGetProperties($meta, $field);
+
+		$this->assertArrayHasKey('syntaxes', $properties);
+		$this->assertEquals(['php', 'javascript'], $properties['syntaxes']);
 	}
 }

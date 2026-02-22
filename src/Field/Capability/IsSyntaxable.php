@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Duon\Cms\Field\Capability;
+
+trait IsSyntaxable
+{
+	protected array $syntaxes = ['plaintext'];
+
+	public function syntaxes(array $syntaxes): void
+	{
+		$values = [];
+
+		foreach ($syntaxes as $syntax) {
+			$syntax = trim($syntax);
+
+			if ($syntax === '') {
+				continue;
+			}
+
+			if (in_array($syntax, $values, true)) {
+				continue;
+			}
+
+			$values[] = $syntax;
+		}
+
+		$this->syntaxes = $values ?: ['plaintext'];
+	}
+
+	public function getSyntaxes(): array
+	{
+		return $this->syntaxes;
+	}
+
+	public function getDefaultSyntax(): string
+	{
+		return $this->syntaxes[0] ?? 'plaintext';
+	}
+}
