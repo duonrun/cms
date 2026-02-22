@@ -136,18 +136,18 @@
 	.cms-embedded-control-bar {
 		position: sticky;
 		top: 0;
-		border-bottom: 1px solid var(--gray-300);
-		background-color: var(--white);
-		padding: var(--s-4) 0;
+		border-bottom: 1px solid var(--cms-color-neutral-300);
+		background-color: var(--cms-color-white);
+		padding: var(--cms-space-4) 0;
 	}
 
 	.cms-embedded-control-inner {
 		margin: 0 auto;
 		display: flex;
 		width: 100%;
-		max-width: var(--s-7xl);
+		max-width: var(--cms-size-7xl);
 		flex-direction: row;
-		padding: 0 var(--s-8);
+		padding: 0 var(--cms-space-8);
 	}
 
 	.cms-embedded-status-bar {
@@ -164,23 +164,23 @@
 	}
 
 	.cms-embedded-dirty-indicator {
-		margin-left: var(--s-3);
-		border-radius: var(--radius-full);
-		background-color: var(--color-rose-700);
-		padding: 0 var(--s-2) var(--s-px);
-		font-size: var(--font-size-sm);
+		margin-left: var(--cms-space-3);
+		border-radius: var(--cms-radius-full);
+		background-color: var(--cms-color-danger-700);
+		padding: 0 var(--cms-space-2) var(--cms-space-px);
+		font-size: var(--cms-font-size-sm);
 		font-weight: 700;
-		color: var(--white);
+		color: var(--cms-color-white);
 	}
 
 	.cms-embedded-pane {
-		margin-top: var(--s-6);
+		margin-top: var(--cms-space-6);
 	}
 
 	.cms-embedded-actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: var(--s-2);
-		margin-top: calc(var(--s-4) * -1);
+		gap: var(--cms-space-2);
+		margin-top: calc(var(--cms-space-4) * -1);
 	}
 </style>

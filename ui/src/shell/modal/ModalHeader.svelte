@@ -42,7 +42,7 @@
 
 <style lang="postcss">
 	.modal-close-button {
-		color: var(--muted-text-color);
+		color: var(--cms-color-neutral-500);
 
 		&:hover {
 			filter: brightness(90%);

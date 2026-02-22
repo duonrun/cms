@@ -5,15 +5,15 @@ button.danger {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--s-2);
+	gap: var(--cms-space-2);
 	padding: 0.625rem 0.875rem;
 	border: 0;
-	border-radius: var(--radius-md);
-	font-size: var(--font-size-sm);
+	border-radius: var(--cms-radius-md);
+	font-size: var(--cms-font-size-sm);
 	font-weight: 600;
 	line-height: 1.25rem;
 	text-decoration: none;
-	box-shadow: var(--shadow-sm);
+	box-shadow: var(--cms-shadow-sm);
 	transition:
 		background-color 120ms ease,
 		color 120ms ease,
@@ -22,7 +22,7 @@ button.danger {
 }
 
 .cms-button-small {
-	gap: var(--s-1-5);
+	gap: var(--cms-space-1-5);
 	padding: 0.5rem 0.75rem;
 }
 
@@ -43,50 +43,50 @@ button.danger:focus-visible {
 
 .cms-button-primary,
 .primary {
-	background-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
-	color: var(--white);
+	background-color: color-mix(in srgb, var(--cms-color-success-600) 72%, black);
+	color: var(--cms-color-white);
 }
 
 .cms-button-primary:hover,
 .primary:hover {
-	background-color: color-mix(in srgb, var(--color-emerald-600) 82%, black);
+	background-color: color-mix(in srgb, var(--cms-color-success-600) 82%, black);
 }
 
 .cms-button-primary:focus-visible,
 button.primary:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
+	outline-color: color-mix(in srgb, var(--cms-color-success-600) 72%, black);
 }
 
 .cms-button-secondary,
 .secondary {
-	background-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
-	color: var(--white);
+	background-color: color-mix(in srgb, var(--cms-color-info-700) 80%, black);
+	color: var(--cms-color-white);
 }
 
 .cms-button-secondary:hover,
 .secondary:hover {
-	background-color: color-mix(in srgb, var(--color-sky-700) 88%, black);
+	background-color: color-mix(in srgb, var(--cms-color-info-700) 88%, black);
 }
 
 .cms-button-secondary:focus-visible,
 button.secondary:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
+	outline-color: color-mix(in srgb, var(--cms-color-info-700) 80%, black);
 }
 
 .cms-button-danger,
 .danger {
-	background-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
-	color: var(--white);
+	background-color: color-mix(in srgb, var(--cms-color-danger-700) 80%, black);
+	color: var(--cms-color-white);
 }
 
 .cms-button-danger:hover,
 .danger:hover {
-	background-color: color-mix(in srgb, var(--color-rose-700) 88%, black);
+	background-color: color-mix(in srgb, var(--cms-color-danger-700) 88%, black);
 }
 
 .cms-button-danger:focus-visible,
 button.danger:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	outline-color: color-mix(in srgb, var(--cms-color-danger-700) 80%, black);
 }
 
 .cms-button[disabled],
@@ -98,8 +98,8 @@ button[disabled] {
 .cms-button-menu {
 	position: relative;
 	display: inline-flex;
-	border-radius: var(--radius-md);
-	box-shadow: var(--shadow-sm);
+	border-radius: var(--cms-radius-md);
+	box-shadow: var(--cms-shadow-sm);
 }
 
 .cms-button-menu-main {
@@ -110,33 +110,33 @@ button[disabled] {
 .cms-button-menu-toggle {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
-	border-left: var(--border);
+	border-left: var(--cms-border);
 	padding: 0.625rem;
-	color: var(--gray-400);
+	color: var(--cms-color-neutral-400);
 }
 
 .cms-button-menu-panel {
 	position: absolute;
 	right: 0;
 	z-index: 10;
-	margin-top: var(--s-2);
-	margin-right: calc(var(--s-px) * -1);
+	margin-top: var(--cms-space-2);
+	margin-right: calc(var(--cms-space-px) * -1);
 	width: 16rem;
 	transform-origin: top right;
-	border-radius: var(--radius-md);
-	background-color: var(--white);
-	box-shadow: var(--shadow-lg);
-	border: 1px solid color-mix(in srgb, var(--gray-900) 6%, transparent);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-white);
+	box-shadow: var(--cms-shadow-lg);
+	border: 1px solid color-mix(in srgb, var(--cms-color-neutral-900) 6%, transparent);
 }
 
 .cms-button-menu-list {
-	padding: var(--s-1) 0;
+	padding: var(--cms-space-1) 0;
 }
 
 .cms-button-menu-entry {
 	display: block;
 	width: 100%;
-	padding: 0.5rem var(--s-4);
-	font-size: var(--font-size-sm);
+	padding: 0.5rem var(--cms-space-4);
+	font-size: var(--cms-font-size-sm);
 	text-align: left;
 }

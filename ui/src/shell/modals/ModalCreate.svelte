@@ -52,11 +52,11 @@
 	.cms-modal-create-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--s-4);
-		margin-bottom: var(--s-8);
+		gap: var(--cms-space-4);
+		margin-bottom: var(--cms-space-8);
 	}
 
 	.cms-modal-create-label {
-		margin-left: var(--s-2);
+		margin-left: var(--cms-space-2);
 	}
 </style>

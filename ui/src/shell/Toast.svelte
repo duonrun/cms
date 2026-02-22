@@ -20,12 +20,12 @@
 <style lang="postcss">
 	.cms-toast-content {
 		text-align: left;
-		color: var(--white);
+		color: var(--cms-color-white);
 	}
 
 	.cms-toast-title {
-		margin-top: var(--s-3);
-		margin-bottom: var(--s-1);
+		margin-top: var(--cms-space-3);
+		margin-bottom: var(--cms-space-1);
 		font-weight: 600;
 	}
 </style>

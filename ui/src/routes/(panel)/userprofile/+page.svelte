@@ -76,11 +76,11 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: flex-end;
-		gap: var(--s-4);
-		padding: var(--s-6) var(--s-4);
+		gap: var(--cms-space-4);
+		padding: var(--cms-space-6) var(--cms-space-4);
 	}
 
 	.cms-userprofile-headline {
-		margin-top: var(--s-8);
+		margin-top: var(--cms-space-8);
 	}
 </style>

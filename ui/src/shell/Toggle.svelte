@@ -63,14 +63,14 @@
 		height: 1.5rem;
 		flex-shrink: 0;
 		cursor: pointer;
-		border-radius: var(--radius-full);
+		border-radius: var(--cms-radius-full);
 		border: 2px solid transparent;
-		background-color: var(--gray-200);
+		background-color: var(--cms-color-neutral-200);
 		transition: background-color 200ms ease-in-out;
 	}
 
 	.cms-toggle.is-on {
-		background-color: var(--color-emerald-600);
+		background-color: var(--cms-color-success-600);
 	}
 
 	.cms-toggle-knob {
@@ -80,9 +80,9 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		transform: translateX(0);
-		border-radius: var(--radius-full);
-		background-color: var(--white);
-		box-shadow: var(--shadow);
+		border-radius: var(--cms-radius-full);
+		background-color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow);
 		transition: transform 200ms ease-in-out;
 	}
 
@@ -107,11 +107,11 @@
 	}
 
 	.cms-toggle-off {
-		color: var(--gray-400);
+		color: var(--cms-color-neutral-400);
 	}
 
 	.cms-toggle-on {
-		color: var(--color-emerald-600);
+		color: var(--cms-color-success-600);
 	}
 
 	.cms-toggle-icon-svg {

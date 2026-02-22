@@ -18,10 +18,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: var(--radius-full);
-		background-color: var(--color-rose-700);
+		border-radius: var(--cms-radius-full);
+		background-color: var(--cms-color-danger-700);
 		font-weight: 600;
-		color: var(--white);
+		color: var(--cms-color-white);
 		font-size: 9px;
 		height: 12px;
 		width: 12px;

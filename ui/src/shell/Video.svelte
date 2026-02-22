@@ -56,9 +56,9 @@
 	.video {
 		position: relative;
 		width: 100%;
-		border: 1px solid var(--gray-300);
-		background-color: var(--gray-100);
-		padding: var(--s-1);
+		border: 1px solid var(--cms-color-neutral-300);
+		background-color: var(--cms-color-neutral-100);
+		padding: var(--cms-space-1);
 		text-align: center;
 	}
 
@@ -67,11 +67,11 @@
 	}
 
 	.cms-video-controls {
-		margin-top: var(--s-4);
+		margin-top: var(--cms-space-4);
 	}
 
 	.cms-video-remove {
-		color: var(--color-rose-700);
+		color: var(--cms-color-danger-700);
 		border: none;
 		background: transparent;
 		cursor: pointer;
@@ -97,8 +97,8 @@
 
 	.icobtn {
 		text-align: center;
-		font-size: var(--font-size-xs);
-		color: var(--white);
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-white);
 		text-shadow:
 			-1px 0 #000,
 			0 1px #000,
@@ -108,14 +108,14 @@
 
 	.cms-video-ext {
 		position: absolute;
-		right: var(--s-1);
-		bottom: var(--s-1);
-		margin-right: var(--s-px);
-		margin-bottom: var(--s-px);
-		border-radius: var(--radius);
-		background-color: var(--color-rose-700);
-		padding: 0 var(--s-1);
-		font-size: var(--font-size-xs);
-		color: var(--white);
+		right: var(--cms-space-1);
+		bottom: var(--cms-space-1);
+		margin-right: var(--cms-space-px);
+		margin-bottom: var(--cms-space-px);
+		border-radius: var(--cms-radius);
+		background-color: var(--cms-color-danger-700);
+		padding: 0 var(--cms-space-1);
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-white);
 	}
 </style>

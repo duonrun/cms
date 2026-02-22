@@ -131,8 +131,8 @@
 		min-height: 100%;
 		flex-direction: column;
 		justify-content: center;
-		background-color: var(--gray-50);
-		padding: var(--s-12) var(--s-4);
+		background-color: var(--cms-color-neutral-50);
+		padding: var(--cms-space-12) var(--cms-space-4);
 	}
 
 	.cms-login-logo-wrap,
@@ -145,7 +145,7 @@
 	}
 
 	.cms-login-logo-wrap {
-		margin-top: calc(var(--s-32) * -1);
+		margin-top: calc(var(--cms-space-32) * -1);
 	}
 
 	.cms-login-logo-box {
@@ -154,34 +154,34 @@
 	}
 
 	.cms-login-logo-fallback {
-		height: var(--s-16);
+		height: var(--cms-space-16);
 	}
 
 	.cms-login-message {
-		margin-top: var(--s-8);
-		border: 1px solid var(--color-rose-700);
-		border-radius: var(--radius);
-		background-color: color-mix(in srgb, var(--color-rose-700) 18%, white);
-		padding: var(--s-2) var(--s-4);
+		margin-top: var(--cms-space-8);
+		border: 1px solid var(--cms-color-danger-700);
+		border-radius: var(--cms-radius);
+		background-color: color-mix(in srgb, var(--cms-color-danger-700) 18%, white);
+		padding: var(--cms-space-2) var(--cms-space-4);
 		text-align: center;
-		color: var(--color-rose-700);
+		color: var(--cms-color-danger-700);
 	}
 
 	.cms-login-card-wrap {
-		margin-top: var(--s-10);
+		margin-top: var(--cms-space-10);
 	}
 
 	.cms-login-card {
-		background-color: var(--white);
-		padding: var(--s-12) var(--s-6);
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow);
+		background-color: var(--cms-color-white);
+		padding: var(--cms-space-12) var(--cms-space-6);
+		border-radius: var(--cms-radius-lg);
+		box-shadow: var(--cms-shadow);
 	}
 
 	.cms-login-form {
 		display: flex;
 		flex-direction: column;
-		gap: var(--s-6);
+		gap: var(--cms-space-6);
 	}
 
 	.cms-login-actions {
@@ -191,8 +191,8 @@
 
 	@media (min-width: 1024px) {
 		.cms-login {
-			padding-left: var(--s-8);
-			padding-right: var(--s-8);
+			padding-left: var(--cms-space-8);
+			padding-right: var(--cms-space-8);
 		}
 	}
 </style>

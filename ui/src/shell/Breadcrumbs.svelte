@@ -25,12 +25,12 @@
 
 <style lang="postcss">
 	.breadcrumbs {
-		margin-top: var(--s-8);
-		margin-bottom: var(--s-4);
+		margin-top: var(--cms-space-8);
+		margin-bottom: var(--cms-space-4);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		gap: var(--s-3);
+		gap: var(--cms-space-3);
 	}
 
 	:global(.cms-breadcrumb-link:hover) {
@@ -38,7 +38,7 @@
 	}
 
 	.breadcrumbs :global(svg) {
-		color: var(--gray-400);
+		color: var(--cms-color-neutral-400);
 		display: inline-block;
 	}
 </style>

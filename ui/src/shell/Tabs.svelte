@@ -16,6 +16,6 @@
 
 <style lang="postcss">
 	.cms-tabs {
-		margin-bottom: var(--s-6);
+		margin-bottom: var(--cms-space-6);
 	}
 </style>

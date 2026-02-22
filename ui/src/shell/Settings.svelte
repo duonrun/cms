@@ -96,23 +96,23 @@
 
 <style lang="postcss">
 	.cms-settings {
-		padding: var(--s-4);
+		padding: var(--cms-space-4);
 	}
 
 	@media (min-width: 640px) {
 		.cms-settings {
-			padding: var(--s-6);
+			padding: var(--cms-space-6);
 		}
 	}
 
 	@media (min-width: 768px) {
 		.cms-settings {
-			padding: var(--s-8);
+			padding: var(--cms-space-8);
 		}
 	}
 
 	.cms-settings-paths {
-		margin-bottom: var(--s-8);
+		margin-bottom: var(--cms-space-8);
 		display: table;
 		width: 100%;
 	}
@@ -121,7 +121,7 @@
 		display: table-row;
 
 		& > div {
-			padding: var(--s-2);
+			padding: var(--cms-space-2);
 			display: table-cell;
 		}
 	}
@@ -131,22 +131,22 @@
 	}
 
 	.cms-settings-renderable {
-		max-width: var(--s-3xl);
+		max-width: var(--cms-size-3xl);
 	}
 
 	.cms-settings-section + .cms-settings-section {
-		margin-top: var(--s-4);
+		margin-top: var(--cms-space-4);
 	}
 
 	.cms-settings-row {
 		display: flex;
 		flex-direction: row;
 		align-items: flex-start;
-		gap: var(--s-4);
-		margin-top: var(--s-4);
+		gap: var(--cms-space-4);
+		margin-top: var(--cms-space-4);
 	}
 
 	.cms-settings-value {
-		padding-top: var(--s-px);
+		padding-top: var(--cms-space-px);
 	}
 </style>

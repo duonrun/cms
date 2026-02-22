@@ -100,13 +100,13 @@
 		flex: 1 1 auto;
 		flex-direction: row;
 		align-items: center;
-		gap: var(--s-3);
-		padding: var(--s-2) 0;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-2) 0;
 	}
 
 	.cms-grid-cell-buttons-inline {
 		justify-content: flex-end;
-		margin-right: var(--s-3);
+		margin-right: var(--cms-space-3);
 	}
 
 	.cms-grid-cell-buttons-dropdown {
@@ -114,8 +114,8 @@
 	}
 
 	div button {
-		height: var(--s-4);
-		width: var(--s-4);
+		height: var(--cms-space-4);
+		width: var(--cms-space-4);
 
 		&[disabled] {
 			color: rgb(209 213 219);
@@ -123,10 +123,10 @@
 	}
 
 	.remove {
-		color: var(--color-orange-700);
+		color: var(--cms-color-warning-700);
 	}
 
 	.add {
-		color: var(--color-sky-700);
+		color: var(--cms-color-info-700);
 	}
 </style>

@@ -89,15 +89,15 @@ Render a node by uid from templates with the neutral cms API:
 
 ### Admin panel theming
 
-You can override admin panel tokens through `panel.theme` in your CMS config.
-Only CSS variables prefixed with `--cms-` are applied at runtime.
+You can style the admin panel through `panel.theme` in your CMS config.
+Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`).
+The panel links those CSS files and uses your overrides for `--cms-*` tokens.
 
 ```php
 return [
 	'panel.theme' => [
-		'--cms-color-brand' => '#0f766e',
-		'--cms-color-surface' => '#f7f7f5',
-		'--cms-font-family-base' => '"Source Sans 3", sans-serif',
+		'/assets/cms/theme/base.css',
+		'/assets/cms/theme/brand.css',
 	],
 ];
 ```

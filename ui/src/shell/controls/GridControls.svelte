@@ -88,8 +88,8 @@
 
 <style lang="postcss">
 	div button {
-		height: var(--s-4);
-		width: var(--s-4);
+		height: var(--cms-space-4);
+		width: var(--cms-space-4);
 	}
 
 	.cms-grid-controls {
@@ -105,9 +105,9 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: flex-end;
-		gap: var(--s-3);
-		padding: var(--s-2) 0;
-		margin-right: var(--s-3);
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-2) 0;
+		margin-right: var(--cms-space-3);
 	}
 
 	.cms-grid-controls-edit {
@@ -147,22 +147,22 @@
 		position: absolute;
 		right: 0;
 		z-index: 10;
-		margin-top: var(--s-2);
+		margin-top: var(--cms-space-2);
 		width: 11rem;
 		transform-origin: top right;
-		border-radius: var(--radius-md);
-		background-color: var(--white);
-		padding: 0 var(--s-2);
-		box-shadow: var(--shadow-lg);
+		border-radius: var(--cms-radius-md);
+		background-color: var(--cms-color-white);
+		padding: 0 var(--cms-space-2);
+		box-shadow: var(--cms-shadow-lg);
 		outline: none;
-		border: 1px solid color-mix(in srgb, var(--color-black) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--cms-color-black) 5%, transparent);
 	}
 
 	.cms-grid-buttons-menu-content {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		padding: var(--s-1) 0;
+		padding: var(--cms-space-1) 0;
 	}
 
 	.cms-grid-buttons:hover {
