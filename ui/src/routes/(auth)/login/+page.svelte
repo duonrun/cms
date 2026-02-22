@@ -37,6 +37,14 @@
 	}
 </script>
 
+<svelte:head>
+	{#each $system.theme as href (href)}
+		<link
+			rel="stylesheet"
+			{href} />
+	{/each}
+</svelte:head>
+
 <div class="cms-login">
 	{#if $system.initialized}
 		{#if $system.logo}

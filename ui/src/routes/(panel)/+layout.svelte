@@ -13,6 +13,14 @@
 	let { data, children }: Props = $props();
 </script>
 
+<svelte:head>
+	{#each data?.system?.theme ?? [] as href (href)}
+		<link
+			rel="stylesheet"
+			{href} />
+	{/each}
+</svelte:head>
+
 <Modal>
 	<div class="cms-panel-layout">
 		<Nav collections={data.system.collections} />

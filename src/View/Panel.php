@@ -64,7 +64,7 @@ class Panel
 			'env' => $config->env(),
 			'csrfToken' => 'TOKEN', // TODO: real token
 			'logo' => $config->get('panel.logo', null),
-			'theme' => $this->themeVariables(),
+			'theme' => $this->themeStylesheets(),
 			'api' => $config->apiPath(),
 			'assets' => $config->get('path.assets'),
 			'cache' => $config->get('path.cache'),
@@ -77,31 +77,6 @@ class Panel
 				'video' => array_merge(...array_values($config->get('upload.mimetypes.video'))),
 			],
 		];
-	}
-
-	private function themeVariables(): array
-	{
-		$theme = $this->config->get('panel.theme', null);
-
-		if (!is_array($theme)) {
-			return [];
-		}
-
-		$vars = [];
-
-		foreach ($theme as $key => $value) {
-			if (!is_string($key) || !is_string($value)) {
-				continue;
-			}
-
-			if (!str_starts_with($key, '--cms-')) {
-				continue;
-			}
-
-			$vars[$key] = $value;
-		}
-
-		return $vars;
 	}
 
 	public function index(Factory $factory): Response
@@ -275,6 +250,39 @@ class Panel
 		}
 
 		return $store->save($node, $this->request->json(), $this->request, $context->locales());
+	}
+
+	private function themeStylesheets(): array
+	{
+		$theme = $this->config->get('panel.theme', null);
+
+		if (is_string($theme)) {
+			$theme = trim($theme);
+
+			return $theme === '' ? [] : [$theme];
+		}
+
+		if (!is_array($theme)) {
+			return [];
+		}
+
+		$stylesheets = [];
+
+		foreach ($theme as $item) {
+			if (!is_string($item)) {
+				continue;
+			}
+
+			$item = trim($item);
+
+			if ($item === '') {
+				continue;
+			}
+
+			$stylesheets[] = $item;
+		}
+
+		return $stylesheets;
 	}
 
 	protected function getPanelIndex(): string
