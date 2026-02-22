@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Node\Schema\Registry;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
@@ -86,7 +87,11 @@ final class TypesTest extends TestCase
 		}
 
 		$this->assertFalse(isset($schema->missing));
-		$this->assertNull($schema->missing);
+		$this->assertNull($schema->get('missing'));
+		$this->assertSame('fallback', $schema->get('missing', 'fallback'));
+
+		$this->throws(NoSuchProperty::class, "The node schema '" . PlainPage::class . "' doesn't have the property 'missing'");
+		$schema->missing;
 	}
 
 	public function testTypeMagicAccessCoversAllBuiltinKeys(): void
@@ -103,7 +108,11 @@ final class TypesTest extends TestCase
 		$this->assertSame(PlainPage::class, $type->class);
 		$this->assertSame('PlainPage', $type->classname);
 		$this->assertFalse(isset($type->missing));
-		$this->assertNull($type->missing);
+		$this->assertNull($type->get('missing'));
+		$this->assertSame('fallback', $type->get('missing', 'fallback'));
+
+		$this->throws(NoSuchProperty::class, "The node type '" . PlainPage::class . "' doesn't have the property 'missing'");
+		$type->missing;
 	}
 
 	public function testMagicIssetIsFalseForNullBuiltinValues(): void

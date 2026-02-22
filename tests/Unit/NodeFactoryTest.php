@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
+use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Node\Factory;
@@ -379,6 +380,25 @@ final class NodeFactoryTest extends TestCase
 
 		$this->assertSame('proxy-meta-2', $proxy->meta('uid'));
 		$this->assertSame('fallback', $proxy->meta('missing', 'fallback'));
+	}
+
+	public function testNodeMetaPropertyFailsFastForUnknownKey(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'proxy-meta-3',
+			'published' => true,
+			'content' => [],
+		]);
+
+		$fieldNames = Factory::fieldNamesFor($node);
+		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+
+		$this->assertFalse(isset($proxy->meta->missing));
+		$this->assertNull($proxy->meta->get('missing'));
+		$this->assertSame('fallback', $proxy->meta->get('missing', 'fallback'));
+
+		$this->throws(NoSuchProperty::class, "The node '" . PlainPage::class . "' doesn't have the meta property 'missing'");
+		$proxy->meta->missing;
 	}
 
 	public function testNodeUnsetFieldReturnsNull(): void

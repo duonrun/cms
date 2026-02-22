@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Exception\NoSuchProperty;
+
 class Type
 {
 	public readonly string $class;
@@ -25,6 +27,10 @@ class Type
 
 	public function __get(string $key): mixed
 	{
+		if (!$this->has($key)) {
+			throw new NoSuchProperty("The node type '{$this->class}' doesn't have the property '{$key}'");
+		}
+
 		return $this->get($key);
 	}
 

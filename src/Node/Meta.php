@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Exception\NoSuchProperty;
+
 class Meta
 {
 	private readonly object $node;
@@ -21,10 +23,21 @@ class Meta
 
 	public function __get(string $name): mixed
 	{
+		if (!$this->has($name)) {
+			throw new NoSuchProperty(
+				"The node '" . $this->node::class . "' doesn't have the meta property '{$name}'",
+			);
+		}
+
 		return $this->get($name);
 	}
 
 	public function __isset(string $name): bool
+	{
+		return $this->has($name) && $this->get($name) !== null;
+	}
+
+	public function has(string $name): bool
 	{
 		if (in_array($name, ['name', 'class', 'classname'], true)) {
 			return true;
@@ -33,14 +46,10 @@ class Meta
 		$data = Factory::dataFor($this->node);
 
 		if (array_key_exists($name, $data)) {
-			return $data[$name] !== null;
+			return true;
 		}
 
-		if ($this->type->has($name)) {
-			return $this->type->get($name) !== null;
-		}
-
-		return false;
+		return $this->type->has($name);
 	}
 
 	public function get(string $key, mixed $default = null): mixed

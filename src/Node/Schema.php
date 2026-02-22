@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Node\Schema\Registry;
 use ReflectionClass;
 
@@ -28,6 +29,10 @@ class Schema
 
 	public function __get(string $key): mixed
 	{
+		if (!$this->has($key)) {
+			throw new NoSuchProperty("The node schema '{$this->nodeClass}' doesn't have the property '{$key}'");
+		}
+
 		return $this->get($key);
 	}
 
