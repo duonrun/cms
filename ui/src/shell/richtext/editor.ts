@@ -1,23 +1,99 @@
-import { Editor } from '@tiptap/core';
-import type { EditorOptions } from '@tiptap/core';
-import { readable, type Readable } from 'svelte/store';
+import { EditorState, type Command, type Plugin } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
+import { history } from 'prosemirror-history';
+import { dropCursor } from 'prosemirror-dropcursor';
+import { gapCursor } from 'prosemirror-gapcursor';
+import { schema, parser, serializer } from './schema';
+import { buildKeymap, buildInputRules } from './keymap';
+import { bubbleMenu } from './bubble-menu';
 
-const createEditor = (
-	options: Partial<EditorOptions>,
-	callback: (ed: Editor) => void,
-): Readable<Editor> => {
-	const editor = new Editor(options);
+export interface CmsEditor {
+	view: EditorView;
+	run(command: Command): void;
+	getHTML(): string;
+	setContent(html: string): void;
+	destroy(): void;
+}
 
-	return readable(editor, set => {
-		editor.on('transaction', () => {
-			callback(editor);
-			set(editor);
-		});
+export interface EditorOptions {
+	element: HTMLElement;
+	content: string;
+	onUpdate: (html: string) => void;
+	onStateChange: (state: EditorState) => void;
+	mode: 'default' | 'inline';
+	bubbleElement?: HTMLElement;
+}
 
-		return () => {
-			editor.destroy();
-		};
+function parseContent(html: string) {
+	const container = document.createElement('div');
+	container.innerHTML = html;
+	return parser.parse(container);
+}
+
+function serializeContent(state: EditorState): string {
+	const fragment = serializer.serializeFragment(state.doc.content);
+	const container = document.createElement('div');
+	container.appendChild(fragment);
+	return container.innerHTML;
+}
+
+export default function createEditor(options: EditorOptions): CmsEditor {
+	const { element, content, onUpdate, onStateChange, mode, bubbleElement } = options;
+
+	const plugins: Plugin[] = [
+		buildInputRules(),
+		buildKeymap(),
+		history(),
+		dropCursor(),
+		gapCursor(),
+	];
+
+	if (mode === 'inline' && bubbleElement) {
+		plugins.push(bubbleMenu(bubbleElement));
+	}
+
+	const doc = parseContent(content);
+
+	const state = EditorState.create({
+		doc,
+		schema,
+		plugins,
 	});
-};
 
-export default createEditor;
+	const view = new EditorView(element, {
+		state,
+		dispatchTransaction(tr) {
+			const newState = view.state.apply(tr);
+			view.updateState(newState);
+			onStateChange(newState);
+			if (tr.docChanged) {
+				onUpdate(serializeContent(newState));
+			}
+		},
+	});
+
+	onStateChange(view.state);
+
+	return {
+		view,
+
+		run(command: Command) {
+			view.focus();
+			command(view.state, view.dispatch, view);
+		},
+
+		getHTML(): string {
+			return serializeContent(view.state);
+		},
+
+		setContent(html: string) {
+			const newDoc = parseContent(html);
+			const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+			view.dispatch(tr);
+		},
+
+		destroy() {
+			view.destroy();
+		},
+	};
+}
