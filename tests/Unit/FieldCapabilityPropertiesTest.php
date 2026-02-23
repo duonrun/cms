@@ -16,6 +16,7 @@ use Duon\Cms\Schema\Description;
 use Duon\Cms\Schema\Hidden;
 use Duon\Cms\Schema\Immutable;
 use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Limit;
 use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Required;
@@ -217,6 +218,19 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('multiple', $properties);
 		$this->assertTrue($properties['multiple']);
+	}
+
+	public function testLimitCapabilityReturnsLimitProperty(): void
+	{
+		$field = new class ('image', $this->createOwner(), new ValueContext('image', [])) extends Image implements \Duon\Cms\Field\Capability\Limitable {
+			use \Duon\Cms\Field\Capability\IsLimitable;
+		};
+		$meta = new Limit(5, 2);
+
+		$properties = $this->applyAndGetProperties($meta, $field);
+
+		$this->assertArrayHasKey('limit', $properties);
+		$this->assertEquals(['min' => 2, 'max' => 5], $properties['limit']);
 	}
 
 	public function testValidateCapabilityReturnsValidatorsProperty(): void
