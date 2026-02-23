@@ -8,17 +8,17 @@ use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
 class File extends Field implements
-	Capability\AllowsMultiple,
+	Capability\Limitable,
 	Capability\File\Translatable,
 	Capability\Translatable
 {
-	use Capability\DoesAllowMultiple;
+	use Capability\IsLimitable;
 	use Capability\IsTranslatable;
 	use Capability\File\IsTranslatable;
 
 	public function value(): Value\File|Value\Files
 	{
-		if ($this->multiple) {
+		if ($this->getLimitMax() > 1) {
 			if ($this->translateFile) {
 				return new Value\TranslatedFiles($this->owner, $this, $this->valueContext);
 			}
@@ -84,5 +84,10 @@ class File extends Field implements
 		}
 
 		return $shape;
+	}
+
+	protected function defaultLimitMax(): int
+	{
+		return 999;
 	}
 }

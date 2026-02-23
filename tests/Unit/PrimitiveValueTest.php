@@ -263,7 +263,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 		$field = new \Duon\Cms\Field\File('attachments', $owner, $valueContext);
-		$field->multiple();
+		$field->limit(999);
 		$value = $field->value();
 
 		$this->assertSame(2, $value->count());
@@ -293,6 +293,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -316,6 +317,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -339,7 +341,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->multiple();
+		$field->limit(999);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -359,6 +361,7 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
 		]));
+		$field->limit(1);
 
 		/** @var \Duon\Cms\Value\Image $value */
 		$value = $field->value();
@@ -381,6 +384,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 
 		/** @var \Duon\Cms\Value\Image $value */
 		$value = $field->value();
@@ -412,6 +416,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -438,6 +443,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translate();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -589,7 +595,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->multiple();
+		$field->limit(999);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -609,6 +615,7 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
 		]));
+		$field->limit(1);
 
 		/** @var \Duon\Cms\Value\Image $value */
 		$value = $field->value()->width(320, true)->quality(80);
@@ -629,7 +636,7 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
 			],
 		]));
-		$field->multiple();
+		$field->limit(999);
 
 		/** @var \Duon\Cms\Value\Images $value */
 		$value = $field->value();
