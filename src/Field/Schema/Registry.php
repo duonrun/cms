@@ -11,6 +11,7 @@ use Duon\Cms\Schema\Fulltext;
 use Duon\Cms\Schema\Hidden;
 use Duon\Cms\Schema\Immutable;
 use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Limit;
 use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Required;
@@ -53,6 +54,7 @@ class Registry
 		$registry->register(Hidden::class, new HiddenHandler());
 		$registry->register(Immutable::class, new ImmutableHandler());
 		$registry->register(Options::class, new OptionsHandler());
+		$registry->register(Limit::class, new LimitHandler());
 		$registry->register(Multiple::class, new MultipleHandler());
 		$registry->register(Fulltext::class, new FulltextHandler());
 		$registry->register(Syntax::class, new SyntaxHandler());
