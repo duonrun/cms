@@ -8,11 +8,11 @@ use Duon\Cms\Field\Field;
 use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
-class Image extends Field implements Capability\Translatable, Capability\FileTranslatable, Capability\AllowsMultiple
+class Image extends Field implements Capability\Translatable, Capability\File\Translatable, Capability\AllowsMultiple
 {
 	use Capability\DoesAllowMultiple;
 	use Capability\IsTranslatable;
-	use Capability\FileIsTranslatable;
+	use Capability\File\IsTranslatable;
 
 	public function value(): Value\Images|Value\Image
 	{

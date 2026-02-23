@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Duon\Cms\Field\Capability\Grid;
 
 use ValueError;
 
-trait GridIsResizable
+trait IsResizable
 {
 	protected int $columns = 12;
 	protected int $minCellWidth = 1;

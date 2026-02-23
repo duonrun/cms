@@ -7,7 +7,7 @@ namespace Duon\Cms\Value;
 use Duon\Cms\Assets;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\AllowsMultiple;
-use Duon\Cms\Field\Capability\FileTranslatable;
+use Duon\Cms\Field\Capability\File\Translatable as FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
 use Duon\Cms\Field\Owner;
