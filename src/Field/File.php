@@ -19,7 +19,7 @@ class File extends Field implements
 
 	public function value(): Value\File|Value\Files
 	{
-		if ($this->getLimitMax() > 1) {
+		if ($this->allowsMultipleItems()) {
 			if ($this->translateFile) {
 				return new Value\TranslatedFiles($this->owner, $this, $this->valueContext);
 			}
@@ -86,22 +86,5 @@ class File extends Field implements
 		}
 
 		return $shape;
-	}
-
-	protected function defaultLimitMax(): int
-	{
-		return 999;
-	}
-
-	/** @return string[] */
-	private function limitValidators(): array
-	{
-		$validators = ['maxitems:' . $this->getLimitMax()];
-
-		if ($this->getLimitMin() > 0) {
-			$validators[] = 'minitems:' . $this->getLimitMin();
-		}
-
-		return $validators;
 	}
 }

@@ -81,7 +81,7 @@ class Matrix extends Field implements Capability\Limitable
 			$itemShape->add($name, $subfield->shape());
 		}
 
-		if ($this->getLimitMax() > 1) {
+		if ($this->allowsMultipleItems()) {
 			$shape->add('value', 'list', ...$this->validators);
 			$shape->add('value.*', $itemShape);
 		} else {

@@ -119,7 +119,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$this->assertTrue($properties['translate']);
 	}
 
-	public function testImageFieldPropertiesIncludesLimitAndTranslateFile(): void
+	public function testImageFieldPropertiesDoesNotIncludeLimitWithoutSchema(): void
 	{
 		$context = $this->createContext();
 		$finder = $this->createCms();
@@ -128,8 +128,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$properties = $this->hydrator->getField($node, 'gallery')->properties();
 
-		$this->assertArrayHasKey('limit', $properties);
-		$this->assertSame(['min' => 0, 'max' => 999], $properties['limit']);
+		$this->assertArrayNotHasKey('limit', $properties);
 
 		$this->assertArrayHasKey('translateFile', $properties);
 		$this->assertTrue($properties['translateFile']);

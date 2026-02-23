@@ -17,7 +17,7 @@ class Image extends Field implements Capability\Translatable, Capability\File\Tr
 
 	public function value(): Value\Images|Value\Image
 	{
-		if ($this->getLimitMax() > 1) {
+		if ($this->allowsMultipleItems()) {
 			if ($this->translateFile) {
 				return new Value\TranslatedImages($this->owner, $this, $this->valueContext);
 			}
@@ -89,22 +89,5 @@ class Image extends Field implements Capability\Translatable, Capability\File\Tr
 		}
 
 		return $shape;
-	}
-
-	protected function defaultLimitMax(): int
-	{
-		return 999;
-	}
-
-	/** @return string[] */
-	private function limitValidators(): array
-	{
-		$validators = ['maxitems:' . $this->getLimitMax()];
-
-		if ($this->getLimitMin() > 0) {
-			$validators[] = 'minitems:' . $this->getLimitMin();
-		}
-
-		return $validators;
 	}
 }

@@ -96,21 +96,4 @@ class Picture extends Field implements
 
 		return $shape;
 	}
-
-	protected function defaultLimitMax(): int
-	{
-		return 999;
-	}
-
-	/** @return string[] */
-	private function limitValidators(): array
-	{
-		$validators = ['maxitems:' . $this->getLimitMax()];
-
-		if ($this->getLimitMin() > 0) {
-			$validators[] = 'minitems:' . $this->getLimitMin();
-		}
-
-		return $validators;
-	}
 }

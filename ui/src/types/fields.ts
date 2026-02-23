@@ -17,7 +17,7 @@ export interface Limit {
 }
 
 export interface FileField extends SimpleField {
-	limit: Limit;
+	limit?: Limit;
 	translateFile: boolean;
 }
 

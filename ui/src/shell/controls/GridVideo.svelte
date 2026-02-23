@@ -17,6 +17,7 @@
 	let { field, item = $bindable(), node, index, children }: Props = $props();
 
 	let showSettings = $state(false);
+	const SINGLE_LIMIT = { min: 0, max: 1 };
 </script>
 
 <div class="grid-cell-header">
@@ -28,7 +29,7 @@
 	{:else}
 		<Upload
 			type="video"
-			multiple={false}
+			limit={SINGLE_LIMIT}
 			path="{$system.prefix}/media/video/node/{node}"
 			name={field.name + '_' + index}
 			translate={false}
