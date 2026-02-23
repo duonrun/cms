@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field\Capability;
 
-trait IsSyntaxable
+trait IsSyntaxAware
 {
 	protected array $syntaxes = ['plaintext'];
 

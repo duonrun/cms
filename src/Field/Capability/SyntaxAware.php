@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field\Capability;
 
-interface Syntaxable
+interface SyntaxAware
 {
 	public function syntaxes(array $syntaxes): void;
 

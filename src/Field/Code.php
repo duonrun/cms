@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Field\Capability\IsSyntaxable;
-use Duon\Cms\Field\Capability\Syntaxable;
+use Duon\Cms\Field\Capability\IsSyntaxAware;
+use Duon\Cms\Field\Capability\SyntaxAware;
 use Duon\Cms\Value\Code as CodeValue;
 use Duon\Sire\Shape;
 
-class Code extends Field implements Capability\Translatable, Syntaxable
+class Code extends Field implements Capability\Translatable, Capability\SyntaxAware
 {
 	use Capability\IsTranslatable;
-	use IsSyntaxable;
+	use Capability\IsSyntaxAware;
 
 	public function value(): CodeValue
 	{

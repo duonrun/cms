@@ -233,8 +233,8 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 	public function testSyntaxCapabilityReturnsSyntaxesProperty(): void
 	{
-		$field = new class ('code', $this->createOwner(), new ValueContext('code', [])) extends Text implements \Duon\Cms\Field\Capability\Syntaxable {
-			use \Duon\Cms\Field\Capability\IsSyntaxable;
+		$field = new class ('code', $this->createOwner(), new ValueContext('code', [])) extends Text implements \Duon\Cms\Field\Capability\SyntaxAware {
+			use \Duon\Cms\Field\Capability\IsSyntaxAware;
 		};
 		$meta = new Syntax('php', 'javascript', 'php');
 
