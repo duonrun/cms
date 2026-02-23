@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Duon\Cms\Field\Capability\File;
 
-trait FileIsTranslatable
+trait IsTranslatable
 {
 	protected bool $translateFile = false;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Duon\Cms\Field\Capability\File;
 
-interface FileTranslatable
+interface Translatable
 {
 	public function translateFile(bool $translate = true): static;
 

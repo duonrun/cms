@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
-use Duon\Cms\Field\Capability\IsSyntaxAware;
-use Duon\Cms\Field\Capability\SyntaxAware;
 use Duon\Cms\Value\Code as CodeValue;
 use Duon\Sire\Shape;
 

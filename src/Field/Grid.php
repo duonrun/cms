@@ -8,12 +8,11 @@ use Duon\Cms\Field\Field;
 use Duon\Cms\Validation\GridItemValidator;
 use Duon\Cms\Value\Grid as GridValue;
 use Duon\Sire\Shape;
-use ValueError;
 
-class Grid extends Field implements Capability\Translatable, Capability\GridResizable
+class Grid extends Field implements Capability\Translatable, Capability\Grid\Resizable
 {
 	use Capability\IsTranslatable;
-	use Capability\GridIsResizable;
+	use Capability\Grid\IsResizable;
 
 	public function __toString(): string
 	{

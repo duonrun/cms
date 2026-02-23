@@ -7,11 +7,14 @@ namespace Duon\Cms\Field;
 use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
-class File extends Field implements Capability\Translatable, Capability\FileTranslatable, Capability\AllowsMultiple
+class File extends Field implements
+	Capability\AllowsMultiple,
+	Capability\File\Translatable,
+	Capability\Translatable
 {
 	use Capability\DoesAllowMultiple;
 	use Capability\IsTranslatable;
-	use Capability\FileIsTranslatable;
+	use Capability\File\IsTranslatable;
 
 	public function value(): Value\File|Value\Files
 	{
