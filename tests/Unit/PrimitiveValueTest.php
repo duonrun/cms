@@ -649,6 +649,100 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Two', $value->get(1)->alt());
 	}
 
+	public function testFileShapeRejectsMoreItemsThanLimitMax(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field->limit(2);
+
+		$shape = $field->shape();
+
+		$valid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				['file' => 'a.pdf'],
+				['file' => 'b.pdf'],
+			],
+		]);
+		$invalid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				['file' => 'a.pdf'],
+				['file' => 'b.pdf'],
+				['file' => 'c.pdf'],
+			],
+		]);
+
+		$this->assertTrue($valid->isValid());
+		$this->assertFalse($invalid->isValid());
+	}
+
+	public function testFileShapeRejectsFewerItemsThanLimitMin(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field->limit(3, 2);
+
+		$shape = $field->shape();
+
+		$valid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				['file' => 'a.pdf'],
+				['file' => 'b.pdf'],
+			],
+		]);
+		$invalid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				['file' => 'a.pdf'],
+			],
+		]);
+
+		$this->assertTrue($valid->isValid());
+		$this->assertFalse($invalid->isValid());
+	}
+
+	public function testTranslatedFileShapeAppliesLimitPerLocale(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field->translateFile();
+		$field->limit(1);
+
+		$shape = $field->shape();
+
+		$valid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				'en' => [
+					['file' => 'a.pdf'],
+				],
+				'de' => [
+					['file' => 'b.pdf'],
+				],
+			],
+		]);
+		$invalid = $shape->validate([
+			'type' => 'file',
+			'files' => [
+				'en' => [
+					['file' => 'a.pdf'],
+					['file' => 'b.pdf'],
+				],
+				'de' => [
+					['file' => 'c.pdf'],
+				],
+			],
+		]);
+
+		$this->assertTrue($valid->isValid());
+		$this->assertFalse($invalid->isValid());
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
