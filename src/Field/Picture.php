@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
+use Duon\Cms\Validation\Shape as ValidationShape;
 use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
@@ -48,32 +49,33 @@ class Picture extends Field implements
 
 	public function shape(): Shape
 	{
-		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$limitValidators = $this->limitValidators();
+		$shape = new ValidationShape(title: $this->label, keepUnknown: true);
 		$shape->add('type', 'text', 'required', 'in:picture');
 
 		if ($this->translateFile) {
 			// File-translatable: separate file arrays per locale
-			$subShape = new Shape(list: true, title: $this->label, keepUnknown: true);
+			$subShape = new ValidationShape(list: true, title: $this->label, keepUnknown: true);
 			$subShape->add('file', 'text');
 			$subShape->add('title', 'text');
 			$subShape->add('alt', 'text');
 
-			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
+			$i18nShape = new ValidationShape(title: $this->label, keepUnknown: true);
 			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
-				$i18nShape->add($locale->id, $subShape);
+				$i18nShape->add($locale->id, $subShape, ...$limitValidators);
 			}
 
 			$shape->add('files', $i18nShape, ...$this->validators);
 		} elseif ($this->translate) {
 			// Text-translatable: shared files but translatable titles and alt text
-			$fileShape = new Shape(list: true, keepUnknown: true);
+			$fileShape = new ValidationShape(list: true, keepUnknown: true);
 			$fileShape->add('file', 'text', 'required');
 
 			$locales = $this->owner->locales();
-			$titleShape = new Shape(title: $this->label, keepUnknown: true);
-			$altShape = new Shape(title: $this->label, keepUnknown: true);
+			$titleShape = new ValidationShape(title: $this->label, keepUnknown: true);
+			$altShape = new ValidationShape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$titleShape->add($locale->id, 'text');
@@ -82,16 +84,28 @@ class Picture extends Field implements
 
 			$fileShape->add('title', $titleShape);
 			$fileShape->add('alt', $altShape);
-			$shape->add('files', $fileShape, ...$this->validators);
+			$shape->add('files', $fileShape, ...$limitValidators, ...$this->validators);
 		} else {
 			// Non-translatable
-			$fileShape = new Shape(list: true, keepUnknown: true);
+			$fileShape = new ValidationShape(list: true, keepUnknown: true);
 			$fileShape->add('file', 'text', 'required');
 			$fileShape->add('title', 'text');
 			$fileShape->add('alt', 'text');
-			$shape->add('files', $fileShape, ...$this->validators);
+			$shape->add('files', $fileShape, ...$limitValidators, ...$this->validators);
 		}
 
 		return $shape;
+	}
+
+	/** @return string[] */
+	private function limitValidators(): array
+	{
+		$validators = ['maxitems:' . $this->getLimitMax()];
+
+		if ($this->getLimitMin() > 0) {
+			$validators[] = 'minitems:' . $this->getLimitMin();
+		}
+
+		return $validators;
 	}
 }
