@@ -158,7 +158,7 @@
 
 	.cms-node-shell {
 		display: flex;
-		min-height: 100vh;
+		height: 100vh;
 		flex-direction: column;
 	}
 
