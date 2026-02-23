@@ -16,8 +16,10 @@
 	let { field, data = $bindable(), node, type }: Props = $props();
 
 	let lang = $state(systemLocale($system));
-	let limitMax = $derived(field.limit?.max ?? 1);
-	let isMultiple = $derived(limitMax > 1);
+
+	function getLimitMax(): number {
+		return Number(field.limit?.max ?? 1);
+	}
 </script>
 
 <Field
@@ -34,8 +36,8 @@
 				{#if locale.id === lang}
 					<Upload
 						{type}
-						multiple={isMultiple}
-						{limitMax}
+						multiple={getLimitMax() > 1}
+						limitMax={getLimitMax()}
 						path="{$system.prefix}/media/{type}/node/{node}"
 						required={field.required}
 						name={field.name}
@@ -46,8 +48,8 @@
 		{:else}
 			<Upload
 				{type}
-				multiple={isMultiple}
-				{limitMax}
+				multiple={getLimitMax() > 1}
+				limitMax={getLimitMax()}
 				path="{$system.prefix}/media/{type}/node/{node}"
 				required={field.required}
 				name={field.name}
