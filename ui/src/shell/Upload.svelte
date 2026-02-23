@@ -2,6 +2,7 @@
 	import { preventDefault } from 'svelte/legacy';
 
 	import type { FileItem, UploadResponse, UploadType } from '$types/data';
+	import type { Limit } from '$types/fields';
 	import type { Toast } from '$lib/toast';
 	import type { ModalFunctions } from '$shell/modal';
 
@@ -22,8 +23,7 @@
 		name: string;
 		translate: boolean;
 		assets: FileItem[];
-		multiple?: boolean;
-		limitMax?: number;
+		limit?: Limit;
 		required?: boolean;
 		disabled?: boolean;
 		disabledMsg?: string;
@@ -37,8 +37,7 @@
 		name,
 		translate,
 		assets = $bindable(),
-		multiple = false,
-		limitMax = multiple ? 999 : 1,
+		limit = { max: -1, min: 0 },
 		required = false,
 		disabled = false,
 		disabledMsg = '',
@@ -55,12 +54,8 @@
 				? $system.allowedFiles.video.join(', ')
 				: $system.allowedFiles.file.join(', '),
 	);
-
+	let multiple = $derived(limit.max < 1 || limit.max > 1);
 	let { open, close } = getContext<ModalFunctions>('modal');
-
-	function isMultipleMode(): boolean {
-		return limitMax > 1;
-	}
 
 	function remove(index: number | null) {
 		if (index === null) {
@@ -96,7 +91,7 @@
 		const { files, items } = event.dataTransfer;
 		let result = files.length ? [...files] : readItems(items);
 
-		if (!isMultipleMode() && result.length > 1) {
+		if (!multiple && result.length > 1) {
 			open(
 				Dialog,
 				{
@@ -123,7 +118,12 @@
 	}
 
 	function enforceLimit(files: File[]): File[] {
-		const slotsLeft = Math.max(limitMax - (assets?.length ?? 0), 0);
+		// unlimited
+		if (limit.max < 1) {
+			return files;
+		}
+
+		const slotsLeft = Math.max(limit.max - (assets?.length ?? 0), 0);
 
 		if (slotsLeft === 0) {
 			open(
@@ -133,7 +133,7 @@
 					body:
 						_('In diesem Feld sind maximal') +
 						' ' +
-						limitMax +
+						limit.max +
 						' ' +
 						_('Dateien erlaubt.'),
 					type: 'error',
@@ -217,7 +217,7 @@
 
 				const value = getTitleAltValue();
 
-				if (isMultipleMode()) {
+				if (multiple) {
 					responses.map((item: UploadResponse) => {
 						if (item.ok) {
 							assets.push({
@@ -271,17 +271,17 @@
 	<div
 		class="upload upload-{type}"
 		class:required
-		class:upload-multiple={isMultipleMode()}
+		class:upload-multiple={multiple}
 		class:upload-inline={inline}>
 		<MediaList
 			bind:assets
-			multiple={isMultipleMode()}
+			{multiple}
 			{type}
 			{path}
 			{remove}
 			{loading}
 			{translate} />
-		{#if !assets || assets.length < limitMax}
+		{#if !assets || limit.max < 1 || assets.length < limit.max}
 			<label
 				class="dragdrop"
 				class:dragging
@@ -301,7 +301,7 @@
 				<input
 					type="file"
 					id={name}
-					multiple={isMultipleMode()}
+					{multiple}
 					oninput={onFile(getFilesFromInput)} />
 			</label>
 		{/if}

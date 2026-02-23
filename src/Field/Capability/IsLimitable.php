@@ -8,8 +8,8 @@ use Duon\Cms\Exception\RuntimeException;
 
 trait IsLimitable
 {
-	protected ?int $limitMin = null;
-	protected ?int $limitMax = null;
+	protected int $limitMin = 0;
+	protected int $limitMax = -1;
 
 	public function limit(int $max, int $min = 0): static
 	{
@@ -33,21 +33,32 @@ trait IsLimitable
 
 	public function getLimitMin(): int
 	{
-		return $this->limitMin ?? $this->defaultLimitMin();
+		return $this->limitMin;
 	}
 
 	public function getLimitMax(): int
 	{
-		return $this->limitMax ?? $this->defaultLimitMax();
+		return $this->limitMax;
 	}
 
-	protected function defaultLimitMin(): int
+	protected function allowsMultipleItems(): bool
 	{
-		return 0;
+		return $this->getLimitMax() !== 1;
 	}
 
-	protected function defaultLimitMax(): int
+	/** @return string[] */
+	private function limitValidators(): array
 	{
-		return 1;
+		$validators = [];
+
+		if ($this->limitMax >= 1) {
+			$validators[] = 'maxitems:' . $this->getLimitMax();
+		}
+
+		if ($this->getLimitMin() > 0) {
+			$validators[] = 'minitems:' . $this->getLimitMin();
+		}
+
+		return $validators;
 	}
 }

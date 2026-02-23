@@ -221,14 +221,13 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertEquals(['min' => 2, 'max' => 5], $properties['limit']);
 	}
 
-	public function testImageFieldPropertiesExposeDefaultLimit(): void
+	public function testImageFieldPropertiesDoNotExposeLimitWithoutSchema(): void
 	{
 		$field = $this->createImageField();
 
 		$properties = $field->properties();
 
-		$this->assertArrayHasKey('limit', $properties);
-		$this->assertEquals(['min' => 0, 'max' => 999], $properties['limit']);
+		$this->assertArrayNotHasKey('limit', $properties);
 	}
 
 	public function testValidateCapabilityReturnsValidatorsProperty(): void

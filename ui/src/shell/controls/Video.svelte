@@ -15,10 +15,6 @@
 	let { field, data = $bindable(), node }: Props = $props();
 
 	let lang = $state(systemLocale($system));
-
-	function getLimitMax(): number {
-		return Number(field.limit?.max ?? 1);
-	}
 </script>
 
 <Field
@@ -31,12 +27,11 @@
 	</LabelDiv>
 	<div class="cms-field-content">
 		{#if field.translateFile}
-			{#each $system.locales as locale}
+			{#each $system.locales as locale (locale.id)}
 				{#if locale.id === lang}
 					<Upload
 						type="video"
-						multiple={getLimitMax() > 1}
-						limitMax={getLimitMax()}
+						limit={field.limit}
 						path="{$system.prefix}/media/video/node/{node}"
 						required={field.required}
 						name={field.name}
@@ -47,8 +42,7 @@
 		{:else}
 			<Upload
 				type="video"
-				multiple={getLimitMax() > 1}
-				limitMax={getLimitMax()}
+				limit={field.limit}
 				path="{$system.prefix}/media/video/node/{node}"
 				required={field.required}
 				name={field.name}

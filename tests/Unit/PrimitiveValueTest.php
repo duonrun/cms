@@ -263,9 +263,9 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 		$field = new \Duon\Cms\Field\File('attachments', $owner, $valueContext);
-		$field->limit(999);
 		$value = $field->value();
 
+		$this->assertInstanceOf(\Duon\Cms\Value\Files::class, $value);
 		$this->assertSame(2, $value->count());
 		$this->assertTrue($value->isset());
 		$this->assertSame('Files: count(0)', (string) $value, 'Value unwrap uses locale data, not files.');
@@ -636,7 +636,6 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
 			],
 		]));
-		$field->limit(999);
 
 		/** @var \Duon\Cms\Value\Images $value */
 		$value = $field->value();
