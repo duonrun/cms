@@ -17,7 +17,6 @@ use Duon\Cms\Schema\Hidden;
 use Duon\Cms\Schema\Immutable;
 use Duon\Cms\Schema\Label;
 use Duon\Cms\Schema\Limit;
-use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Required;
 use Duon\Cms\Schema\Rows;
@@ -209,17 +208,6 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertTrue($properties['translateFile']);
 	}
 
-	public function testMultipleCapabilityReturnsMultipleProperty(): void
-	{
-		$field = $this->createImageField();
-		$meta = new Multiple();
-
-		$properties = $this->applyAndGetProperties($meta, $field);
-
-		$this->assertArrayHasKey('multiple', $properties);
-		$this->assertTrue($properties['multiple']);
-	}
-
 	public function testLimitCapabilityReturnsLimitProperty(): void
 	{
 		$field = new class ('image', $this->createOwner(), new ValueContext('image', [])) extends Image implements \Duon\Cms\Field\Capability\Limitable {
@@ -231,6 +219,16 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('limit', $properties);
 		$this->assertEquals(['min' => 2, 'max' => 5], $properties['limit']);
+	}
+
+	public function testImageFieldPropertiesExposeDefaultLimit(): void
+	{
+		$field = $this->createImageField();
+
+		$properties = $field->properties();
+
+		$this->assertArrayHasKey('limit', $properties);
+		$this->assertEquals(['min' => 0, 'max' => 999], $properties['limit']);
 	}
 
 	public function testValidateCapabilityReturnsValidatorsProperty(): void

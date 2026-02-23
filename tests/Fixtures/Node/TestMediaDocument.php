@@ -11,7 +11,6 @@ use Duon\Cms\Field\Video;
 use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Schema\Columns;
 use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Multiple;
 use Duon\Cms\Schema\Options;
 use Duon\Cms\Schema\Translate;
 use Duon\Cms\Schema\TranslateFile;
@@ -20,7 +19,6 @@ use Duon\Cms\Schema\TranslateFile;
 class TestMediaDocument implements Title
 {
 	#[Label('Gallery')]
-	#[Multiple]
 	#[TranslateFile]
 	public Image $gallery;
 
