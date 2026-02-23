@@ -84,7 +84,7 @@ class Grid extends Value
 							$this->context->fieldName,
 							$this->owner,
 							new ValueContext($this->context->fieldName, $item->data),
-						))->multiple()->value() as $image) {
+						))->limit(999)->value() as $image) {
 							yield $image;
 						}
 					}
@@ -103,7 +103,7 @@ class Grid extends Value
 						$this->context->fieldName,
 						$this->owner,
 						new ValueContext($this->context->fieldName, $item->data),
-					))->multiple()->value() as $image) {
+					))->limit(999)->value() as $image) {
 						yield $image;
 					}
 				}

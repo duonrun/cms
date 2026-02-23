@@ -6,20 +6,19 @@ namespace Duon\Cms\Value;
 
 use Duon\Cms\Assets;
 use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Capability\File\Translatable as FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
 use Duon\Cms\Field\Owner;
 
 /**
- * @property-read Field&AllowsMultiple&FileTranslatable&Translatable $field
+ * @property-read Field&FileTranslatable&Translatable $field
  */
 class File extends Value
 {
 	public function __construct(
 		Owner $owner,
-		Field&AllowsMultiple&FileTranslatable&Translatable $field,
+		Field&FileTranslatable&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {

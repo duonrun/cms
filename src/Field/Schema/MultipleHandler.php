@@ -6,6 +6,7 @@ namespace Duon\Cms\Field\Schema;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\Capability\AllowsMultiple;
+use Duon\Cms\Field\Capability\Limitable;
 use Duon\Cms\Field\Field;
 
 class MultipleHandler extends Handler
@@ -18,6 +19,12 @@ class MultipleHandler extends Handler
 			return;
 		}
 
+		if ($field instanceof Limitable) {
+			$field->limit(999);
+
+			return;
+		}
+
 		throw new RuntimeException($this->capabilityErrorMessage($field, AllowsMultiple::class));
 	}
 
@@ -25,6 +32,10 @@ class MultipleHandler extends Handler
 	{
 		if ($field instanceof AllowsMultiple) {
 			return ['multiple' => $field->getMultiple()];
+		}
+
+		if ($field instanceof Limitable) {
+			return ['multiple' => $field->getLimitMax() > 1];
 		}
 
 		return [];

@@ -8,15 +8,15 @@ use Duon\Cms\Field\Field;
 use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
-class Image extends Field implements Capability\Translatable, Capability\File\Translatable, Capability\AllowsMultiple
+class Image extends Field implements Capability\Translatable, Capability\File\Translatable, Capability\Limitable
 {
-	use Capability\DoesAllowMultiple;
+	use Capability\IsLimitable;
 	use Capability\IsTranslatable;
 	use Capability\File\IsTranslatable;
 
 	public function value(): Value\Images|Value\Image
 	{
-		if ($this->multiple) {
+		if ($this->getLimitMax() > 1) {
 			if ($this->translateFile) {
 				return new Value\TranslatedImages($this->owner, $this, $this->valueContext);
 			}
@@ -87,5 +87,10 @@ class Image extends Field implements Capability\Translatable, Capability\File\Tr
 		}
 
 		return $shape;
+	}
+
+	protected function defaultLimitMax(): int
+	{
+		return 999;
 	}
 }

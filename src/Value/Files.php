@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Value;
 
-use Duon\Cms\Field\Capability\AllowsMultiple;
 use Duon\Cms\Field\Capability\File\Translatable as FileTranslatable;
 use Duon\Cms\Field\Capability\Translatable;
 use Duon\Cms\Field\Field;
@@ -17,7 +16,7 @@ class Files extends Value implements Iterator
 
 	public function __construct(
 		Owner $owner,
-		Field&AllowsMultiple&FileTranslatable&Translatable $field,
+		Field&FileTranslatable&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {
