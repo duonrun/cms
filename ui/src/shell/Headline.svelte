@@ -61,8 +61,9 @@
 		margin-left: var(--cms-space-4);
 		border-radius: var(--cms-radius-full);
 		background-color: var(--cms-color-danger-700);
-		padding: 0 var(--cms-space-2) var(--cms-space-px);
+		padding: var(--cms-space-px) var(--cms-space-2);
 		font-size: var(--cms-font-size-sm);
+		line-height: 1.25rem;
 		font-weight: 700;
 		color: var(--cms-color-white);
 	}

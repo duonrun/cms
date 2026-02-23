@@ -29,10 +29,10 @@
 		width: 0.4rem;
 
 		&.large {
-			padding-left: var(--cms-space-2);
-			padding-right: var(--cms-space-2);
+			padding: var(--cms-space-px) var(--cms-space-2);
 			height: auto;
 			width: auto;
+			line-height: 1.25rem;
 		}
 
 		&.published {
