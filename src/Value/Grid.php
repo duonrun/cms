@@ -58,7 +58,7 @@ class Grid extends Value
 						$this->context->fieldName,
 						$this->owner,
 						new ValueContext($this->context->fieldName, $value->data),
-					))->value();
+					))->limit(1)->value();
 				}
 			}
 		}
@@ -78,13 +78,13 @@ class Grid extends Value
 							$this->context->fieldName,
 							$this->owner,
 							new ValueContext($this->context->fieldName, $item->data),
-						))->value();
+						))->limit(1)->value();
 					} elseif ($item->type === 'images') {
 						foreach ((new Field\Image(
 							$this->context->fieldName,
 							$this->owner,
 							new ValueContext($this->context->fieldName, $item->data),
-						))->limit(999)->value() as $image) {
+						))->value() as $image) {
 							yield $image;
 						}
 					}
@@ -97,13 +97,13 @@ class Grid extends Value
 						$this->context->fieldName,
 						$this->owner,
 						new ValueContext($this->context->fieldName, $item->data),
-					))->value();
+					))->limit(1)->value();
 				} elseif ($item->type === 'images') {
 					foreach ((new Field\Image(
 						$this->context->fieldName,
 						$this->owner,
 						new ValueContext($this->context->fieldName, $item->data),
-					))->limit(999)->value() as $image) {
+					))->value() as $image) {
 						yield $image;
 					}
 				}

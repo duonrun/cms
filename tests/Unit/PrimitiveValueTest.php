@@ -341,7 +341,6 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->limit(999);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -595,7 +594,6 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->limit(999);
 		$field->translateFile();
 		$context->request->set('locale', $context->locales()->get('de'));
 
