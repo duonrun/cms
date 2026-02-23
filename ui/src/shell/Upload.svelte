@@ -48,7 +48,6 @@
 
 	let loading = $state(false);
 	let dragging = $state(false);
-	let isMultiple = $derived(limitMax > 1);
 	let allowedExtensions = $derived(
 		type === 'image'
 			? $system.allowedFiles.image.join(', ')
@@ -58,6 +57,10 @@
 	);
 
 	let { open, close } = getContext<ModalFunctions>('modal');
+
+	function isMultipleMode(): boolean {
+		return limitMax > 1;
+	}
 
 	function remove(index: number | null) {
 		if (index === null) {
@@ -93,7 +96,7 @@
 		const { files, items } = event.dataTransfer;
 		let result = files.length ? [...files] : readItems(items);
 
-		if (!isMultiple && result.length > 1) {
+		if (!isMultipleMode() && result.length > 1) {
 			open(
 				Dialog,
 				{
@@ -214,7 +217,7 @@
 
 				const value = getTitleAltValue();
 
-				if (isMultiple) {
+				if (isMultipleMode()) {
 					responses.map((item: UploadResponse) => {
 						if (item.ok) {
 							assets.push({
@@ -268,11 +271,11 @@
 	<div
 		class="upload upload-{type}"
 		class:required
-		class:upload-multiple={isMultiple}
+		class:upload-multiple={isMultipleMode()}
 		class:upload-inline={inline}>
 		<MediaList
 			bind:assets
-			multiple={isMultiple}
+			multiple={isMultipleMode()}
 			{type}
 			{path}
 			{remove}
@@ -298,7 +301,7 @@
 				<input
 					type="file"
 					id={name}
-					multiple={isMultiple}
+					multiple={isMultipleMode()}
 					oninput={onFile(getFilesFromInput)} />
 			</label>
 		{/if}
