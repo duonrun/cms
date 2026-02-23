@@ -9,11 +9,11 @@ use Duon\Cms\Value;
 use Duon\Sire\Shape;
 
 class Picture extends Field implements
-	Capability\AllowsMultiple,
+	Capability\Limitable,
 	Capability\File\Translatable,
 	Capability\Translatable
 {
-	use Capability\DoesAllowMultiple;
+	use Capability\IsLimitable;
 	use Capability\File\IsTranslatable;
 	use Capability\IsTranslatable;
 

@@ -11,9 +11,9 @@ use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
 
-class Matrix extends Field implements Capability\AllowsMultiple
+class Matrix extends Field implements Capability\Limitable
 {
-	use Capability\DoesAllowMultiple;
+	use Capability\IsLimitable;
 
 	protected array $subfields = [];
 	protected bool $subfieldsInitialized = false;
@@ -81,7 +81,7 @@ class Matrix extends Field implements Capability\AllowsMultiple
 			$itemShape->add($name, $subfield->shape());
 		}
 
-		if ($this->multiple) {
+		if ($this->getLimitMax() > 1) {
 			$shape->add('value', 'list', ...$this->validators);
 			$shape->add('value.*', $itemShape);
 		} else {

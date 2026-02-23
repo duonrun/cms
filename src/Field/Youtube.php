@@ -8,10 +8,10 @@ use Duon\Cms\Field\Field;
 use Duon\Cms\Value\Youtube as YoutubeValue;
 use Duon\Sire\Shape;
 
-class Youtube extends Field implements Capability\Translatable, Capability\AllowsMultiple
+class Youtube extends Field implements Capability\Translatable, Capability\Limitable
 {
 	use Capability\IsTranslatable;
-	use Capability\DoesAllowMultiple;
+	use Capability\IsLimitable;
 
 	public function value(): YoutubeValue
 	{
