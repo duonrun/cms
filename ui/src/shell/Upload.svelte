@@ -23,6 +23,7 @@
 		translate: boolean;
 		assets: FileItem[];
 		multiple?: boolean;
+		limitMax?: number;
 		required?: boolean;
 		disabled?: boolean;
 		disabledMsg?: string;
@@ -37,6 +38,7 @@
 		translate,
 		assets = $bindable(),
 		multiple = false,
+		limitMax = multiple ? 999 : 1,
 		required = false,
 		disabled = false,
 		disabledMsg = '',
@@ -46,6 +48,7 @@
 
 	let loading = $state(false);
 	let dragging = $state(false);
+	let isMultiple = $derived(limitMax > 1);
 	let allowedExtensions = $derived(
 		type === 'image'
 			? $system.allowedFiles.image.join(', ')
@@ -67,21 +70,30 @@
 	}
 
 	function readItems(items: DataTransferItemList) {
-		let result = [];
+		let result: File[] = [];
 
 		for (const item of items) {
 			if (item.kind === 'file') {
-				result.push(item.getAsFile());
+				const file = item.getAsFile();
+
+				if (file) {
+					result.push(file);
+				}
 			}
 		}
 
 		return result;
 	}
 
-	function getFilesFromDrop({ dataTransfer: { files, items } }: DragEvent) {
+	function getFilesFromDrop(event: DragEvent | Event) {
+		if (!(event instanceof DragEvent) || !event.dataTransfer) {
+			return [];
+		}
+
+		const { files, items } = event.dataTransfer;
 		let result = files.length ? [...files] : readItems(items);
 
-		if (!multiple && result.length > 1) {
+		if (!isMultiple && result.length > 1) {
 			open(
 				Dialog,
 				{
@@ -103,6 +115,52 @@
 		const files = target.files ? [...target.files] : [];
 
 		target.value = '';
+
+		return files;
+	}
+
+	function enforceLimit(files: File[]): File[] {
+		const slotsLeft = Math.max(limitMax - (assets?.length ?? 0), 0);
+
+		if (slotsLeft === 0) {
+			open(
+				Dialog,
+				{
+					title: _('Fehler'),
+					body:
+						_('In diesem Feld sind maximal') +
+						' ' +
+						limitMax +
+						' ' +
+						_('Dateien erlaubt.'),
+					type: 'error',
+					close,
+				},
+				{},
+			);
+
+			return [];
+		}
+
+		if (files.length > slotsLeft) {
+			open(
+				Dialog,
+				{
+					title: _('Fehler'),
+					body:
+						_('Es können nur noch') +
+						' ' +
+						slotsLeft +
+						' ' +
+						_('Datei(en) hinzugefügt werden.'),
+					type: 'error',
+					close,
+				},
+				{},
+			);
+
+			return files.slice(0, slotsLeft);
+		}
 
 		return files;
 	}
@@ -143,7 +201,7 @@
 	function onFile(getFilesFunction: (event: DragEvent | Event) => File[]) {
 		return async (event: Event) => {
 			stopDragging();
-			let files = getFilesFunction(event);
+			let files = enforceLimit(getFilesFunction(event));
 
 			if (files.length > 0) {
 				loading = true;
@@ -156,7 +214,7 @@
 
 				const value = getTitleAltValue();
 
-				if (multiple) {
+				if (isMultiple) {
 					responses.map((item: UploadResponse) => {
 						if (item.ok) {
 							assets.push({
@@ -210,17 +268,17 @@
 	<div
 		class="upload upload-{type}"
 		class:required
-		class:upload-multiple={multiple}
+		class:upload-multiple={isMultiple}
 		class:upload-inline={inline}>
 		<MediaList
 			bind:assets
-			{multiple}
+			multiple={isMultiple}
 			{type}
 			{path}
 			{remove}
 			{loading}
 			{translate} />
-		{#if !assets || assets.length === 0 || multiple}
+		{#if !assets || assets.length < limitMax}
 			<label
 				class="dragdrop"
 				class:dragging
@@ -240,7 +298,7 @@
 				<input
 					type="file"
 					id={name}
-					{multiple}
+					multiple={isMultiple}
 					oninput={onFile(getFilesFromInput)} />
 			</label>
 		{/if}

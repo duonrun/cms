@@ -97,6 +97,11 @@ class Picture extends Field implements
 		return $shape;
 	}
 
+	protected function defaultLimitMax(): int
+	{
+		return 999;
+	}
+
 	/** @return string[] */
 	private function limitValidators(): array
 	{

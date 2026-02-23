@@ -11,8 +11,13 @@ export interface SimpleField {
 	translate: boolean;
 }
 
+export interface Limit {
+	min: number;
+	max: number;
+}
+
 export interface FileField extends SimpleField {
-	multiple: boolean;
+	limit: Limit;
 	translateFile: boolean;
 }
 

@@ -15,6 +15,8 @@
 	let { field, data = $bindable(), node }: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	let limitMax = $derived(field.limit?.max ?? 1);
+	let isMultiple = $derived(limitMax > 1);
 </script>
 
 <Field
@@ -31,7 +33,8 @@
 				{#if locale.id === lang}
 					<Upload
 						type="video"
-						multiple={field.multiple}
+						multiple={isMultiple}
+						{limitMax}
 						path="{$system.prefix}/media/video/node/{node}"
 						required={field.required}
 						name={field.name}
@@ -42,7 +45,8 @@
 		{:else}
 			<Upload
 				type="video"
-				multiple={field.multiple}
+				multiple={isMultiple}
+				{limitMax}
 				path="{$system.prefix}/media/video/node/{node}"
 				required={field.required}
 				name={field.name}
