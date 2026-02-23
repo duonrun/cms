@@ -16,6 +16,8 @@
 	let { field, data = $bindable(), node }: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	let limitMax = $derived(field.limit?.max ?? 999);
+	let isMultiple = $derived(limitMax > 1);
 </script>
 
 <Field {field}>
@@ -27,7 +29,8 @@
 	<div class="cms-field-content">
 		<Upload
 			type="image"
-			multiple={true}
+			multiple={isMultiple}
+			{limitMax}
 			path="{$system.prefix}/media/image/node/{node}"
 			name={field.name}
 			translate={field.translateFile ? false : field.translate}

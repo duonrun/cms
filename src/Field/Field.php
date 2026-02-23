@@ -94,6 +94,13 @@ abstract class Field implements
 			$properties = array_merge($properties, $handler->properties($meta, $this));
 		}
 
+		if ($this instanceof Capability\Limitable) {
+			$properties['limit'] = [
+				'min' => $this->getLimitMin(),
+				'max' => $this->getLimitMax(),
+			];
+		}
+
 		return $properties;
 	}
 
