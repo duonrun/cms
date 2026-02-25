@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Schema;
 use Duon\Cms\Node\Schema\DeletableHandler;
 use Duon\Cms\Node\Schema\FieldOrderHandler;
@@ -27,7 +28,9 @@ use Duon\Cms\Tests\Fixtures\Node\CustomIcon;
 use Duon\Cms\Tests\Fixtures\Node\CustomIconHandler;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithCustomAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
@@ -122,6 +125,14 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertEquals(['titleField' => 'heading'], $result);
 	}
 
+	public function testTitleHandlerThrowsForEmptyClassLevelField(): void
+	{
+		$handler = new TitleHandler();
+
+		$this->throws(RuntimeException::class, "The #[Title] attribute on node 'Duon\\Cms\\Tests\\Fixtures\\Node\\PlainPage' requires a non-empty field name when used on a class.");
+		$handler->resolve(new Title(), PlainPage::class);
+	}
+
 	public function testFieldOrderHandlerResolve(): void
 	{
 		$handler = new FieldOrderHandler();
@@ -174,6 +185,22 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertNull($schema->fieldOrder);
 		// No #[Deletable] => true
 		$this->assertTrue($schema->deletable);
+	}
+
+	public function testSchemaResolvesTitleFromPropertyAttribute(): void
+	{
+		$registry = Registry::withDefaults();
+		$schema = new Schema(NodeWithPropertyTitleAttribute::class, $registry);
+
+		$this->assertEquals('heading', $schema->titleField);
+	}
+
+	public function testSchemaThrowsForPropertyTitleOnNonFieldProperty(): void
+	{
+		$registry = Registry::withDefaults();
+
+		$this->throws(RuntimeException::class, "The #[Title] attribute on property 'Duon\\Cms\\Tests\\Fixtures\\Node\\NodeWithInvalidPropertyTitleAttribute::heading' requires a field-typed property.");
+		new Schema(NodeWithInvalidPropertyTitleAttribute::class, $registry);
 	}
 
 	public function testSchemaDeletableFalse(): void

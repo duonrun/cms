@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Duon\Cms\Node;
 
 use Duon\Cms\Exception\NoSuchProperty;
+use Duon\Cms\Exception\RuntimeException;
+use Duon\Cms\Field\Field;
 use Duon\Cms\Node\Schema\Registry;
+use Duon\Cms\Schema\Title;
 use ReflectionClass;
+use ReflectionProperty;
+use ReflectionUnionType;
 
 class Schema
 {
@@ -85,6 +90,37 @@ class Schema
 			}
 		}
 
+		foreach ($reflection->getProperties() as $property) {
+			foreach ($property->getAttributes(Title::class) as $attribute) {
+				$instance = $attribute->newInstance();
+				$handler = $this->registry->getHandler($instance);
+
+				if ($handler === null) {
+					continue;
+				}
+
+				if (!$this->isFieldProperty($property)) {
+					throw new RuntimeException(
+						"The #[Title] attribute on property '{$this->nodeClass}::{$property->getName()}' "
+							. "requires a field-typed property.",
+					);
+				}
+
+				$resolved = array_merge($resolved, $handler->resolve(new Title($property->getName()), $this->nodeClass));
+			}
+		}
+
 		return $resolved;
+	}
+
+	private function isFieldProperty(ReflectionProperty $property): bool
+	{
+		$type = $property->getType();
+
+		if ($type === null || $type::class === ReflectionUnionType::class) {
+			return false;
+		}
+
+		return is_subclass_of($type->getName(), Field::class);
 	}
 }

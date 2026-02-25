@@ -6,8 +6,6 @@ namespace Duon\Cms;
 
 use Closure;
 use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
 
 use function Duon\Cms\Util\escape;
@@ -60,7 +58,7 @@ final class Column
 		return $this;
 	}
 
-	public function get(object $node): array
+	public function get(Node $node): array
 	{
 		return [
 			'value' => is_string($this->field)
@@ -74,23 +72,15 @@ final class Column
 		];
 	}
 
-	private function getValue(object $node, string $field): mixed
+	private function getValue(Node $node, string $field): mixed
 	{
 		$inner = Node::unwrap($node);
 
 		switch ($field) {
 			case 'title':
-				if ($inner instanceof Title) {
-					return $inner->title();
-				}
-
-				return method_exists($inner, 'title') ? $inner->title() : '';
+				return $node->title();
 			case 'meta.name':
-				if ($node instanceof Node) {
-					return $node->meta->name;
-				}
-
-				return basename(str_replace('\\', '/', $inner::class));
+				return $node->meta->name;
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
@@ -102,25 +92,25 @@ final class Column
 			case 'meta.handle':
 				$key = explode('.', $field)[1];
 
-				if ($node instanceof Node) {
-					return $node->meta->get($key);
-				}
-
-				return Factory::meta($node, $key);
+				return $node->meta->get($key);
 			case 'meta.class':
 				return $inner::class;
 			case 'meta.classname':
 				return basename(str_replace('\\', '/', $inner::class));
 			case 'meta.editor':
+				$editorData = (array) $node->meta->get('editor_data', []);
+
 				return escape(
-					Factory::meta($node, 'editor_data')['name']
-					?? Factory::meta($node, 'editor_username'),
-				) ?? Factory::meta($node, 'editor_email');
+					$editorData['name']
+					?? $node->meta->get('editor_username'),
+				) ?? $node->meta->get('editor_email');
 			case 'meta.creator':
+				$creatorData = (array) $node->meta->get('creator_data', []);
+
 				return escape(
-					Factory::meta($node, 'creator_data')['name']
-					?? Factory::meta($node, 'creator_username'),
-				) ?? Factory::meta($node, 'creator_email');
+					$creatorData['name']
+					?? $node->meta->get('creator_username'),
+				) ?? $node->meta->get('creator_email');
 			default:
 				$hydrator = new FieldHydrator();
 				$fieldObj = $hydrator->getField($inner, $field);

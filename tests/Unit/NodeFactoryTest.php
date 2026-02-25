@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Unit;
 
+use Duon\Cms\Column;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Field\FieldHydrator;
@@ -12,7 +13,11 @@ use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Serializer;
 use Duon\Cms\Node\Types;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithInjectedType;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithNumericTitleField;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithTitleMethodWithoutInterface;
 use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
 use Duon\Cms\Tests\Fixtures\Node\PlainPage;
 use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
@@ -156,6 +161,106 @@ final class NodeFactoryTest extends TestCase
 		$serializer = new Serializer($this->factory->hydrator(), $this->types);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
+	}
+
+	public function testPropertyTitleAttributeResolvesNodeTitleFromField(): void
+	{
+		$node = $this->factory->create(NodeWithPropertyTitleAttribute::class, $this->context, $this->cms, [
+			'uid' => 'property-title-1',
+			'content' => [
+				'heading' => ['value' => 'Property Title'],
+			],
+		]);
+
+		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$title = $serializer->resolveTitle($node);
+		$this->assertSame('Property Title', $title);
+	}
+
+	public function testNodeTitleResolvesFromClassTitleAttribute(): void
+	{
+		$node = $this->factory->create(NodeWithClassTitleAttribute::class, $this->context, $this->cms, [
+			'uid' => 'node-title-class-1',
+			'content' => [
+				'heading' => ['value' => 'Node Class Title'],
+			],
+		]);
+
+		$proxy = $this->factory->proxy($node, $this->context->request);
+
+		$this->assertSame('Node Class Title', $proxy->title());
+	}
+
+	public function testNodeTitleResolvesFromPropertyTitleAttribute(): void
+	{
+		$node = $this->factory->create(NodeWithPropertyTitleAttribute::class, $this->context, $this->cms, [
+			'uid' => 'node-title-property-1',
+			'content' => [
+				'heading' => ['value' => 'Node Property Title'],
+			],
+		]);
+
+		$proxy = $this->factory->proxy($node, $this->context->request);
+
+		$this->assertSame('Node Property Title', $proxy->title());
+	}
+
+	public function testNodeTitleIgnoresMethodWithoutTitleInterface(): void
+	{
+		$node = $this->factory->create(NodeWithTitleMethodWithoutInterface::class, $this->context, $this->cms, [
+			'uid' => 'node-title-no-interface-1',
+			'content' => [
+				'title' => ['value' => 'Property fallback title'],
+			],
+		]);
+
+		$proxy = $this->factory->proxy($node, $this->context->request);
+
+		$this->assertSame('Property fallback title', $proxy->title());
+	}
+
+	public function testNodeTitleFieldMustBeText(): void
+	{
+		$node = $this->factory->create(NodeWithNumericTitleField::class, $this->context, $this->cms, [
+			'uid' => 'node-title-number-1',
+			'content' => [
+				'count' => ['value' => 42],
+			],
+		]);
+
+		$proxy = $this->factory->proxy($node, $this->context->request);
+
+		$this->assertSame('', $proxy->title());
+	}
+
+	public function testColumnTitleResolvesFromClassTitleAttribute(): void
+	{
+		$node = $this->factory->create(NodeWithClassTitleAttribute::class, $this->context, $this->cms, [
+			'uid' => 'column-title-class-1',
+			'content' => [
+				'heading' => ['value' => 'Class Attribute Title'],
+			],
+		]);
+
+		$column = Column::new('Title', 'title');
+		$row = $column->get($this->factory->proxy($node, $this->context->request));
+
+		$this->assertSame('Class Attribute Title', $row['value']);
+	}
+
+	public function testColumnTitleResolvesFromPropertyTitleAttribute(): void
+	{
+		$node = $this->factory->create(NodeWithPropertyTitleAttribute::class, $this->context, $this->cms, [
+			'uid' => 'column-title-property-1',
+			'content' => [
+				'heading' => ['value' => 'Property Attribute Title'],
+			],
+		]);
+
+		$column = Column::new('Title', 'title');
+		$row = $column->get($this->factory->proxy($node, $this->context->request));
+
+		$this->assertSame('Property Attribute Title', $row['value']);
 	}
 
 	// -- WeakMap data storage -------------------------------------------------

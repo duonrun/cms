@@ -6,7 +6,6 @@ namespace Duon\Cms\View;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Config;
-use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
 use Duon\Cms\Middleware\Permission;
 use Duon\Cms\Node\Factory as NodeFactory;
@@ -67,7 +66,7 @@ class Nodes
 			$uid = $node->meta->uid;
 			$n = [
 				'uid' => $uid,
-				'title' => $node instanceof \Duon\Cms\Node\Contract\Title ? $node->title() : (method_exists($node, 'title') ? $node->title() : ''),
+				'title' => $node->title(),
 				'handle' => $node->meta->handle,
 				'published' => $node->meta->published,
 				'hidden' => $node->meta->hidden,

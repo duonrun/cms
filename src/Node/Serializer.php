@@ -6,7 +6,6 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Locales;
-use Duon\Cms\Node\Contract\Title;
 use ReflectionMethod;
 
 use function Duon\Cms\Util\nanoid;
@@ -132,23 +131,16 @@ class Serializer
 
 	public function resolveTitle(object $node): string
 	{
-		if ($node instanceof Title) {
-			return $node->title();
-		}
+		$proxy = $node instanceof Node
+			? $node
+			: new Node(
+				Node::unwrap($node),
+				Factory::fieldNamesFor($node),
+				$this->hydrator,
+				$this->types,
+			);
 
-		if (method_exists($node, 'title')) {
-			return $node->title();
-		}
-
-		$titleField = $this->types->get($node::class, 'titleField');
-
-		if ($titleField) {
-			$field = $this->hydrator->getField($node, $titleField);
-
-			return $field->value()->unwrap() ?? '';
-		}
-
-		return '';
+		return $proxy->title();
 	}
 
 	/**

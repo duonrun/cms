@@ -6,7 +6,9 @@ namespace Duon\Cms\Node;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\FieldHydrator;
+use Duon\Cms\Field\Text;
 use Duon\Cms\Locale;
+use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Value\Value;
 use Duon\Core\Request;
 
@@ -62,6 +64,39 @@ class Node
 	public function meta(string $key, mixed $default = null): mixed
 	{
 		return $this->meta->get($key, $default);
+	}
+
+	public function title(): string
+	{
+		$inner = self::unwrap($this->node);
+
+		if ($inner instanceof Title) {
+			return $inner->title();
+		}
+
+		$titleField = $this->types->get($inner::class, 'titleField');
+
+		if (is_string($titleField) && $titleField !== '') {
+			$field = $this->hydrator->getField($inner, $titleField);
+
+			if (!$field instanceof Text) {
+				return '';
+			}
+
+			return $field->value()->unwrap() ?? '';
+		}
+
+		if (in_array('title', $this->fieldNames, true)) {
+			$field = $this->hydrator->getField($inner, 'title');
+
+			if (!$field instanceof Text) {
+				return '';
+			}
+
+			return $field->value()->unwrap() ?? '';
+		}
+
+		return '';
 	}
 
 	public function __get(string $name): ?Value
