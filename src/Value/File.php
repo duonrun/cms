@@ -90,7 +90,7 @@ class File extends Value
 			return $this->translated($key, $index);
 		}
 
-		return $this->data['files'][$this->index][$key][$this->defaultLocale->id] ?? '';
+		return $this->data['files'][$this->index][$key] ?? '';
 	}
 
 	protected function translated(string $key, int $index): string
