@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Field;
 
+use Duon\Cms\Validation\Shape as ValidationShape;
 use Duon\Cms\Value\MatrixValue;
 use Duon\Cms\Value\ValueContext;
 use Duon\Sire\Shape;
@@ -72,10 +73,10 @@ class Matrix extends Field implements Capability\Limitable
 
 	public function shape(): Shape
 	{
-		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape = new ValidationShape(title: $this->label, keepUnknown: true);
 		$shape->add('type', 'text', 'required', 'in:matrix');
 
-		$itemShape = new Shape(title: $this->label, keepUnknown: true);
+		$itemShape = new ValidationShape(title: $this->label, keepUnknown: true);
 
 		foreach ($this->subfields as $name => $subfield) {
 			$itemShape->add($name, $subfield->shape());

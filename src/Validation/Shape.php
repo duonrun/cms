@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Validation;
 
+use Duon\Sire\Contract\Shape as ShapeContract;
 use Duon\Sire\Contract\TypeCasterRegistry as TypeCasterRegistryContract;
 use Duon\Sire\Contract\ValidatorDefinitionParser as ValidatorDefinitionParserContract;
 use Duon\Sire\Contract\ValidatorRegistry as ValidatorRegistryContract;
@@ -11,6 +12,7 @@ use Duon\Sire\Shape as SireShape;
 use Duon\Sire\Validator;
 use Duon\Sire\ValidatorRegistry;
 use Duon\Sire\Value;
+use Override;
 
 class Shape extends SireShape
 {
@@ -59,5 +61,15 @@ class Shape extends SireShape
 			$validatorDefinitionParser,
 			$typeCasterRegistry,
 		);
+	}
+
+	#[Override]
+	protected function toSubValues(mixed $pristine, ShapeContract $shape): Value
+	{
+		if ($pristine === null) {
+			$pristine = [];
+		}
+
+		return parent::toSubValues($pristine, $shape);
 	}
 }

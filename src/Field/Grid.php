@@ -6,6 +6,7 @@ namespace Duon\Cms\Field;
 
 use Duon\Cms\Field\Field;
 use Duon\Cms\Validation\GridItemValidator;
+use Duon\Cms\Validation\Shape as ValidationShape;
 use Duon\Cms\Value\Grid as GridValue;
 use Duon\Sire\Shape;
 
@@ -45,7 +46,7 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 
 	public function shape(): Shape
 	{
-		$shape = new Shape(title: $this->label, keepUnknown: true);
+		$shape = new ValidationShape(title: $this->label, keepUnknown: true);
 		$shape->add('type', 'text', 'required', 'in:grid');
 		$shape->add('columns', 'int', 'required');
 
@@ -54,7 +55,7 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nShape = new Shape(title: $this->label, keepUnknown: true);
+			$i18nShape = new ValidationShape(title: $this->label, keepUnknown: true);
 
 			foreach ($locales as $locale) {
 				$innerValidators = [];
