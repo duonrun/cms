@@ -78,16 +78,16 @@ describe('unsetTextAlign', () => {
 });
 
 describe('setParagraphClass', () => {
-	test('sets large class on paragraph', () => {
+	test('sets cms text class on paragraph', () => {
 		const state = createState('<p>text</p>', 3);
-		const result = applyCommand(state, setParagraphClass('large'));
-		expect(serializeHTML(result.doc)).toBe('<p class="large">text</p>');
+		const result = applyCommand(state, setParagraphClass('cms-text-lg'));
+		expect(serializeHTML(result.doc)).toBe('<p class="cms-text-lg">text</p>');
 	});
 
 	test('converts heading to paragraph with class', () => {
 		const state = createState('<h2>title</h2>', 3);
-		const result = applyCommand(state, setParagraphClass('large'));
-		expect(serializeHTML(result.doc)).toBe('<p class="large">title</p>');
+		const result = applyCommand(state, setParagraphClass('cms-text-2xl'));
+		expect(serializeHTML(result.doc)).toBe('<p class="cms-text-2xl">title</p>');
 	});
 });
 

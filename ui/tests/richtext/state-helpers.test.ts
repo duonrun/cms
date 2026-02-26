@@ -112,13 +112,13 @@ describe('isNodeActive', () => {
 	});
 
 	test('detects paragraph with class attribute', () => {
-		const state = createState('<p class="large">big text</p>', 3);
-		expect(isNodeActive(state, schema.nodes.paragraph, { class: 'large' })).toBe(true);
+		const state = createState('<p class="cms-text-lg">big text</p>', 3);
+		expect(isNodeActive(state, schema.nodes.paragraph, { class: 'cms-text-lg' })).toBe(true);
 	});
 
 	test('returns false for non-matching class', () => {
-		const state = createState('<p class="large">big text</p>', 3);
-		expect(isNodeActive(state, schema.nodes.paragraph, { class: 'small' })).toBe(false);
+		const state = createState('<p class="cms-text-lg">big text</p>', 3);
+		expect(isNodeActive(state, schema.nodes.paragraph, { class: 'cms-text-sm' })).toBe(false);
 	});
 
 	test('detects blockquote', () => {
@@ -134,10 +134,10 @@ describe('isNodeActive', () => {
 
 describe('getBlockAttributes', () => {
 	test('returns paragraph attributes', () => {
-		const state = createState('<p class="large">text</p>', 3);
+		const state = createState('<p class="cms-text-xl">text</p>', 3);
 		const attrs = getBlockAttributes(state, schema.nodes.paragraph);
 		expect(attrs).not.toBeNull();
-		expect(attrs!.class).toBe('large');
+		expect(attrs!.class).toBe('cms-text-xl');
 	});
 
 	test('returns heading attributes', () => {

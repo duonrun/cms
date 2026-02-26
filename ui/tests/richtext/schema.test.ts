@@ -53,13 +53,15 @@ describe('paragraph round-trip', () => {
 		expect(roundTrip('<p>Hello world</p>')).toBe('<p>Hello world</p>');
 	});
 
-	test('paragraph with class="large"', () => {
-		expect(roundTrip('<p class="large">Big text</p>')).toBe('<p class="large">Big text</p>');
+	test('paragraph with class="cms-text-lg"', () => {
+		expect(roundTrip('<p class="cms-text-lg">Big text</p>')).toBe(
+			'<p class="cms-text-lg">Big text</p>',
+		);
 	});
 
-	test('paragraph with class="small"', () => {
-		expect(roundTrip('<p class="small">Small text</p>')).toBe(
-			'<p class="small">Small text</p>',
+	test('paragraph with class="cms-text-sm"', () => {
+		expect(roundTrip('<p class="cms-text-sm">Small text</p>')).toBe(
+			'<p class="cms-text-sm">Small text</p>',
 		);
 	});
 
@@ -86,8 +88,14 @@ describe('paragraph round-trip', () => {
 	});
 
 	test('paragraph with class and text-align combined', () => {
-		expect(roundTrip('<p class="large" style="text-align: center">Large centered</p>')).toBe(
-			'<p class="large" style="text-align: center;">Large centered</p>',
+		expect(
+			roundTrip('<p class="cms-text-2xl" style="text-align: center">Large centered</p>'),
+		).toBe('<p class="cms-text-2xl" style="text-align: center;">Large centered</p>');
+	});
+
+	test('font size class 3xl is preserved on paragraph', () => {
+		expect(roundTrip('<p class="cms-text-3xl">Huge text</p>')).toBe(
+			'<p class="cms-text-3xl">Huge text</p>',
 		);
 	});
 
@@ -243,6 +251,20 @@ describe('superscript mark round-trip', () => {
 describe('underline mark round-trip', () => {
 	test('underline round-trips', () => {
 		expect(roundTrip('<p><u>Underlined</u></p>')).toBe('<p><u>Underlined</u></p>');
+	});
+});
+
+describe('fontSize mark round-trip', () => {
+	test('2xl class round-trips', () => {
+		expect(roundTrip('<p><span class="cms-text-2xl">Big</span></p>')).toBe(
+			'<p><span class="cms-text-2xl">Big</span></p>',
+		);
+	});
+
+	test('3xl class round-trips', () => {
+		expect(roundTrip('<p><span class="cms-text-3xl">Huge</span></p>')).toBe(
+			'<p><span class="cms-text-3xl">Huge</span></p>',
+		);
 	});
 });
 

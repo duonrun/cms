@@ -271,11 +271,27 @@
 			margin-bottom: 0;
 		}
 
-		.cms-text-xs   { font-size: var(--cms-font-size-xs); }
-		.cms-text-sm   { font-size: var(--cms-font-size-sm); }
-		.cms-text-base { font-size: var(--cms-font-size-base); }
-		.cms-text-lg   { font-size: var(--cms-font-size-lg); }
-		.cms-text-xl   { font-size: var(--cms-font-size-xl); }
+		.cms-text-xs {
+			font-size: var(--cms-font-size-xs);
+		}
+		.cms-text-sm {
+			font-size: var(--cms-font-size-sm);
+		}
+		.cms-text-base {
+			font-size: var(--cms-font-size-base);
+		}
+		.cms-text-lg {
+			font-size: var(--cms-font-size-lg);
+		}
+		.cms-text-xl {
+			font-size: var(--cms-font-size-xl);
+		}
+		.cms-text-2xl {
+			font-size: var(--cms-font-size-2xl);
+		}
+		.cms-text-3xl {
+			font-size: var(--cms-font-size-3xl);
+		}
 	}
 
 	.ProseMirror-focused {

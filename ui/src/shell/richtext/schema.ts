@@ -295,7 +295,7 @@ const marks: Record<string, MarkSpec> = {
 				getAttrs(dom) {
 					const el = dom as HTMLElement;
 					const cls = el.getAttribute('class') || '';
-					const match = cls.match(/\bcms-text-(xs|sm|base|lg|xl)\b/);
+					const match = cls.match(/\bcms-text-(xs|sm|base|lg|xl|2xl|3xl)\b/);
 					if (!match) return false;
 					return { size: match[1] };
 				},

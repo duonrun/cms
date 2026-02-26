@@ -96,9 +96,7 @@
 		heading1: false,
 		heading2: false,
 		heading3: false,
-		paragraphDefault: false,
-		paragraphLarge: false,
-		paragraphSmall: false,
+		paragraphClass: null as string | null,
 		center: false,
 		right: false,
 		justify: false,
@@ -116,19 +114,27 @@
 	let showDropdown = $state(false);
 	let showFontSizeDropdown = $state(false);
 
+	const fontSizeOptions = [
+		{ size: 'xs', label: 'X', paragraphLabel: 'Absatz X' },
+		{ size: 'sm', label: 'S', paragraphLabel: 'Absatz S' },
+		{ size: 'lg', label: 'L', paragraphLabel: 'Absatz L' },
+		{ size: 'xl', label: 'XL', paragraphLabel: 'Absatz XL' },
+		{ size: '2xl', label: '2XL', paragraphLabel: 'Absatz 2XL' },
+		{ size: '3xl', label: '3XL', paragraphLabel: 'Absatz 3XL' },
+	] as const;
+
+	function getTextSizeClass(size: string): string {
+		return `cms-text-${size}`;
+	}
+
 	function updateEditorState(state: EditorState) {
 		editorState.bold = isMarkActive(state, schema.marks.bold);
 		editorState.heading1 = isNodeActive(state, schema.nodes.heading, { level: 1 });
 		editorState.heading2 = isNodeActive(state, schema.nodes.heading, { level: 2 });
 		editorState.heading3 = isNodeActive(state, schema.nodes.heading, { level: 3 });
+		const isParagraph = isNodeActive(state, schema.nodes.paragraph);
 		const paragraphAttrs = getBlockAttributes(state, schema.nodes.paragraph);
-		editorState.paragraphDefault =
-			isNodeActive(state, schema.nodes.paragraph) &&
-			(!paragraphAttrs || paragraphAttrs.class === 'default');
-		editorState.paragraphLarge =
-			isNodeActive(state, schema.nodes.paragraph) && paragraphAttrs?.class === 'large';
-		editorState.paragraphSmall =
-			isNodeActive(state, schema.nodes.paragraph) && paragraphAttrs?.class === 'small';
+		editorState.paragraphClass = isParagraph ? (paragraphAttrs?.class ?? 'default') : null;
 		editorState.center = getActiveTextAlign(state) === 'center';
 		editorState.right = getActiveTextAlign(state) === 'right';
 		editorState.justify = getActiveTextAlign(state) === 'justify';
@@ -356,34 +362,28 @@
 										role="menuitem"
 										tabindex="-1"
 										class="richtext-dropdown-item"
-										class:active={editorState.paragraphDefault}>
+										class:active={editorState.paragraphClass === 'default'}>
 										<IcoParagraph />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Absatz')}
 										</span>
 									</button>
-									<button
-										onclick={runDropdown(setParagraphClass('large'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.paragraphLarge}>
-										<IcoTextHeight />
-										<span class="cms-richtext-dropdown-item-label">
-											{_('Absatz große Schrift')}
-										</span>
-									</button>
-									<button
-										onclick={runDropdown(setParagraphClass('small'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.paragraphSmall}>
-										<IcoTextHeight />
-										<span class="cms-richtext-dropdown-item-label">
-											{_('Absatz kleine Schrift')}
-										</span>
-									</button>
+									{#each fontSizeOptions as option (option.size)}
+										<button
+											onclick={runDropdown(
+												setParagraphClass(getTextSizeClass(option.size)),
+											)}
+											role="menuitem"
+											tabindex="-1"
+											class="richtext-dropdown-item"
+											class:active={editorState.paragraphClass ===
+												getTextSizeClass(option.size)}>
+											<IcoTextHeight />
+											<span class="cms-richtext-dropdown-item-label">
+												{_(option.paragraphLabel)}
+											</span>
+										</button>
+									{/each}
 									<button
 										onclick={runDropdown(clearNodes())}
 										role="menuitem"
@@ -430,76 +430,18 @@
 								<div
 									class="cms-richtext-dropdown-items"
 									role="none">
-									<button
-										onclick={runFontSizeDropdown(setFontSize('xs'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === 'xs'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('X')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('sm'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === 'sm'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('S')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('base'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === 'base'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('Normal')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('lg'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === 'lg'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('L')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('xl'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === 'xl'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('XL')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('2xl'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === '2xl'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('2XL')}
-										</span>
-									</button>
-									<button
-										onclick={runFontSizeDropdown(setFontSize('3xl'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.fontSize === '3xl'}>
-										<span class="cms-richtext-dropdown-item-label">
-											{_('3XL')}
-										</span>
-									</button>
+									{#each fontSizeOptions as option (option.size)}
+										<button
+											onclick={runFontSizeDropdown(setFontSize(option.size))}
+											role="menuitem"
+											tabindex="-1"
+											class="richtext-dropdown-item"
+											class:active={editorState.fontSize === option.size}>
+											<span class="cms-richtext-dropdown-item-label">
+												{_(option.label)}
+											</span>
+										</button>
+									{/each}
 									<button
 										onclick={runFontSizeDropdown(unsetFontSize())}
 										role="menuitem"
