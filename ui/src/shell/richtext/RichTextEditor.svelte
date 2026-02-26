@@ -37,6 +37,8 @@
 		unsetLink,
 		clearMarks,
 		clearNodes,
+		setFontSize,
+		unsetFontSize,
 	} from './commands';
 	import { undo, redo } from 'prosemirror-history';
 
@@ -66,6 +68,7 @@
 	import IcoUnlink from '$shell/icons/IcoUnlink.svelte';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoLineBreak from '$shell/icons/IcoLineBreak.svelte';
+	import IcoFontSize from '$shell/icons/IcoFontSize.svelte';
 
 	type Props = {
 		value: string;
@@ -107,9 +110,11 @@
 		superscript: false,
 		blockquote: false,
 		link: false,
+		fontSize: null as string | null,
 	});
 	let showSource = $state(false);
 	let showDropdown = $state(false);
+	let showFontSizeDropdown = $state(false);
 
 	function updateEditorState(state: EditorState) {
 		editorState.bold = isMarkActive(state, schema.marks.bold);
@@ -135,6 +140,8 @@
 		editorState.superscript = isMarkActive(state, schema.marks.superscript);
 		editorState.blockquote = isNodeActive(state, schema.nodes.blockquote);
 		editorState.link = isMarkActive(state, schema.marks.link);
+		const fontSizeAttrs = getMarkAttributes(state, schema.marks.fontSize);
+		editorState.fontSize = fontSizeAttrs?.size ?? null;
 	}
 
 	onMount(() => {
@@ -168,6 +175,7 @@
 	function run(command: (state: any, dispatch?: any, view?: any) => boolean) {
 		return () => {
 			showDropdown = false;
+			showFontSizeDropdown = false;
 			editor?.run(command);
 		};
 	}
@@ -179,9 +187,17 @@
 		};
 	}
 
+	function runFontSizeDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
+		return () => {
+			editor?.run(command);
+			showFontSizeDropdown = false;
+		};
+	}
+
 	function toggleSource() {
 		showSource = !showSource;
 		showDropdown = false;
+		showFontSizeDropdown = false;
 	}
 
 	function addLink(url: string, blank: boolean) {
@@ -376,6 +392,122 @@
 										<IcoRemoveFormat />
 										<span class="cms-richtext-dropdown-item-label">
 											{_('Format entfernen')}
+										</span>
+									</button>
+								</div>
+							</div>
+						{/if}
+					</div>
+					<div class="cms-richtext-dropdown-wrap">
+						<div class="richtext-dropdown">
+							<button
+								type="button"
+								class="richtext-dropdown-button"
+								aria-expanded={showFontSizeDropdown}
+								aria-haspopup="true"
+								onclick={() => (showFontSizeDropdown = !showFontSizeDropdown)}>
+								<IcoFontSize />
+								<svg
+									class="cms-richtext-dropdown-icon"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									aria-hidden="true">
+									<path
+										fill-rule="evenodd"
+										d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+										clip-rule="evenodd" />
+								</svg>
+							</button>
+						</div>
+						{#if showFontSizeDropdown}
+							<div
+								class="richtext-dropdown-menu"
+								role="menu"
+								aria-orientation="vertical"
+								aria-labelledby="font-size-menu-button"
+								tabindex="-1">
+								<div
+									class="cms-richtext-dropdown-items"
+									role="none">
+									<button
+										onclick={runFontSizeDropdown(setFontSize('xs'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === 'xs'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('X')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('sm'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === 'sm'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('S')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('base'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === 'base'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Normal')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('lg'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === 'lg'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('L')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('xl'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === 'xl'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('XL')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('2xl'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === '2xl'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('2XL')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(setFontSize('3xl'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.fontSize === '3xl'}>
+										<span class="cms-richtext-dropdown-item-label">
+											{_('3XL')}
+										</span>
+									</button>
+									<button
+										onclick={runFontSizeDropdown(unsetFontSize())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoRemoveFormat />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Größe entfernen')}
 										</span>
 									</button>
 								</div>

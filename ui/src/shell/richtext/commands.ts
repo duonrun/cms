@@ -186,6 +186,27 @@ export function toggleSuperscript(): Command {
 	return toggleMark(schema.marks.superscript);
 }
 
+export function setFontSize(size: string): Command {
+	return (state, dispatch) => {
+		const { from, to, empty } = state.selection;
+		if (empty) return false;
+		if (!dispatch) return true;
+		const mark = schema.marks.fontSize.create({ size });
+		dispatch(state.tr.addMark(from, to, mark).scrollIntoView());
+		return true;
+	};
+}
+
+export function unsetFontSize(): Command {
+	return (state, dispatch) => {
+		const { from, to, empty } = state.selection;
+		if (empty) return false;
+		if (!dispatch) return true;
+		dispatch(state.tr.removeMark(from, to, schema.marks.fontSize).scrollIntoView());
+		return true;
+	};
+}
+
 export function toggleBulletList(): Command {
 	return (state, dispatch, view) => {
 		const { bulletList, listItem } = schema.nodes;

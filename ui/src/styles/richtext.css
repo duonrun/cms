@@ -270,6 +270,12 @@
 		> *:last-child {
 			margin-bottom: 0;
 		}
+
+		.cms-text-xs   { font-size: var(--cms-font-size-xs); }
+		.cms-text-sm   { font-size: var(--cms-font-size-sm); }
+		.cms-text-base { font-size: var(--cms-font-size-base); }
+		.cms-text-lg   { font-size: var(--cms-font-size-lg); }
+		.cms-text-xl   { font-size: var(--cms-font-size-xl); }
 	}
 
 	.ProseMirror-focused {

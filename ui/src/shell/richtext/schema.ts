@@ -284,6 +284,27 @@ const marks: Record<string, MarkSpec> = {
 			return ['sup', 0];
 		},
 	},
+
+	fontSize: {
+		attrs: {
+			size: { default: 'base' },
+		},
+		parseDOM: [
+			{
+				tag: 'span[class]',
+				getAttrs(dom) {
+					const el = dom as HTMLElement;
+					const cls = el.getAttribute('class') || '';
+					const match = cls.match(/\bcms-text-(xs|sm|base|lg|xl)\b/);
+					if (!match) return false;
+					return { size: match[1] };
+				},
+			},
+		],
+		toDOM(mark) {
+			return ['span', { class: `cms-text-${mark.attrs.size}` }, 0];
+		},
+	},
 };
 
 export const schema = new Schema({ nodes, marks });
