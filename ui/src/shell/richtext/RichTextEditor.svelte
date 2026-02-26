@@ -69,6 +69,7 @@
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoLineBreak from '$shell/icons/IcoLineBreak.svelte';
 	import IcoFontSize from '$shell/icons/IcoFontSize.svelte';
+	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
 
 	type Props = {
 		value: string;
@@ -113,6 +114,7 @@
 	let showSource = $state(false);
 	let showDropdown = $state(false);
 	let showFontSizeDropdown = $state(false);
+	let showCompactToolsDropdown = $state(false);
 
 	const fontSizeOptions = [
 		{ size: 'xs', label: 'XS', paragraphLabel: 'Absatz XS' },
@@ -182,6 +184,7 @@
 		return () => {
 			showDropdown = false;
 			showFontSizeDropdown = false;
+			showCompactToolsDropdown = false;
 			editor?.run(command);
 		};
 	}
@@ -190,6 +193,8 @@
 		return () => {
 			editor?.run(command);
 			showDropdown = !showDropdown;
+			showFontSizeDropdown = false;
+			showCompactToolsDropdown = false;
 		};
 	}
 
@@ -197,6 +202,8 @@
 		return () => {
 			editor?.run(command);
 			showFontSizeDropdown = false;
+			showDropdown = false;
+			showCompactToolsDropdown = false;
 		};
 	}
 
@@ -204,6 +211,12 @@
 		showSource = !showSource;
 		showDropdown = false;
 		showFontSizeDropdown = false;
+		showCompactToolsDropdown = false;
+	}
+
+	function openAddLinkModalCompact() {
+		showCompactToolsDropdown = false;
+		openAddLinkModal();
 	}
 
 	function addLink(url: string, blank: boolean) {
@@ -299,7 +312,11 @@
 								class="richtext-dropdown-button"
 								aria-expanded="true"
 								aria-haspopup="true"
-								onclick={() => (showDropdown = !showDropdown)}>
+								onclick={() => {
+									showDropdown = !showDropdown;
+									showFontSizeDropdown = false;
+									showCompactToolsDropdown = false;
+								}}>
 								{_('Absatz')}
 								<svg
 									class="cms-richtext-dropdown-icon"
@@ -405,7 +422,11 @@
 								class="richtext-dropdown-button"
 								aria-expanded={showFontSizeDropdown}
 								aria-haspopup="true"
-								onclick={() => (showFontSizeDropdown = !showFontSizeDropdown)}>
+								onclick={() => {
+									showFontSizeDropdown = !showFontSizeDropdown;
+									showDropdown = false;
+									showCompactToolsDropdown = false;
+								}}>
 								<IcoFontSize />
 								<svg
 									class="cms-richtext-dropdown-icon"
@@ -456,7 +477,223 @@
 							</div>
 						{/if}
 					</div>
-					<div class="richtext-toolbar-btns cms-richtext-toolbar-btns-grow">
+					<div class="cms-richtext-dropdown-wrap cms-richtext-toolbar-compact-actions">
+						<div class="richtext-dropdown">
+							<button
+								type="button"
+								id="compact-tools-menu-button"
+								class="richtext-dropdown-button cms-richtext-compact-tools-button"
+								title={_('Formatting tools')}
+								aria-label={_('Formatting tools')}
+								aria-expanded={showCompactToolsDropdown}
+								aria-haspopup="true"
+								onclick={() => {
+									showCompactToolsDropdown = !showCompactToolsDropdown;
+									showDropdown = false;
+									showFontSizeDropdown = false;
+								}}>
+								<IcoThreeDots />
+							</button>
+						</div>
+						{#if showCompactToolsDropdown}
+							<div
+								class="richtext-dropdown-menu cms-richtext-compact-tools-menu"
+								role="menu"
+								aria-orientation="vertical"
+								aria-labelledby="compact-tools-menu-button"
+								tabindex="-1">
+								<div
+									class="cms-richtext-dropdown-items"
+									role="none">
+									<button
+										onclick={run(unsetTextAlign())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoAlignLeft />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Text align left')}
+										</span>
+									</button>
+									<button
+										onclick={run(setTextAlign('center'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.center}>
+										<IcoAlignCenter />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Text align center')}
+										</span>
+									</button>
+									<button
+										onclick={run(setTextAlign('right'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.right}>
+										<IcoAlignRight />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Text align right')}
+										</span>
+									</button>
+									<button
+										onclick={run(setTextAlign('justify'))}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.justify}>
+										<IcoAlignJustify />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Justify text')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleBold())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.bold}>
+										<IcoBold />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Bold text')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleItalic())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.italic}>
+										<IcoItalic />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Italic text')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleStrike())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.strike}>
+										<IcoStrikethrough />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Strike through')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleBulletList())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.bulletList}>
+										<IcoListUl />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Bulleted list')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleOrderedList())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.orderedList}>
+										<IcoListOl />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Numbered list')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleSubscript())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.subscript}>
+										<IcoSubscript />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Subscript')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleSuperscript())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.superscript}>
+										<IcoSuperscript />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Superscript')}
+										</span>
+									</button>
+									<button
+										onclick={run(toggleBlockquote())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+										class:active={editorState.blockquote}>
+										<IcoBlockQuoteRight />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Block quote')}
+										</span>
+									</button>
+									<button
+										onclick={run(insertHorizontalRule())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoHorizontalRule />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Horizontal line')}
+										</span>
+									</button>
+									<button
+										onclick={openAddLinkModalCompact}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoLink />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Add link to page')}
+										</span>
+									</button>
+									{#if editorState.link}
+										<button
+											onclick={run(unsetLink())}
+											role="menuitem"
+											tabindex="-1"
+											class="richtext-dropdown-item">
+											<IcoUnlink />
+											<span class="cms-richtext-dropdown-item-label">
+												{_('Remove link')}
+											</span>
+										</button>
+									{/if}
+									<button
+										onclick={run(insertHardBreak())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoLineBreak />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Add a hard line break')}
+										</span>
+									</button>
+									<button
+										onclick={run(clearMarks())}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item">
+										<IcoRemoveFormat />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Remove formats')}
+										</span>
+									</button>
+								</div>
+							</div>
+						{/if}
+					</div>
+					<div
+						class="richtext-toolbar-btns cms-richtext-toolbar-btns-grow cms-richtext-toolbar-main-actions">
 						<button
 							class="richtext-toolbar-btn"
 							title={_('Text align left')}
@@ -591,7 +828,9 @@
 								onclick={toggleSource}
 								class="richtext-source-btn cms-richtext-source-btn-offset">
 								<IcoCode />
-								{_('Show source')}
+								<span class="cms-richtext-toolbar-source-label">
+									{_('Show source')}
+								</span>
 							</button>
 						{/if}
 					</div>
