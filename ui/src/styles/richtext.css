@@ -299,6 +299,15 @@
 			font-size: var(--cms-font-size-3xl);
 			line-height: var(--cms-line-height-3xl);
 		}
+
+		p.cms-text-xl {
+			margin-bottom: var(--cms-space-4);
+		}
+
+		p.cms-text-2xl,
+		p.cms-text-3xl {
+			margin-bottom: var(--cms-space-5);
+		}
 	}
 
 	.ProseMirror-focused {
