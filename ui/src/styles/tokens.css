@@ -60,6 +60,14 @@
 	--cms-font-size-2xl: 1.5rem;
 	--cms-font-size-3xl: 2rem;
 
+	--cms-line-height-xs: 1rem;
+	--cms-line-height-sm: 1.25rem;
+	--cms-line-height-base: 1.5rem;
+	--cms-line-height-lg: 1.75rem;
+	--cms-line-height-xl: 1.75rem;
+	--cms-line-height-2xl: 2rem;
+	--cms-line-height-3xl: 2.25rem;
+
 	--cms-radius-sm: 0.125rem;
 	--cms-radius: 0.25rem;
 	--cms-radius-md: 0.375rem;

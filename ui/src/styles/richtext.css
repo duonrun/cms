@@ -273,24 +273,31 @@
 
 		.cms-text-xs {
 			font-size: var(--cms-font-size-xs);
+			line-height: var(--cms-line-height-xs);
 		}
 		.cms-text-sm {
 			font-size: var(--cms-font-size-sm);
+			line-height: var(--cms-line-height-sm);
 		}
 		.cms-text-base {
 			font-size: var(--cms-font-size-base);
+			line-height: var(--cms-line-height-base);
 		}
 		.cms-text-lg {
 			font-size: var(--cms-font-size-lg);
+			line-height: var(--cms-line-height-lg);
 		}
 		.cms-text-xl {
 			font-size: var(--cms-font-size-xl);
+			line-height: var(--cms-line-height-xl);
 		}
 		.cms-text-2xl {
 			font-size: var(--cms-font-size-2xl);
+			line-height: var(--cms-line-height-2xl);
 		}
 		.cms-text-3xl {
 			font-size: var(--cms-font-size-3xl);
+			line-height: var(--cms-line-height-3xl);
 		}
 	}
 

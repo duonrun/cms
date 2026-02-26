@@ -115,7 +115,7 @@
 	let showFontSizeDropdown = $state(false);
 
 	const fontSizeOptions = [
-		{ size: 'xs', label: 'X', paragraphLabel: 'Absatz X' },
+		{ size: 'xs', label: 'XS', paragraphLabel: 'Absatz XS' },
 		{ size: 'sm', label: 'S', paragraphLabel: 'Absatz S' },
 		{ size: 'lg', label: 'L', paragraphLabel: 'Absatz L' },
 		{ size: 'xl', label: 'XL', paragraphLabel: 'Absatz XL' },
