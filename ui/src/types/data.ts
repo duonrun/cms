@@ -160,6 +160,13 @@ export interface Collection {
 	showHidden: boolean;
 	showLocked: boolean;
 	header: string[];
+	total: number;
+	offset: number;
+	limit: number;
+	q: string;
+	sort: string;
+	dir: string;
+	sorts: string[];
 	nodes: ListedNode[];
 	blueprints: Blueprint[];
 }

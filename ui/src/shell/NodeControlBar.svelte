@@ -19,7 +19,7 @@
 		deletable: boolean;
 		locked?: boolean;
 		save: (publish: boolean) => void;
-		preview: () => void | null;
+		preview: (() => void) | null;
 	};
 
 	let {

@@ -1,13 +1,31 @@
 <script lang="ts">
-	import type { ListedNode } from '$types/data';
+	import { goto } from '$app/navigation';
+	import type { Collection } from '$types/data';
+	import { _ } from '$lib/locale';
+	import { base } from '$lib/req';
+	import Button from '$shell/Button.svelte';
 	import Searchbar from '$shell/Searchbar.svelte';
 	import Published from '$shell/Published.svelte';
 	import Link from '$shell/Link.svelte';
 
-	let { data } = $props();
+	type Props = {
+		data: Collection & {
+			total: number;
+			offset: number;
+			limit: number;
+			q: string;
+			sort: string;
+			dir: string;
+		};
+	};
 
-	let searchTerm = $state('');
-	let regex: RegExp | null = null;
+	let { data }: Props = $props();
+
+	let searchTerm = $state(data.q ?? '');
+
+	$effect(() => {
+		searchTerm = data.q ?? '';
+	});
 
 	function fmtDate(d: string) {
 		const date = new Date(d);
@@ -21,39 +39,90 @@
 		});
 	}
 
-	function search(searchTerm: string) {
-		return (node: ListedNode) => {
-			if (searchTerm.length > 1) {
-				regex = new RegExp(
-					`(${escapeRegExp(searchTerm)})`,
-					/\p{Lu}/u.test(searchTerm) ? 'g' : 'gi',
-				);
-				return node.columns.some(col => {
-					return regex?.test(col.value.toString() ?? '');
-				});
-			}
+	function query(params: {
+		q?: string;
+		offset?: number;
+		limit?: number;
+		sort?: string;
+		dir?: string;
+	}) {
+		const searchParams = new URLSearchParams();
+		const q = (params.q ?? data.q ?? '').trim();
+		const offset = Math.max(0, params.offset ?? data.offset ?? 0);
+		const limit = Math.max(1, params.limit ?? data.limit ?? 50);
+		const sort = (params.sort ?? data.sort ?? '').trim();
+		const dir = (params.dir ?? data.dir ?? '').trim();
 
-			regex = null;
-			return true;
-		};
+		if (q !== '') {
+			searchParams.set('q', q);
+		}
+
+		searchParams.set('offset', String(offset));
+		searchParams.set('limit', String(limit));
+
+		if (sort !== '') {
+			searchParams.set('sort', sort);
+		}
+
+		if (dir !== '') {
+			searchParams.set('dir', dir);
+		}
+
+		return searchParams.toString();
 	}
 
-	function highlightSearchterm(value: string) {
-		if (searchTerm.length < 2 || !regex) return value;
+	function collectionPath(params: {
+		q?: string;
+		offset?: number;
+		limit?: number;
+		sort?: string;
+		dir?: string;
+	}) {
+		const qs = query(params);
 
-		return value.replace(regex, `<span class="search-hl">$1</span>`);
+		if (qs === '') {
+			return `${base}collection/${data.slug}`;
+		}
+
+		return `${base}collection/${data.slug}?${qs}`;
 	}
 
-	function escapeRegExp(string: string) {
-		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	function nodePath(uid: string) {
+		const qs = query({});
+
+		if (qs === '') {
+			return `collection/${data.slug}/${uid}`;
+		}
+
+		return `collection/${data.slug}/${uid}?${qs}`;
 	}
 
-	let nodes = $derived(data.nodes.filter(search(searchTerm)));
+	async function search() {
+		await goto(collectionPath({ q: searchTerm, offset: 0 }), {
+			invalidateAll: true,
+		});
+	}
+
+	async function page(offset: number) {
+		await goto(collectionPath({ offset }), {
+			invalidateAll: true,
+		});
+	}
+
+	let first = $derived(data.total === 0 ? 0 : data.offset + 1);
+	let last = $derived(Math.min(data.total, data.offset + data.nodes.length));
+	let hasPrevious = $derived(data.offset > 0);
+	let hasNext = $derived(last < data.total);
+	let previousOffset = $derived(Math.max(0, data.offset - data.limit));
+	let nextOffset = $derived(data.offset + data.limit);
+	let createQuery = $derived(query({}));
 </script>
 
 <div class="cms-collection-page">
 	<Searchbar
 		bind:searchTerm
+		{search}
+		query={createQuery}
 		collectionSlug={data.slug}
 		blueprints={data.blueprints} />
 	<h1 class="cms-collection-title">
@@ -76,7 +145,16 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each nodes as node (node)}
+								{#if data.nodes.length === 0}
+									<tr>
+										<td
+											colspan={data.header.length +
+												(data.showPublished ? 1 : 0)}>
+											{_('Keine Eintraege gefunden')}
+										</td>
+									</tr>
+								{/if}
+								{#each data.nodes as node (node.uid)}
 									<tr>
 										{#if data.showPublished}
 											<td class="published cms-published-cell">
@@ -85,15 +163,15 @@
 												</span>
 											</td>
 										{/if}
-										{#each node.columns as column (column)}
+										{#each node.columns as column, i (i)}
 											<td
 												class:cms-cell-bold={column.bold}
 												class:cms-cell-italic={column.italic}>
-												<Link href="collection/{data.slug}/{node.uid}">
+												<Link href={nodePath(node.uid)}>
 													{#if column.date}
 														{fmtDate(column.value.toString())}
 													{:else}
-														{@html highlightSearchterm(column.value)}
+														{column.value.toString()}
 													{/if}
 												</Link>
 											</td>
@@ -102,6 +180,27 @@
 								{/each}
 							</tbody>
 						</table>
+						<div class="cms-collection-footer">
+							<span class="cms-collection-range">
+								{first}-{last} / {data.total}
+							</span>
+							<div class="cms-collection-pagination">
+								<Button
+									small
+									class="secondary"
+									disabled={!hasPrevious}
+									onclick={() => page(previousOffset)}>
+									{_('Zurueck')}
+								</Button>
+								<Button
+									small
+									class="secondary"
+									disabled={!hasNext}
+									onclick={() => page(nextOffset)}>
+									{_('Weiter')}
+								</Button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -239,10 +338,24 @@
 		font-style: italic;
 	}
 
-	:global(.search-hl) {
-		background: #ffea50;
-		border: 1px solid #ffb100;
-		border-radius: 0.25rem;
+	.cms-collection-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--cms-space-4);
+		padding: var(--cms-space-4);
+		background-color: var(--cms-color-white);
+		border-top: 1px solid var(--cms-color-neutral-200);
+	}
+
+	.cms-collection-range {
+		font-size: var(--cms-font-size-sm);
+		color: var(--cms-color-neutral-700);
+	}
+
+	.cms-collection-pagination {
+		display: flex;
+		gap: var(--cms-space-2);
 	}
 
 	tr:hover {

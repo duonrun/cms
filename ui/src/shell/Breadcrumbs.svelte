@@ -4,11 +4,11 @@
 	import Link from '$shell/Link.svelte';
 
 	type Props = {
-		slug: string;
+		href: string;
 		name: string;
 	};
 
-	let { slug, name }: Props = $props();
+	let { href, name }: Props = $props();
 </script>
 
 <div class="breadcrumbs">
@@ -16,7 +16,7 @@
 	<IcoChevronRight />
 	<span>
 		<Link
-			href="collection/{slug}"
+			{href}
 			class="cms-breadcrumb-link">
 			{name}
 		</Link>

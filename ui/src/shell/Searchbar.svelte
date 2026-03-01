@@ -13,10 +13,21 @@
 		searchTerm: string;
 		blueprints: Blueprint[];
 		collectionSlug: string;
+		query: string;
+		search: () => void;
 	};
 
-	let { searchTerm = $bindable(), blueprints, collectionSlug }: Props = $props();
+	let { searchTerm = $bindable(), blueprints, collectionSlug, query, search }: Props = $props();
 	let { open, close } = getContext<ModalFunctions>('modal');
+
+	function suffix() {
+		return query ? `?${query}` : '';
+	}
+
+	function submit(event: SubmitEvent) {
+		event.preventDefault();
+		search();
+	}
 
 	async function create() {
 		if (blueprints.length > 1) {
@@ -25,12 +36,13 @@
 				{
 					blueprints,
 					collectionSlug,
+					query,
 					close,
 				},
 				{},
 			);
 		} else {
-			goto(`${base}collection/${collectionSlug}/create/${blueprints[0].slug}`);
+			goto(`${base}collection/${collectionSlug}/create/${blueprints[0].slug}${suffix()}`);
 		}
 	}
 </script>
@@ -38,7 +50,9 @@
 <div class="headerbar cms-searchbar">
 	<NavToggle />
 	<div class="cms-searchbar-controls">
-		<div class="cms-searchbar-input-wrap">
+		<form
+			onsubmit={submit}
+			class="cms-searchbar-input-wrap">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 20 20"
@@ -52,7 +66,7 @@
 				type="text"
 				placeholder={_('Suche')}
 				bind:value={searchTerm} />
-		</div>
+		</form>
 		{#if blueprints.length > 0}
 			<button
 				class="cms-searchbar-create"
