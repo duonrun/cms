@@ -90,7 +90,21 @@ class File extends Value
 			return $this->translated($key, $index);
 		}
 
-		return $this->data['files'][$this->index][$key] ?? '';
+		$value = $this->data['files'][$index][$key] ?? '';
+
+		if (is_string($value)) {
+			return $value;
+		}
+
+		if (is_array($value)) {
+			return $this->translatedArray($value);
+		}
+
+		if (is_int($value) || is_float($value)) {
+			return (string) $value;
+		}
+
+		return '';
 	}
 
 	protected function translated(string $key, int $index): string
@@ -105,6 +119,37 @@ class File extends Value
 			}
 
 			$locale = $locale->fallback();
+		}
+
+		return '';
+	}
+
+	protected function translatedArray(array $value): string
+	{
+		$locale = $this->locale;
+
+		while ($locale) {
+			$translation = $value[$locale->id] ?? null;
+
+			if (is_string($translation) && $translation !== '') {
+				return $translation;
+			}
+
+			if (is_int($translation) || is_float($translation)) {
+				return (string) $translation;
+			}
+
+			$locale = $locale->fallback();
+		}
+
+		foreach ($value as $translation) {
+			if (is_string($translation) && $translation !== '') {
+				return $translation;
+			}
+
+			if (is_int($translation) || is_float($translation)) {
+				return (string) $translation;
+			}
 		}
 
 		return '';
