@@ -339,7 +339,9 @@ class End2EndTestCase extends IntegrationTestCase
 		if (isset($options['query'])) {
 			$queryString = http_build_query($options['query']);
 			$uriObj = $psrRequest->getUri()->withQuery($queryString);
-			$psrRequest = $psrRequest->withUri($uriObj);
+			$psrRequest = $psrRequest
+				->withUri($uriObj)
+				->withQueryParams($options['query']);
 		}
 
 		// Add headers
