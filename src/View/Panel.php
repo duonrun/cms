@@ -28,6 +28,9 @@ use Duon\Wire\Creator;
 
 class Panel
 {
+	private const int LIMIT_DEFAULT = 50;
+	private const int LIMIT_MAX = 250;
+
 	protected string $publicPath;
 
 	public function __construct(
@@ -137,6 +140,29 @@ class Panel
 			predefinedTypes: [Request::class => $this->request],
 		);
 		$blueprints = [];
+		$offset = $this->intParam('offset', 0, min: 0);
+		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
+		$q = $this->stringParam('q');
+		$sort = $this->stringParam('sort');
+		$dir = strtolower($this->stringParam('dir'));
+
+		if ($dir !== '' && !in_array($dir, ['asc', 'desc'], true)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$sorts = $obj->sorts();
+
+		if ($sort !== '' && !array_key_exists($sort, $sorts)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$listing = $obj->list(
+			offset: $offset,
+			limit: $limit,
+			q: $q,
+			sort: $sort,
+			dir: $dir,
+		);
 
 		foreach ($obj->blueprints() as $blueprint) {
 			$blueprints[] = [
@@ -152,7 +178,14 @@ class Panel
 			'showPublished' => $obj->showPublished(),
 			'showHidden' => $obj->showHidden(),
 			'showLocked' => $obj->showLocked(),
-			'nodes' => $obj->listing(),
+			'total' => $listing['total'],
+			'offset' => $listing['offset'],
+			'limit' => $listing['limit'],
+			'q' => $listing['q'],
+			'sort' => $listing['sort'],
+			'dir' => $listing['dir'],
+			'sorts' => array_keys($sorts),
+			'nodes' => $listing['nodes'],
 			'blueprints' => $blueprints,
 		];
 	}
@@ -283,6 +316,44 @@ class Panel
 		}
 
 		return $stylesheets;
+	}
+
+	private function intParam(
+		string $key,
+		int $default,
+		int $min,
+		?int $max = null,
+	): int {
+		$value = $this->request->param($key, (string) $default);
+
+		if (is_int($value)) {
+			$int = $value;
+		} elseif (is_string($value) && preg_match('/^-?[0-9]+$/', $value)) {
+			$int = (int) $value;
+		} else {
+			throw new HttpBadRequest($this->request);
+		}
+
+		if ($int < $min) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		if ($max !== null && $int > $max) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		return $int;
+	}
+
+	private function stringParam(string $key): string
+	{
+		$value = $this->request->param($key, '');
+
+		if (!is_string($value)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		return trim($value);
 	}
 
 	protected function getPanelIndex(): string
