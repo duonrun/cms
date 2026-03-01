@@ -128,10 +128,10 @@
 	<h1 class="cms-collection-title">
 		{data.name}
 	</h1>
-	<div class="cms-collection-scroll">
-		<div class="cms-collection-flow">
-			<div class="cms-collection-wrap">
-				<div class="cms-collection-ring">
+	<div class="cms-collection-content">
+		<div class="cms-collection-wrap">
+			<div class="cms-collection-ring">
+				<div class="cms-collection-scroll">
 					<div class="cms-collection-table-wrap">
 						<table class="cms-collection-table">
 							<thead>
@@ -180,27 +180,27 @@
 								{/each}
 							</tbody>
 						</table>
-						<div class="cms-collection-footer">
-							<span class="cms-collection-range">
-								{first}-{last} / {data.total}
-							</span>
-							<div class="cms-collection-pagination">
-								<Button
-									small
-									class="secondary"
-									disabled={!hasPrevious}
-									onclick={() => page(previousOffset)}>
-									{_('Zurueck')}
-								</Button>
-								<Button
-									small
-									class="secondary"
-									disabled={!hasNext}
-									onclick={() => page(nextOffset)}>
-									{_('Weiter')}
-								</Button>
-							</div>
-						</div>
+					</div>
+				</div>
+				<div class="cms-collection-footer">
+					<span class="cms-collection-range">
+						{first}-{last} / {data.total}
+					</span>
+					<div class="cms-collection-pagination">
+						<Button
+							small
+							class="secondary"
+							disabled={!hasPrevious}
+							onclick={() => page(previousOffset)}>
+							{_('Zurueck')}
+						</Button>
+						<Button
+							small
+							class="secondary"
+							disabled={!hasNext}
+							onclick={() => page(nextOffset)}>
+							{_('Weiter')}
+						</Button>
 					</div>
 				</div>
 			</div>
@@ -221,30 +221,37 @@
 		font-weight: 600;
 	}
 
-	.cms-collection-scroll {
+	.cms-collection-content {
 		flex: 1 1 auto;
-		overflow-y: auto;
-		padding: 0 var(--cms-space-4);
-	}
-
-	.cms-collection-flow {
-		display: flow-root;
+		min-height: 0;
+		padding: 0 var(--cms-space-4) var(--cms-space-8);
 	}
 
 	.cms-collection-wrap {
-		margin: 0 var(--cms-space-8) var(--cms-space-8);
+		height: 100%;
+		min-height: 100%;
+		margin: 0 var(--cms-space-8);
 	}
 
 	.cms-collection-ring {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		min-height: 100%;
 		margin: 0 calc(var(--cms-space-4) * -1);
 		border: 1px solid color-mix(in srgb, var(--cms-color-black) 5%, transparent);
+		background-color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow);
+	}
+
+	.cms-collection-scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
 	}
 
 	.cms-collection-table-wrap {
-		display: inline-block;
 		min-width: 100%;
-		vertical-align: middle;
-		box-shadow: var(--cms-shadow);
 	}
 
 	.cms-collection-table {
@@ -263,7 +270,7 @@
 	}
 
 	@media (min-width: var(--cms-breakpoint-sm)) {
-		.cms-collection-scroll {
+		.cms-collection-content {
 			padding: 0 var(--cms-space-6);
 		}
 
@@ -279,7 +286,7 @@
 	}
 
 	@media (min-width: var(--cms-breakpoint-lg)) {
-		.cms-collection-scroll {
+		.cms-collection-content {
 			padding: 0 var(--cms-space-8);
 		}
 
@@ -346,6 +353,7 @@
 		padding: var(--cms-space-4);
 		background-color: var(--cms-color-white);
 		border-top: 1px solid var(--cms-color-neutral-200);
+		flex-shrink: 0;
 	}
 
 	.cms-collection-range {
