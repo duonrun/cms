@@ -44,7 +44,7 @@ class Auth
 			if ($user === false) {
 				return $response->json(array_merge(
 					['error' => _('Falscher Benutzername oder Passwort'), 'loginType' => 'panel'],
-					$shape->pristineValues(),
+					$result->pristineValues(),
 				), 400);
 			}
 

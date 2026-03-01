@@ -70,6 +70,24 @@ final class AuthTest extends End2EndTestCase
 		$this->assertNotEmpty($payload['uid'] ?? null);
 	}
 
+	public function testLoginWithWrongCredentialsReturnsValidationPayload(): void
+	{
+		$response = $this->makeRequest('POST', '/panel/api/login', [
+			'body' => [
+				'login' => 'nobody@example.com',
+				'password' => 'wrong-password',
+				'rememberme' => true,
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 400);
+
+		$this->assertSame('panel', $payload['loginType'] ?? null);
+		$this->assertSame('nobody@example.com', $payload['login'] ?? null);
+		$this->assertSame('wrong-password', $payload['password'] ?? null);
+		$this->assertTrue($payload['rememberme'] ?? false);
+	}
+
 	public function testPermissionEnforcementReturnsUnauthorizedWithoutToken(): void
 	{
 		$response = $this->makeRequest('GET', '/panel/api/nodes', [
