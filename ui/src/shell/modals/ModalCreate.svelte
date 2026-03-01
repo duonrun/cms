@@ -10,13 +10,18 @@
 		close: () => void;
 		collectionSlug: string;
 		blueprints: Blueprint[];
+		query?: string;
 	};
 
-	let { close, collectionSlug, blueprints }: Props = $props();
+	let { close, collectionSlug, blueprints, query = '' }: Props = $props();
+
+	function suffix() {
+		return query ? `?${query}` : '';
+	}
 
 	function createNode(slug: string) {
 		return () => {
-			goto(`${base}collection/${collectionSlug}/create/${slug}`);
+			goto(`${base}collection/${collectionSlug}/create/${slug}${suffix()}`);
 			close();
 		};
 	}

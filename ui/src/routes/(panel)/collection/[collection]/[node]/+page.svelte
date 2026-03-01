@@ -9,9 +9,22 @@
 		data: PageData;
 	};
 
+	type CollectionState = {
+		name: string;
+		slug: string;
+		q?: string;
+		offset?: number;
+		limit?: number;
+		sort?: string;
+		dir?: string;
+	};
+
 	let { data }: Props = $props();
-	let collection = data.collection;
-	let node = $state(data.node);
+	let collection = (data.collection ?? {
+		name: '',
+		slug: '',
+	}) as CollectionState;
+	let node = $state(data.node as NodeType);
 
 	async function save(publish: boolean) {
 		if (publish) {

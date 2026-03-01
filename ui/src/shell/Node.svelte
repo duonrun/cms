@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { BeforeNavigate } from '@sveltejs/kit';
-	import type { Collection, Node } from '$types/data';
+	import type { Node } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
 
 	import { getContext } from 'svelte';
@@ -47,7 +47,15 @@
 
 	type Props = {
 		node: Node;
-		collection: Collection;
+		collection: {
+			name: string;
+			slug: string;
+			q?: string;
+			offset?: number;
+			limit?: number;
+			sort?: string;
+			dir?: string;
+		};
 		save: (published: boolean) => Promise<void>;
 	};
 
@@ -55,6 +63,32 @@
 
 	let activeTab = $state('content');
 	let showPreview: string | null = $state(null);
+	let collectionPath = $derived.by(() => {
+		const params = new URLSearchParams();
+
+		if (collection.q) {
+			params.set('q', collection.q);
+		}
+
+		params.set('offset', String(collection.offset ?? 0));
+		params.set('limit', String(collection.limit ?? 50));
+
+		if (collection.sort) {
+			params.set('sort', collection.sort);
+		}
+
+		if (collection.dir) {
+			params.set('dir', collection.dir);
+		}
+
+		const query = params.toString();
+
+		if (query === '') {
+			return `collection/${collection.slug}`;
+		}
+
+		return `collection/${collection.slug}?${query}`;
+	});
 
 	function changeTab(tab: string) {
 		return () => {
@@ -77,13 +111,13 @@
 <div class="cms-node-shell">
 	<NodeControlBar
 		bind:uid={node.uid}
-		collectionPath="collection/{collection.slug}"
+		{collectionPath}
 		deletable={node.deletable}
 		preview={node.type.routable && node.type.renderable ? preview : null}
 		{save} />
 	<Document>
 		<Breadcrumbs
-			slug={collection.slug}
+			href={collectionPath}
 			name={collection.name} />
 		<Headline
 			published={node.published}
