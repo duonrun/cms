@@ -6,6 +6,7 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Types;
@@ -15,10 +16,13 @@ use Iterator;
 
 final class Nodes implements Iterator
 {
+	use CompilesField;
+
 	private string $whereFields = '';
 	private string $whereTypes = '';
 	private string $order = '';
 	private ?int $limit = null;
+	private ?int $offset = null;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
 	private ?bool $published = true; // ditto
 	private ?bool $hidden = false; // ditto
@@ -56,7 +60,48 @@ final class Nodes implements Iterator
 	public function filter(string $query): self
 	{
 		$compiler = new QueryCompiler($this->context, $this->builtins);
-		$this->whereFields = $compiler->compile($query);
+		$this->addWhere($compiler->compile($query));
+
+		return $this;
+	}
+
+	public function search(string $query, array $fields): self
+	{
+		$query = trim($query);
+
+		if ($query === '') {
+			return $this;
+		}
+
+		$fields = array_values(array_filter(array_map('trim', $fields)));
+
+		if ($fields === []) {
+			return $this;
+		}
+
+		$terms = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
+
+		if (!is_array($terms) || $terms === []) {
+			return $this;
+		}
+
+		$expressions = array_map(
+			fn(string $field): string => $this->fieldExpression($field),
+			$fields,
+		);
+		$termClauses = [];
+
+		foreach ($terms as $term) {
+			$needle = $this->context->db->quote('%' . $term . '%');
+			$fieldClauses = array_map(
+				fn(string $expression): string => "COALESCE(({$expression})::text, '') ILIKE {$needle}",
+				$expressions,
+			);
+
+			$termClauses[] = '(' . implode(' OR ', $fieldClauses) . ')';
+		}
+
+		$this->addWhere(implode(' AND ', $termClauses));
 
 		return $this;
 	}
@@ -88,6 +133,20 @@ final class Nodes implements Iterator
 		$this->limit = $limit;
 
 		return $this;
+	}
+
+	public function offset(int $offset): self
+	{
+		$this->offset = $offset;
+
+		return $this;
+	}
+
+	public function count(): int
+	{
+		$record = $this->context->db->nodes->count($this->baseParams())->one();
+
+		return (int) ($record['count'] ?? 0);
 	}
 
 	public function published(?bool $published): self
@@ -159,6 +218,25 @@ final class Nodes implements Iterator
 
 	private function fetchResult(): void
 	{
+		$params = $this->baseParams();
+
+		if ($this->order) {
+			$params['order'] = $this->order;
+		}
+
+		if ($this->limit !== null) {
+			$params['limit'] = $this->limit;
+		}
+
+		if ($this->offset !== null) {
+			$params['offset'] = $this->offset;
+		}
+
+		$this->result = $this->context->db->nodes->find($params)->lazy();
+	}
+
+	private function baseParams(): array
+	{
 		$conditions = implode(' AND ', array_filter([
 			trim($this->whereFields),
 			trim($this->whereTypes),
@@ -166,7 +244,6 @@ final class Nodes implements Iterator
 
 		$params = [
 			'condition' => $conditions,
-			'limit' => $this->limit,
 		];
 
 		if (is_bool($this->deleted)) {
@@ -181,11 +258,39 @@ final class Nodes implements Iterator
 			$params['hidden'] = $this->hidden;
 		}
 
-		if ($this->order) {
-			$params['order'] = $this->order;
+		return $params;
+	}
+
+	private function addWhere(string $clause): void
+	{
+		$clause = trim($clause);
+
+		if ($clause === '') {
+			return;
 		}
 
-		$this->result = $this->context->db->nodes->find($params)->lazy();
+		if ($this->whereFields === '') {
+			$this->whereFields = $clause;
+
+			return;
+		}
+
+		$this->whereFields = "({$this->whereFields}) AND ({$clause})";
+	}
+
+	private function fieldExpression(string $field): string
+	{
+		$builtin = $this->builtins[$field] ?? null;
+
+		if (is_string($builtin) && $builtin !== '') {
+			return $builtin;
+		}
+
+		if (!preg_match('/^[A-Za-z][A-Za-z0-9._-]*$/', $field)) {
+			throw new RuntimeException('Invalid field name for search: ' . $field);
+		}
+
+		return $this->compileField($field, 'n.content');
 	}
 
 	private function typesCondition(array $types): string

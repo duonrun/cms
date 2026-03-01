@@ -83,4 +83,8 @@ ORDER BY <?= $order ?>
 <?php if (isset($limit)) : ?>
 
 LIMIT :limit
+<?php endif ?>
+<?php if (isset($offset)) : ?>
+
+OFFSET :offset
 <?php endif ?>;

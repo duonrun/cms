@@ -174,6 +174,79 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertCount(3, $nodes);
 	}
 
+	public function testFinderAppliesOffset(): void
+	{
+		$typeId = $this->createTestType('limit-test-page');
+
+		for ($i = 1; $i <= 5; $i++) {
+			$this->createTestNode([
+				'uid' => "offset-node-{$i}",
+				'type' => $typeId,
+			]);
+		}
+
+		$finder = $this->createCms();
+		$nodes = iterator_to_array($finder->nodes()
+			->types('limit-test-page')
+			->order('uid ASC')
+			->limit(2)
+			->offset(2));
+
+		$this->assertCount(2, $nodes);
+		$this->assertEquals('offset-node-3', Factory::meta($nodes[0], 'uid'));
+		$this->assertEquals('offset-node-4', Factory::meta($nodes[1], 'uid'));
+	}
+
+	public function testFinderCountIgnoresOffsetAndLimit(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		for ($i = 1; $i <= 4; $i++) {
+			$this->createTestNode([
+				'uid' => "count-node-{$i}",
+				'type' => $typeId,
+			]);
+		}
+
+		$finder = $this->createCms()->nodes()
+			->types('ordered-test-page')
+			->order('uid ASC')
+			->limit(1)
+			->offset(2);
+
+		$this->assertSame(4, $finder->count());
+		$this->assertCount(1, iterator_to_array($finder));
+	}
+
+	public function testFinderSearchesAcrossFields(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		$this->createTestNode([
+			'uid' => 'search-node-alpha',
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Alpha story']],
+			],
+		]);
+		$this->createTestNode([
+			'uid' => 'search-node-beta',
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Beta story']],
+			],
+		]);
+
+		$finder = $this->createCms();
+		$nodes = iterator_to_array($finder->nodes()
+			->types('ordered-test-page')
+			->order('uid ASC')
+			->search('search ALPHA', ['uid', 'title']));
+
+		$this->assertCount(1, $nodes);
+		$this->assertSame('search-node-alpha', Factory::meta($nodes[0], 'uid'));
+	}
+
 	public function testFinderFiltersHiddenNodes(): void
 	{
 		$typeId = $this->createTestType('hidden-test-page');
