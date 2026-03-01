@@ -1,0 +1,27 @@
+SELECT
+	COUNT(DISTINCT n.node) AS count
+FROM
+	cms.nodes n
+	INNER JOIN cms.types t USING(type)
+	INNER JOIN cms.users uc ON
+		uc.usr = n.creator
+	INNER JOIN cms.users ue ON
+		ue.usr = n.editor
+WHERE
+	1 = 1
+<?php if (isset($deleted)) : ?>
+<?php if ($deleted) : ?>
+	AND n.deleted IS NOT NULL
+<?php else: ?>
+	AND n.deleted IS NULL
+<?php endif ?>
+<?php endif ?>
+<?php if (isset($published)) : ?>
+	AND n.published = :published
+<?php endif ?>
+<?php if (isset($hidden)) : ?>
+	AND n.hidden = :hidden
+<?php endif ?>
+<?php if (isset($condition) && !empty(trim($condition))) : ?>
+	AND (<?= $condition ?>)
+<?php endif ?>;
