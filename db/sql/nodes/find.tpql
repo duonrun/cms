@@ -1,6 +1,7 @@
 SELECT
 	-- n.node,
 	n.uid,
+	np.uid AS parent,
 	n.published,
 	n.hidden,
 	n.locked,
@@ -24,6 +25,8 @@ SELECT
 FROM
 	cms.nodes n
 	INNER JOIN cms.types t USING(type)
+	LEFT JOIN cms.nodes np ON
+		np.node = n.parent
 	INNER JOIN cms.users uc ON
 		uc.usr = n.creator
 	INNER JOIN cms.users ue ON
@@ -68,6 +71,7 @@ WHERE
 
 GROUP BY
 	n.node,
+	np.uid,
 	uc.uid,
 	uc.email,
 	uc.username,

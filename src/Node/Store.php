@@ -41,11 +41,15 @@ class Store
 		try {
 			$this->db->begin();
 
-			$this->persist($node, $data, $editor, $locales);
+			$this->persist($node, $data, $editor, $locales, $request);
 
 			$this->db->commit();
 		} catch (Throwable $e) {
 			$this->db->rollback();
+
+			if ($e instanceof HttpBadRequest) {
+				throw $e;
+			}
 
 			throw new RuntimeException(
 				_('Fehler beim Speichern: ') . $e->getMessage(),
@@ -108,16 +112,24 @@ class Store
 		return $result->values();
 	}
 
-	private function persist(object $node, array $data, int $editor, Locales $locales): void
-	{
-		$nodeId = $this->persistNode($node, $data, $editor);
+	private function persist(
+		object $node,
+		array $data,
+		int $editor,
+		Locales $locales,
+		Request $request,
+	): void {
+		$parentUid = $this->resolveParentUid($node, $data, $request);
+		$parentId = $this->resolveParentId($parentUid, $request);
+
+		$nodeId = $this->persistNode($node, $data, $editor, $parentId);
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
 
-	private function persistNode(object $node, array $data, int $editor): int
+	private function persistNode(object $node, array $data, int $editor, ?int $parent): int
 	{
 		$class = $node::class;
 		$handle = (string) $this->types->get($class, 'handle');
@@ -125,6 +137,7 @@ class Store
 
 		return (int) $this->db->nodes->save([
 			'uid' => $data['uid'],
+			'parent' => $parent,
 			'hidden' => $data['hidden'],
 			'published' => $data['published'],
 			'locked' => $data['locked'],
@@ -132,6 +145,51 @@ class Store
 			'content' => json_encode($data['content']),
 			'editor' => $editor,
 		])->one()['node'];
+	}
+
+	private function resolveParentUid(object $node, array $data, Request $request): ?string
+	{
+		$parentUid = array_key_exists('parent', $data)
+			? $data['parent']
+			: Factory::meta($node, 'parent');
+
+		if ($parentUid === null) {
+			return null;
+		}
+
+		if (!is_string($parentUid)) {
+			throw new HttpBadRequest($request, payload: [
+				'message' => _('Parent must be a uid string'),
+			]);
+		}
+
+		$parentUid = trim($parentUid);
+
+		if ($parentUid === '') {
+			return null;
+		}
+
+		return $parentUid;
+	}
+
+	private function resolveParentId(?string $parentUid, Request $request): ?int
+	{
+		if ($parentUid === null) {
+			return null;
+		}
+
+		$parent = $this->db->execute(
+			'SELECT node FROM cms.nodes WHERE uid = :uid AND deleted IS NULL LIMIT 1',
+			['uid' => $parentUid],
+		)->one();
+
+		if (!$parent) {
+			throw new HttpBadRequest($request, payload: [
+				'message' => _('Invalid parent uid: ') . $parentUid,
+			]);
+		}
+
+		return (int) $parent['node'];
 	}
 
 	private function ensureTypeExists(string $handle): void

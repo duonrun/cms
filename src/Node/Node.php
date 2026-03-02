@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node;
 
+use Duon\Cms\Cms;
+use Duon\Cms\Context;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Field\FieldHydrator;
 use Duon\Cms\Field\Text;
+use Duon\Cms\Finder\Nodes;
 use Duon\Cms\Locale;
 use Duon\Cms\Node\Contract\Title;
 use Duon\Cms\Value\Value;
@@ -22,6 +25,9 @@ class Node
 		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
 		private readonly ?Request $request = null,
+		private readonly ?Context $context = null,
+		private readonly ?Cms $cms = null,
+		private readonly ?Factory $nodeFactory = null,
 	) {
 		$this->meta = new Meta($this->node, $this->types);
 	}
@@ -97,6 +103,24 @@ class Node
 		}
 
 		return '';
+	}
+
+	public function children(string $query = ''): Nodes
+	{
+		if ($this->context === null || $this->cms === null || $this->nodeFactory === null) {
+			throw new RuntimeException('children() is only available on finder-backed node proxies');
+		}
+
+		$children = (new Nodes($this->context, $this->cms, $this->nodeFactory, $this->types))
+			->published(null)
+			->hidden(null)
+			->childrenOf($this->meta->uid);
+
+		if (trim($query) !== '') {
+			$children->filter($query);
+		}
+
+		return $children;
 	}
 
 	public function __get(string $name): ?Value

@@ -145,6 +145,7 @@ class Panel
 		$q = $this->stringParam('q');
 		$sort = $this->stringParam('sort');
 		$dir = strtolower($this->stringParam('dir'));
+		$parent = $this->stringParam('parent');
 
 		if ($dir !== '' && !in_array($dir, ['asc', 'desc'], true)) {
 			throw new HttpBadRequest($this->request);
@@ -162,6 +163,7 @@ class Panel
 			q: $q,
 			sort: $sort,
 			dir: $dir,
+			parent: $parent === '' ? null : $parent,
 		);
 
 		foreach ($obj->blueprints() as $blueprint) {
@@ -178,6 +180,7 @@ class Panel
 			'showPublished' => $obj->showPublished(),
 			'showHidden' => $obj->showHidden(),
 			'showLocked' => $obj->showLocked(),
+			'showChildren' => $obj->showChildren(),
 			'total' => $listing['total'],
 			'offset' => $listing['offset'],
 			'limit' => $listing['limit'],

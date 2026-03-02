@@ -68,7 +68,7 @@ class Node
 		if ($this->types->isNode($class)) {
 			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
 
-			return $this->nodeFactory->proxy($node, $this->context->request);
+			return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
 		}
 
 		throw new HttpBadRequest($this->context->request);

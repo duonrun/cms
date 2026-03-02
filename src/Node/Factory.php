@@ -91,14 +91,21 @@ class Factory
 	/**
 	 * Wrap a node for template-friendly access.
 	 */
-	public function proxy(object $node, Request $request): Node
-	{
+	public function proxy(
+		object $node,
+		Request $request,
+		?Context $context = null,
+		?Cms $cms = null,
+	): Node {
 		return new Node(
 			$node,
 			self::fieldNamesFor($node),
 			$this->hydrator,
 			$this->types,
 			$request,
+			$context,
+			$cms,
+			$this,
 		);
 	}
 

@@ -6,6 +6,7 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Schema;
+use Duon\Cms\Node\Schema\ChildrenHandler;
 use Duon\Cms\Node\Schema\DeletableHandler;
 use Duon\Cms\Node\Schema\FieldOrderHandler;
 use Duon\Cms\Node\Schema\HandleHandler;
@@ -16,6 +17,7 @@ use Duon\Cms\Node\Schema\RenderHandler;
 use Duon\Cms\Node\Schema\RouteHandler;
 use Duon\Cms\Node\Schema\TitleHandler;
 use Duon\Cms\Node\Types;
+use Duon\Cms\Schema\Children;
 use Duon\Cms\Schema\Deletable;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Handle;
@@ -26,6 +28,7 @@ use Duon\Cms\Schema\Route;
 use Duon\Cms\Schema\Title;
 use Duon\Cms\Tests\Fixtures\Node\CustomIcon;
 use Duon\Cms\Tests\Fixtures\Node\CustomIconHandler;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithCustomAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
@@ -52,6 +55,7 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertInstanceOf(TitleHandler::class, $registry->getHandler(new Title('test')));
 		$this->assertInstanceOf(FieldOrderHandler::class, $registry->getHandler(new FieldOrder('a', 'b')));
 		$this->assertInstanceOf(DeletableHandler::class, $registry->getHandler(new Deletable()));
+		$this->assertInstanceOf(ChildrenHandler::class, $registry->getHandler(new Children(PlainPage::class, PlainBlock::class)));
 	}
 
 	public function testRegistryReturnsNullForUnknownAttribute(): void
@@ -149,6 +153,19 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertEquals(['deletable' => false], $result);
 	}
 
+	public function testChildrenHandlerResolve(): void
+	{
+		$handler = new ChildrenHandler();
+		$result = $handler->resolve(new Children(PlainPage::class, PlainBlock::class), PlainPage::class);
+
+		$this->assertEquals([
+			'children' => [
+				PlainPage::class,
+				PlainBlock::class,
+			],
+		], $result);
+	}
+
 	// -- Schema integration with Registry -------------------------------------
 
 	public function testSchemaResolvesBuiltinAttributesViaRegistry(): void
@@ -185,6 +202,19 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertNull($schema->fieldOrder);
 		// No #[Deletable] => true
 		$this->assertTrue($schema->deletable);
+		// No #[Children] => []
+		$this->assertSame([], $schema->children);
+	}
+
+	public function testSchemaResolvesChildrenAttributeFromClass(): void
+	{
+		$registry = Registry::withDefaults();
+		$schema = new Schema(NodeWithChildrenAttribute::class, $registry);
+
+		$this->assertSame([
+			PlainPage::class,
+			PlainBlock::class,
+		], $schema->children);
 	}
 
 	public function testSchemaResolvesTitleFromPropertyAttribute(): void
@@ -298,6 +328,7 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertArrayHasKey('titleField', $props);
 		$this->assertArrayHasKey('fieldOrder', $props);
 		$this->assertArrayHasKey('deletable', $props);
+		$this->assertArrayHasKey('children', $props);
 	}
 
 	// -- Types with custom registry -------------------------------------------

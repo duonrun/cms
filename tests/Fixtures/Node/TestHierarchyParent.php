@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Duon\Cms\Tests\Fixtures\Node;
+
+use Duon\Cms\Field\Text;
+use Duon\Cms\Node\Contract\Title;
+use Duon\Cms\Schema\Children;
+use Duon\Cms\Schema\Label;
+use Duon\Cms\Schema\Translate;
+
+#[Label('Hierarchy Parent')]
+#[Children(TestHierarchyParent::class, TestHierarchyChild::class)]
+class TestHierarchyParent implements Title
+{
+	#[Label('Title')]
+	#[Translate]
+	public Text $title;
+
+	public function title(): string
+	{
+		return $this->title?->value()->unwrap() ?? 'Hierarchy Parent';
+	}
+}

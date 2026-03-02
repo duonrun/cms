@@ -20,6 +20,7 @@
 	let { data }: Props = $props();
 	let collection = data.collection as CollectionState;
 	let node = $state(data.node);
+	let parentUid = data.parent ?? null;
 
 	function collectionPath() {
 		const params = new URLSearchParams();
@@ -51,6 +52,10 @@
 	async function save(publish: boolean) {
 		if (publish) {
 			node.published = true;
+		}
+
+		if (parentUid !== null) {
+			node.parent = parentUid;
 		}
 
 		create(node, node.type.handle, collectionPath());

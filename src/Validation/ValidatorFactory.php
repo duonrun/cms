@@ -21,6 +21,7 @@ class ValidatorFactory
 	) {
 		$this->shape = new Shape(keepUnknown: true);
 		$this->shape->add('uid', 'text', 'required', 'maxlen:64');
+		$this->shape->add('parent', 'text', 'maxlen:64');
 		$this->shape->add('published', 'bool', 'required');
 		$this->shape->add('locked', 'bool', 'required');
 		$this->shape->add('hidden', 'bool', 'required');

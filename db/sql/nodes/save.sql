@@ -1,5 +1,6 @@
 INSERT INTO cms.nodes (
 	uid,
+	parent,
 	type,
 	published,
 	locked,
@@ -10,6 +11,7 @@ INSERT INTO cms.nodes (
 )
 SELECT
 	:uid,
+	:parent,
 	type,
 	:published,
 	:locked,
@@ -25,6 +27,7 @@ WHERE
 ON CONFLICT (uid) DO
 
 UPDATE SET
+	parent = :parent,
 	published = :published,
 	locked = :locked,
 	hidden = :hidden,

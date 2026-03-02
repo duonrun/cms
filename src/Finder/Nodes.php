@@ -45,6 +45,7 @@ final class Nodes implements Iterator
 			'locked' => 'n.locked',
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
+			'parent' => '(SELECT p.uid FROM cms.nodes p WHERE p.node = n.parent)',
 			'routable' => $this->typeFlagExpression(
 				fn(string $class): bool => (bool) $this->types->get($class, 'routable', false),
 			),
@@ -116,6 +117,28 @@ final class Nodes implements Iterator
 	public function type(string $type): self
 	{
 		$this->whereTypes = $this->typesCondition([$type]);
+
+		return $this;
+	}
+
+	public function roots(): self
+	{
+		$this->addWhere('n.parent IS NULL');
+
+		return $this;
+	}
+
+	public function childrenOf(string $uid): self
+	{
+		$uid = trim($uid);
+
+		if ($uid === '') {
+			throw new RuntimeException('Parent uid is required');
+		}
+
+		$this->addWhere(
+			'n.parent = (SELECT p.node FROM cms.nodes p WHERE p.uid = ' . $this->context->db->quote($uid) . ')',
+		);
 
 		return $this;
 	}
@@ -198,7 +221,7 @@ final class Nodes implements Iterator
 
 		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $page);
 
-		return $this->nodeFactory->proxy($node, $this->context->request);
+		return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
 	}
 
 	public function key(): int

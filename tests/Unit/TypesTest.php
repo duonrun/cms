@@ -7,6 +7,7 @@ namespace Duon\Cms\Tests\Unit;
 use Duon\Cms\Exception\NoSuchProperty;
 use Duon\Cms\Node\Schema\Registry;
 use Duon\Cms\Node\Types;
+use Duon\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Duon\Cms\Tests\Fixtures\Node\NodeWithPermissionAttribute;
@@ -73,6 +74,15 @@ final class TypesTest extends TestCase
 		$this->assertEquals([
 			'read' => 'me',
 		], $this->types->schemaOf(NodeWithPermissionAttribute::class)->permission);
+	}
+
+	public function testChildrenAttributeSet(): void
+	{
+		$this->assertSame([
+			PlainPage::class,
+			PlainBlock::class,
+		], $this->types->get(NodeWithChildrenAttribute::class, 'children'));
+		$this->assertSame([], $this->types->get(NodeWithNameAttribute::class, 'children'));
 	}
 
 	public function testSchemaMagicAccessCoversAllBuiltinKeys(): void

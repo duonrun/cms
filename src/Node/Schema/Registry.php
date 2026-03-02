@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Node\Schema;
 
+use Duon\Cms\Schema\Children;
 use Duon\Cms\Schema\Deletable;
 use Duon\Cms\Schema\FieldOrder;
 use Duon\Cms\Schema\Handle;
@@ -82,6 +83,7 @@ class Registry
 		$registry->register(Title::class, new TitleHandler());
 		$registry->register(FieldOrder::class, new FieldOrderHandler());
 		$registry->register(Deletable::class, new DeletableHandler());
+		$registry->register(Children::class, new ChildrenHandler());
 
 		return $registry;
 	}
@@ -103,6 +105,7 @@ class Registry
 		$this->default('titleField', static fn(string $nodeClass, array $properties): ?string => null);
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default('deletable', static fn(string $nodeClass, array $properties): bool => true);
+		$this->default('children', static fn(string $nodeClass, array $properties): array => []);
 	}
 
 	/**

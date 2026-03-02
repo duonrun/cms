@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import type { Collection } from '$types/data';
 	import { _ } from '$lib/locale';
-	import { base } from '$lib/req';
+	import req, { base } from '$lib/req';
+	import { flattenCollectionNodes } from '$lib/collection-hierarchy';
 	import Button from '$shell/Button.svelte';
 	import Searchbar from '$shell/Searchbar.svelte';
 	import Published from '$shell/Published.svelte';
@@ -22,9 +23,29 @@
 	let { data }: Props = $props();
 
 	let searchTerm = $state(data.q ?? '');
+	let expanded = $state<Record<string, boolean>>({});
+	let loadingChildren = $state<Record<string, boolean>>({});
+	let childrenByParent = $state<Record<string, Collection['nodes']>>({});
+	let openChildMenuUid = $state<string | null>(null);
+	let hierarchyStateKey = $derived(
+		`${data.slug}:${data.q}:${data.sort}:${data.dir}:${data.offset}:${data.limit}`,
+	);
+	let visibleRows = $derived.by(() =>
+		data.showChildren
+			? flattenCollectionNodes(data.nodes, childrenByParent, expanded)
+			: data.nodes.map(node => ({ node, depth: 0 })),
+	);
 
 	$effect(() => {
 		searchTerm = data.q ?? '';
+	});
+
+	$effect(() => {
+		hierarchyStateKey;
+		expanded = {};
+		loadingChildren = {};
+		childrenByParent = {};
+		openChildMenuUid = null;
 	});
 
 	function fmtDate(d: string) {
@@ -97,6 +118,13 @@
 		return `collection/${data.slug}/${uid}?${qs}`;
 	}
 
+	function childCreatePath(parentUid: string, type: string) {
+		const searchParams = new URLSearchParams(query({}));
+		searchParams.set('parent', parentUid);
+
+		return `${base}collection/${data.slug}/create/${type}?${searchParams.toString()}`;
+	}
+
 	async function search() {
 		await goto(collectionPath({ q: searchTerm, offset: 0 }), {
 			invalidateAll: true,
@@ -107,6 +135,82 @@
 		await goto(collectionPath({ offset }), {
 			invalidateAll: true,
 		});
+	}
+
+	function isExpanded(uid: string) {
+		return expanded[uid] === true;
+	}
+
+	async function fetchChildren(uid: string) {
+		if (loadingChildren[uid] || uid in childrenByParent) {
+			return;
+		}
+
+		loadingChildren = { ...loadingChildren, [uid]: true };
+
+		const params: Record<string, string> = {
+			parent: uid,
+			limit: '250',
+			offset: '0',
+		};
+
+		if (data.sort.trim() !== '') {
+			params.sort = data.sort;
+		}
+
+		if (data.dir.trim() !== '') {
+			params.dir = data.dir;
+		}
+
+		const response = await req.get(`collection/${data.slug}`, params);
+
+		if (response?.ok) {
+			const payload = response.data as Collection;
+			childrenByParent = {
+				...childrenByParent,
+				[uid]: payload.nodes ?? [],
+			};
+		} else {
+			childrenByParent = {
+				...childrenByParent,
+				[uid]: [],
+			};
+		}
+
+		loadingChildren = { ...loadingChildren, [uid]: false };
+	}
+
+	async function toggleChildren(event: MouseEvent, uid: string) {
+		event.preventDefault();
+		event.stopPropagation();
+		openChildMenuUid = null;
+
+		if (isExpanded(uid)) {
+			expanded = { ...expanded, [uid]: false };
+
+			return;
+		}
+
+		if (!(uid in childrenByParent)) {
+			await fetchChildren(uid);
+		}
+
+		expanded = { ...expanded, [uid]: true };
+	}
+
+	function toggleChildMenu(event: MouseEvent, uid: string) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		openChildMenuUid = openChildMenuUid === uid ? null : uid;
+	}
+
+	async function createChild(event: MouseEvent, parentUid: string, type: string) {
+		event.preventDefault();
+		event.stopPropagation();
+		openChildMenuUid = null;
+
+		await goto(childCreatePath(parentUid, type));
 	}
 
 	let first = $derived(data.total === 0 ? 0 : data.offset + 1);
@@ -136,6 +240,9 @@
 						<table class="cms-collection-table">
 							<thead>
 								<tr>
+									{#if data.showChildren}
+										<th class="cms-tree-col"></th>
+									{/if}
 									{#if data.showPublished}
 										<th class="published"></th>
 									{/if}
@@ -145,17 +252,80 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#if data.nodes.length === 0}
+								{#if visibleRows.length === 0}
 									<tr>
 										<td
 											colspan={data.header.length +
+												(data.showChildren ? 1 : 0) +
 												(data.showPublished ? 1 : 0)}>
 											{_('Keine Eintraege gefunden')}
 										</td>
 									</tr>
 								{/if}
-								{#each data.nodes as node (node.uid)}
+								{#each visibleRows as row (row.node.uid)}
+									{@const node = row.node}
 									<tr>
+										{#if data.showChildren}
+											<td class="cms-tree-cell">
+												<div
+													class="cms-tree-control"
+													style={`--cms-tree-depth:${row.depth}`}>
+													{#if node.hasChildren}
+														<button
+															type="button"
+															class="cms-tree-toggle"
+															aria-expanded={isExpanded(node.uid)}
+															disabled={loadingChildren[node.uid] ===
+																true}
+															onclick={event =>
+																toggleChildren(event, node.uid)}>
+															{#if loadingChildren[node.uid] === true}
+																…
+															{:else if isExpanded(node.uid)}
+																▾
+															{:else}
+																▸
+															{/if}
+														</button>
+													{:else}
+														<span class="cms-tree-spacer"></span>
+													{/if}
+													{#if node.childBlueprints.length > 0}
+														<div class="cms-child-create-wrap">
+															<button
+																type="button"
+																class="cms-child-create-toggle"
+																aria-expanded={openChildMenuUid ===
+																	node.uid}
+																onclick={event =>
+																	toggleChildMenu(
+																		event,
+																		node.uid,
+																	)}>
+																+
+															</button>
+															{#if openChildMenuUid === node.uid}
+																<div class="cms-child-create-menu">
+																	{#each node.childBlueprints as blueprint}
+																		<button
+																			type="button"
+																			class="cms-child-create-option"
+																			onclick={event =>
+																				createChild(
+																					event,
+																					node.uid,
+																					blueprint.slug,
+																				)}>
+																			{blueprint.name}
+																		</button>
+																	{/each}
+																</div>
+															{/if}
+														</div>
+													{/if}
+												</div>
+											</td>
+										{/if}
 										{#if data.showPublished}
 											<td class="published cms-published-cell">
 												<span class="cms-published-value">
@@ -325,6 +495,96 @@
 
 	.published {
 		padding-right: 0;
+	}
+
+	.cms-tree-col,
+	.cms-tree-cell {
+		padding-left: var(--cms-space-2);
+		padding-right: 0;
+		width: 1%;
+	}
+
+	.cms-tree-control {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		gap: var(--cms-space-1);
+		padding-left: calc(var(--cms-tree-depth, 0) * var(--cms-space-5));
+		min-width: var(--cms-space-8);
+		position: relative;
+	}
+
+	.cms-tree-toggle,
+	.cms-tree-spacer {
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		width: var(--cms-space-6);
+		height: var(--cms-space-6);
+	}
+
+	.cms-tree-toggle {
+		border: 1px solid var(--cms-color-neutral-300);
+		border-radius: var(--cms-radius-sm);
+		background-color: var(--cms-color-white);
+		color: var(--cms-color-neutral-700);
+		cursor: pointer;
+		padding: 0;
+	}
+
+	.cms-tree-toggle:disabled {
+		cursor: wait;
+		opacity: 0.8;
+	}
+
+	.cms-child-create-wrap {
+		position: relative;
+	}
+
+	.cms-child-create-toggle {
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		width: var(--cms-space-6);
+		height: var(--cms-space-6);
+		border: 1px solid var(--cms-color-neutral-300);
+		border-radius: var(--cms-radius-sm);
+		background-color: var(--cms-color-white);
+		color: var(--cms-color-neutral-700);
+		cursor: pointer;
+		padding: 0;
+		font-size: var(--cms-font-size-sm);
+		line-height: 1;
+	}
+
+	.cms-child-create-menu {
+		position: absolute;
+		top: calc(100% + var(--cms-space-1));
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		min-width: 11rem;
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-neutral-300);
+		border-radius: var(--cms-radius-sm);
+		background-color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow);
+		z-index: 20;
+	}
+
+	.cms-child-create-option {
+		border: none;
+		background: transparent;
+		text-align: left;
+		padding: var(--cms-space-2) var(--cms-space-3);
+		border-radius: var(--cms-radius-sm);
+		cursor: pointer;
+		color: var(--cms-color-neutral-900);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	.cms-child-create-option:hover {
+		background-color: var(--cms-color-neutral-100);
 	}
 
 	.cms-published-value {

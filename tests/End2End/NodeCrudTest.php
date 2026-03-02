@@ -112,6 +112,88 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame($nodePath, $createdPayload['paths']['en'] ?? null);
 	}
 
+	public function testCreateNodePersistsParentUid(): void
+	{
+		$this->authenticateAs('editor');
+
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$this->createTestNode([
+			'uid' => 'parent-for-child-create',
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Parent Node']],
+			],
+		]);
+
+		$uid = 'child-with-parent-' . uniqid();
+		$nodePath = '/test/' . $uid;
+		$nodeData = [
+			'uid' => $uid,
+			'parent' => 'parent-for-child-create',
+			'published' => true,
+			'hidden' => false,
+			'locked' => false,
+			'paths' => [
+				'en' => $nodePath,
+			],
+			'generatedPaths' => [],
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Child Node']],
+			],
+		];
+
+		$response = $this->makeRequest('POST', '/panel/api/node/test-page', [
+			'body' => $nodeData,
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+
+		$this->trackNodeByUid($uid);
+
+		$stored = $this->db()->execute(
+			'SELECT c.parent, p.uid AS parent_uid FROM cms.nodes c LEFT JOIN cms.nodes p ON p.node = c.parent WHERE c.uid = :uid',
+			['uid' => $uid],
+		)->one();
+
+		$this->assertNotNull($stored['parent'] ?? null);
+		$this->assertSame('parent-for-child-create', $stored['parent_uid'] ?? null);
+	}
+
+	public function testCreateNodeRejectsInvalidParentUid(): void
+	{
+		$this->authenticateAs('editor');
+
+		$uid = 'child-invalid-parent-' . uniqid();
+		$nodeData = [
+			'uid' => $uid,
+			'parent' => 'missing-parent',
+			'published' => true,
+			'hidden' => false,
+			'locked' => false,
+			'paths' => [
+				'en' => '/test/' . $uid,
+			],
+			'generatedPaths' => [],
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Child Node']],
+			],
+		];
+
+		$response = $this->makeRequest('POST', '/panel/api/node/test-page', [
+			'body' => $nodeData,
+		]);
+
+		$this->assertResponseStatus(400, $response);
+
+		$node = $this->db()->execute('SELECT node FROM cms.nodes WHERE uid = :uid', ['uid' => $uid])->one();
+		$this->assertFalse((bool) $node);
+	}
+
 	public function testUpdateNode(): void
 	{
 		$this->authenticateAs('editor');

@@ -61,6 +61,15 @@ final class Department implements Title
 | `#[Title('...')]` | Field name to use as title |
 | `#[FieldOrder('...')]` | Admin panel field order |
 | `#[Deletable(false)]` | Prevent deletion in admin panel (default: `true`) |
+| `#[Children(Foo::class, ...)]` | Allowed direct child node types for hierarchy-enabled collection lists |
+
+### Hierarchy lists in panel
+
+- Set `showChildren` to `true` on a collection to switch its list endpoint to hierarchy mode.
+- Root requests (`GET /panel/api/collection/{collection}`) return nodes with no parent.
+- Child requests (`GET /panel/api/collection/{collection}?parent=<uid>`) return direct children for that parent uid.
+- Row payload includes `hasChildren`, `childBlueprints`, and `parent`.
+- Child create options are derived from `#[Children(...)]` declarations.
 
 ### Behavioral interfaces
 
