@@ -140,15 +140,92 @@ class TestCase extends BaseTestCase
 	 */
 	public function db(): \Duon\Quma\Database
 	{
-		return new \Duon\Quma\Database(
-			new \Duon\Quma\Connection(
-				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-				self::root() . '/db/sql',
-				self::root() . '/db/migrations',
-				fetchMode: PDO::FETCH_ASSOC,
-				print: false,
-			),
+		$connection = new \Duon\Quma\Connection(
+			self::testDsn(),
+			self::testSqlDirs(),
+			self::testMigrationDirs(),
+			fetchMode: PDO::FETCH_ASSOC,
+			print: false,
 		);
+
+		if (self::testDriver() === 'sqlite') {
+			$connection->setMigrationsTable('migrations');
+		}
+
+		$db = new \Duon\Quma\Database($connection);
+
+		if (self::testDriver() === 'sqlite') {
+			self::attachSqliteSchema($db);
+		}
+
+		return $db;
+	}
+
+	protected static function testDriver(): string
+	{
+		$driver = getenv('CMS_TEST_DRIVER');
+
+		return $driver !== false && $driver !== '' ? $driver : 'pgsql';
+	}
+
+	protected static function testDsn(): string
+	{
+		$dsn = getenv('CMS_TEST_DSN');
+
+		if ($dsn !== false && $dsn !== '') {
+			return $dsn;
+		}
+
+		if (self::testDriver() === 'sqlite') {
+			return 'sqlite:' . sys_get_temp_dir() . '/duoncms-test.sqlite';
+		}
+
+		return 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms';
+	}
+
+	protected static function testSqlDirs(): array
+	{
+		$root = self::root();
+
+		return array_values(array_filter([
+			$root . '/db/sql',
+			$root . '/db/sql/' . self::testDriver(),
+		], 'is_dir'));
+	}
+
+	protected static function testMigrationDirs(): array
+	{
+		$root = self::root();
+		$driver = self::testDriver();
+
+		return [
+			'install' => array_values(array_filter([
+				$root . '/db/migrations/' . $driver . '/install',
+				$driver === 'pgsql' ? $root . '/db/migrations/install' : null,
+			], 'is_dir')),
+			'default' => array_values(array_filter([
+				$root . '/db/migrations/' . $driver . '/update',
+				$driver === 'pgsql' ? $root . '/db/migrations/update' : null,
+			], 'is_dir')),
+		];
+	}
+
+	protected static function sqliteSchemaPath(): string
+	{
+		$path = substr(self::testDsn(), strlen('sqlite:'));
+		$info = pathinfo($path === false ? '' : $path);
+		$dir = $info['dirname'] ?? '.';
+		$filename = $info['filename'] ?? 'database';
+		$extension = isset($info['extension']) ? '.' . $info['extension'] : '';
+
+		return $dir . '/' . $filename . '.cms' . $extension;
+	}
+
+	protected static function attachSqliteSchema(\Duon\Quma\Database $db): void
+	{
+		$db->execute(
+			"ATTACH DATABASE '" . str_replace("'", "''", self::sqliteSchemaPath()) . "' AS cms",
+		)->run();
 	}
 
 	public function set(string $method, array $values): void

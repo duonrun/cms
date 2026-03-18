@@ -1,0 +1,75 @@
+SELECT
+	n.uid,
+	np.uid AS parent,
+	n.published,
+	n.hidden,
+	n.locked,
+	n.created,
+	n.changed,
+	n.deleted,
+	n.content,
+	t.handle,
+	uc.uid AS creator_uid,
+	uc.email AS creator_email,
+	uc.username AS creator_username,
+	uc.data AS creator_data,
+	ue.uid AS editor_uid,
+	ue.email AS editor_email,
+	ue.username AS editor_username,
+	ue.data AS editor_data,
+	COALESCE(paths.paths, '{}') AS paths
+FROM
+	cms.nodes n
+	INNER JOIN cms.types t USING(type)
+	LEFT JOIN cms.nodes np ON np.node = n.parent
+	INNER JOIN cms.users uc ON uc.usr = n.creator
+	INNER JOIN cms.users ue ON ue.usr = n.editor
+	LEFT JOIN (
+		SELECT
+			node,
+			json_group_object(locale, path) AS paths
+		FROM cms.urlpaths
+		WHERE inactive IS NULL
+		GROUP BY node
+	) paths ON paths.node = n.node
+WHERE
+	1 = 1
+<?php if (isset($uid)) : ?>
+	AND n.uid = :uid
+<?php endif ?>
+<?php if (isset($deleted)) : ?>
+<?php if ($deleted) : ?>
+	AND n.deleted IS NOT NULL
+<?php else: ?>
+	AND n.deleted IS NULL
+<?php endif ?>
+<?php endif ?>
+<?php if (isset($published)) : ?>
+	AND n.published = :published
+<?php endif ?>
+<?php if (isset($hidden)) : ?>
+	AND n.hidden = :hidden
+<?php endif ?>
+<?php if (isset($condition) && !empty(trim($condition))) : ?>
+	AND (<?= $condition ?>)
+<?php endif ?>
+<?php if (isset($path)) : ?>
+	AND EXISTS (
+		SELECT 1
+		FROM cms.urlpaths up
+		WHERE up.node = n.node
+			AND up.path = :path
+			AND up.inactive IS NULL
+	)
+<?php endif ?>
+<?php if (isset($order)) : ?>
+ORDER BY <?= $order ?>
+<?php endif ?>
+<?php if (isset($limit)) : ?>
+
+LIMIT :limit
+<?php endif ?>
+<?php if (isset($offset)) : ?>
+
+OFFSET :offset
+<?php endif ?>;

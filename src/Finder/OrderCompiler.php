@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder;
 
+use Duon\Cms\Db\Dialect;
+use Duon\Cms\Db\PostgresDialect;
 use Duon\Cms\Exception\ParserException;
 
 final class OrderCompiler
 {
 	use CompilesField;
+	private readonly Dialect $dialect;
 
-	public function __construct(private readonly array $builtins = []) {}
+	public function __construct(
+		private readonly array $builtins = [],
+		?Dialect $dialect = null,
+	) {
+		$this->dialect = $dialect ?? new PostgresDialect();
+	}
 
 	public function compile(string $statement): string
 	{
@@ -62,5 +70,10 @@ final class OrderCompiler
 		}
 
 		return $result;
+	}
+
+	protected function dialect(): Dialect
+	{
+		return $this->dialect;
 	}
 }

@@ -10,13 +10,13 @@ use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\TemplateRenderer;
 use Duon\Cms\Node\Types;
-use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 use Throwable;
 
 class Render
 {
 	protected object $node;
+	private readonly NodeRecordMapper $records;
 
 	public function __construct(
 		private readonly Context $context,
@@ -28,24 +28,19 @@ class Render
 		?bool $deleted = false,
 		?bool $published = true,
 	) {
+		$this->records = new NodeRecordMapper($this->context, $this->cms, $this->nodeFactory);
 		$data = $this->context->db->nodes->find([
 			'uid' => $uid,
 			'published' => $published,
 			'deleted' => $deleted,
 		])->one();
-		$class = $this
-			->context
-			->container
-			->tag(Plugin::NODE_TAG)
-			->entry($data['handle'])
-			->definition();
+		$class = $this->records->className($data);
 
 		if (!(bool) $this->types->get($class, 'renderable', false)) {
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 
-		$data['content'] = json_decode($data['content'], true);
-		$this->node = $this->nodeFactory->create($class, $context, $cms, $data);
+		$this->node = $this->records->node($data, $class);
 	}
 
 	public function __toString(): string

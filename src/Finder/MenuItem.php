@@ -17,7 +17,9 @@ class MenuItem implements Iterator
 		protected readonly Context $context,
 		protected readonly array $item,
 	) {
-		$this->data = json_decode($item['data'], true);
+		$this->data = is_string($item['data'])
+			? json_decode($item['data'], true)
+			: $item['data'];
 		$this->children = $item['children'];
 	}
 

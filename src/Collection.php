@@ -199,17 +199,14 @@ abstract class Collection
 		}
 
 		$uids = array_values(array_unique($uids));
-		$list = implode(',', array_map(
-			static fn(string $uid): string => "'" . str_replace("'", "\\\\'", $uid) . "'",
-			$uids,
-		));
 
-		if ($list === '') {
+		if ($uids === []) {
 			return [];
 		}
 
 		$children = $this->cms
-			->nodes("parent @ [{$list}]")
+			->nodes()
+			->childrenOfAny($uids)
 			->published(null)
 			->hidden(null);
 		$result = [];

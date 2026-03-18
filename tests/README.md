@@ -1,13 +1,14 @@
 # Duon CMS Testing Guide
 
 This guide explains how to set up and run tests for the Duon CMS project.
+PostgreSQL remains the default test target, and SQLite currently covers the core read-layer suites.
 
 ## Test Architecture
 
 The test suite combines three types of tests:
 
 - **Unit Tests**: Fast tests for isolated components (lexer, parser, utilities, field capabilities)
-- **Integration Tests**: Tests that interact with a real PostgreSQL database directly
+- **Integration Tests**: Tests that interact with a real database directly
 - **End-to-End (E2E) Tests**: Tests that exercise the full HTTP request/response cycle through the application
 
 ### Key Principles
@@ -66,6 +67,16 @@ The `recreate-db` command:
 ```bash
 composer test
 ```
+
+### Run Core Read Tests on SQLite
+
+Use SQLite when you want a quick portability check for the finder and menu read layer:
+
+```bash
+CMS_TEST_DRIVER=sqlite ./vendor/bin/phpunit --testdox --colors=always tests/Integration/FinderTest.php tests/Integration/MenuFinderTest.php
+```
+
+The PostgreSQL-only compiler snapshot tests still assert PostgreSQL SQL output and should stay on the default driver.
 
 ## How to Resume
 

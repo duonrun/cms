@@ -57,16 +57,17 @@ final class MenuFinderTest extends IntegrationTestCase
 		];
 
 		foreach ($items as $item) {
-			$this->db()->execute(
-				'INSERT INTO cms.menuitems (item, parent, menu, displayorder, data) VALUES (:item, :parent, :menu, :displayorder, :data::jsonb)',
-				[
-					'item' => $item['item'],
-					'parent' => $item['parent'],
-					'menu' => 'test-menu',
-					'displayorder' => $item['displayorder'],
-					'data' => json_encode($item['data']),
-				],
-			)->run();
+			$sql = self::testDriver() === 'sqlite'
+				? 'INSERT INTO cms.menuitems (item, parent, menu, displayorder, data) VALUES (:item, :parent, :menu, :displayorder, :data)'
+				: 'INSERT INTO cms.menuitems (item, parent, menu, displayorder, data) VALUES (:item, :parent, :menu, :displayorder, :data::jsonb)';
+
+			$this->db()->execute($sql, [
+				'item' => $item['item'],
+				'parent' => $item['parent'],
+				'menu' => 'test-menu',
+				'displayorder' => $item['displayorder'],
+				'data' => json_encode($item['data']),
+			])->run();
 		}
 	}
 

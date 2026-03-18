@@ -9,17 +9,20 @@ use Duon\Cms\Context;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node as NodeWrapper;
 use Duon\Cms\Node\Types;
-use Duon\Cms\Plugin;
 use Duon\Core\Exception\HttpBadRequest;
 
 class Node
 {
+	private readonly NodeRecordMapper $records;
+
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
 		private readonly Types $types,
-	) {}
+	) {
+		$this->records = new NodeRecordMapper($this->context, $this->cms, $this->nodeFactory);
+	}
 
 	public function byPath(
 		string $path,
@@ -54,21 +57,10 @@ class Node
 			return null;
 		}
 
-		$data['content'] = json_decode($data['content'], true);
-		$data['editor_data'] = json_decode($data['editor_data'], true);
-		$data['creator_data'] = json_decode($data['creator_data'], true);
-		$data['paths'] = json_decode($data['paths'], true);
-		$class = $this
-			->context
-			->container
-			->tag(Plugin::NODE_TAG)
-			->entry($data['handle'])
-			->definition();
+		$class = $this->records->className($data);
 
 		if ($this->types->isNode($class)) {
-			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
-
-			return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
+			return $this->records->proxy($data, $class);
 		}
 
 		throw new HttpBadRequest($this->context->request);

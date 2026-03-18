@@ -6,6 +6,8 @@ namespace Duon\Cms\Finder;
 
 use Duon\Cms\Cms;
 use Duon\Cms\Context;
+use Duon\Cms\Db\Dialect;
+use Duon\Cms\Db\Dialects;
 use Duon\Cms\Exception\RuntimeException;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
@@ -18,16 +20,10 @@ final class Nodes implements Iterator
 {
 	use CompilesField;
 
-	private string $whereFields = '';
-	private string $whereTypes = '';
-	private string $order = '';
-	private ?int $limit = null;
-	private ?int $offset = null;
-	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
-	private ?bool $published = true; // ditto
-	private ?bool $hidden = false; // ditto
-	private array $whereParams = [];
+	private QueryState $state;
+	private readonly Dialect $dialect;
 	private readonly array $builtins;
+	private readonly NodeRecordMapper $records;
 	private Generator $result;
 
 	public function __construct(
@@ -36,6 +32,9 @@ final class Nodes implements Iterator
 		private readonly Factory $nodeFactory,
 		private readonly Types $types,
 	) {
+		$this->state = QueryState::defaults();
+		$this->dialect = Dialects::for($this->context->db);
+		$this->records = new NodeRecordMapper($this->context, $this->cms, $this->nodeFactory);
 		$this->builtins = [
 			'changed' => 'n.changed',
 			'created' => 'n.created',
@@ -46,7 +45,7 @@ final class Nodes implements Iterator
 			'locked' => 'n.locked',
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
-			'parent' => '(SELECT p.uid FROM cms.nodes p WHERE p.node = n.parent)',
+			'parent' => '(SELECT p.uid FROM ' . $this->dialect->table('nodes') . ' p WHERE p.node = n.parent)',
 			'routable' => $this->typeFlagExpression(
 				fn(string $class): bool => (bool) $this->types->get($class, 'routable', false),
 			),
@@ -62,7 +61,9 @@ final class Nodes implements Iterator
 	public function filter(string $query): self
 	{
 		$compiler = new QueryCompiler($this->context, $this->builtins);
-		$this->addWhere($compiler->compile($query));
+		$this->state = $this->state->withFilters(
+			$this->state->filters->and($compiler->compileFragment($query)),
+		);
 
 		return $this;
 	}
@@ -96,35 +97,35 @@ final class Nodes implements Iterator
 		foreach ($terms as $term) {
 			$needle = $this->context->db->quote('%' . $term . '%');
 			$fieldClauses = array_map(
-				fn(string $expression): string => "COALESCE(({$expression})::text, '') ILIKE {$needle}",
+				fn(string $expression): string => $this->dialect->compileSearchMatch($expression, $needle),
 				$expressions,
 			);
 
 			$termClauses[] = '(' . implode(' OR ', $fieldClauses) . ')';
 		}
 
-		$this->addWhere(implode(' AND ', $termClauses));
+		$this->addWhere(new SqlFragment(implode(' AND ', $termClauses)));
 
 		return $this;
 	}
 
 	public function types(string ...$types): self
 	{
-		$this->whereTypes = $this->typesCondition($types);
+		$this->state = $this->state->withTypes($this->typesCondition($types));
 
 		return $this;
 	}
 
 	public function type(string $type): self
 	{
-		$this->whereTypes = $this->typesCondition([$type]);
+		$this->state = $this->state->withTypes($this->typesCondition([$type]));
 
 		return $this;
 	}
 
 	public function roots(): self
 	{
-		$this->addWhere('n.parent IS NULL');
+		$this->addWhere(new SqlFragment('n.parent IS NULL'));
 
 		return $this;
 	}
@@ -137,62 +138,92 @@ final class Nodes implements Iterator
 			throw new RuntimeException('Parent uid is required');
 		}
 
-		$param = 'parent_uid_' . count($this->whereParams);
+		$param = 'parent_uid_' . count($this->state->condition()->params);
 
-		$this->addWhere(
-			'n.parent = (SELECT p.node FROM cms.nodes p WHERE p.uid = :' . $param . ')',
-		);
-		$this->whereParams[$param] = $uid;
+		$this->addWhere(new SqlFragment(
+			'n.parent = (SELECT p.node FROM ' . $this->dialect->table('nodes') . ' p WHERE p.uid = :' . $param . ')',
+			[$param => $uid],
+		));
+
+		return $this;
+	}
+
+	/** @param list<string> $uids */
+	public function childrenOfAny(array $uids): self
+	{
+		$uids = array_values(array_filter(array_map(
+			static fn(string $uid): string => trim($uid),
+			$uids,
+		), static fn(string $uid): bool => $uid !== ''));
+
+		if ($uids === []) {
+			return $this;
+		}
+
+		$params = [];
+		$placeholders = [];
+		$offset = count($this->state->condition()->params);
+
+		foreach ($uids as $index => $uid) {
+			$key = 'parent_uid_' . ($offset + $index);
+			$params[$key] = $uid;
+			$placeholders[] = ':' . $key;
+		}
+
+		$this->addWhere(new SqlFragment(
+			'(SELECT p.uid FROM ' . $this->dialect->table('nodes') . ' p WHERE p.node = n.parent) IN (' . implode(', ', $placeholders) . ')',
+			$params,
+		));
 
 		return $this;
 	}
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins);
-		$this->order = $compiler->compile(implode(',', $order));
+		$compiler = new OrderCompiler($this->builtins, $this->dialect);
+		$this->state = $this->state->withOrder($compiler->compile(implode(',', $order)));
 
 		return $this;
 	}
 
 	public function limit(int $limit): self
 	{
-		$this->limit = $limit;
+		$this->state = $this->state->withLimit($limit);
 
 		return $this;
 	}
 
 	public function offset(int $offset): self
 	{
-		$this->offset = $offset;
+		$this->state = $this->state->withOffset($offset);
 
 		return $this;
 	}
 
 	public function count(): int
 	{
-		$record = $this->context->db->nodes->count($this->baseParams())->one();
+		$record = $this->context->db->nodes->count($this->state->baseParams())->one();
 
 		return (int) ($record['count'] ?? 0);
 	}
 
 	public function published(?bool $published): self
 	{
-		$this->published = $published;
+		$this->state = $this->state->withPublished($published);
 
 		return $this;
 	}
 
 	public function hidden(?bool $hidden): self
 	{
-		$this->hidden = $hidden;
+		$this->state = $this->state->withHidden($hidden);
 
 		return $this;
 	}
 
 	public function deleted(?bool $deleted): self
 	{
-		$this->deleted = $deleted;
+		$this->state = $this->state->withDeleted($deleted);
 
 		return $this;
 	}
@@ -211,21 +242,7 @@ final class Nodes implements Iterator
 			$this->fetchResult();
 		}
 
-		$page = $this->result->current();
-
-		$page['content'] = json_decode($page['content'], true);
-		$page['editor_data'] = json_decode($page['editor_data'], true);
-		$page['creator_data'] = json_decode($page['creator_data'], true);
-		$page['paths'] = json_decode($page['paths'], true);
-		$class = $this->context
-			->container
-			->tag(Plugin::NODE_TAG)
-			->entry($page['handle'])
-			->definition();
-
-		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $page);
-
-		return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
+		return $this->records->proxy($this->result->current());
 	}
 
 	public function key(): int
@@ -245,68 +262,16 @@ final class Nodes implements Iterator
 
 	private function fetchResult(): void
 	{
-		$params = $this->baseParams();
-
-		if ($this->order) {
-			$params['order'] = $this->order;
-		}
-
-		if ($this->limit !== null) {
-			$params['limit'] = $this->limit;
-		}
-
-		if ($this->offset !== null) {
-			$params['offset'] = $this->offset;
-		}
-
-		$this->result = $this->context->db->nodes->find($params)->lazy();
+		$this->result = $this->context->db->nodes->find($this->state->findParams())->lazy();
 	}
 
-	private function baseParams(): array
+	private function addWhere(SqlFragment $fragment): void
 	{
-		$conditions = implode(' AND ', array_filter([
-			trim($this->whereFields),
-			trim($this->whereTypes),
-		], fn($clause) => !empty($clause)));
-
-		$params = [
-			'condition' => $conditions,
-		];
-
-		if ($this->whereParams !== []) {
-			$params = array_merge($params, $this->whereParams);
-		}
-
-		if (is_bool($this->deleted)) {
-			$params['deleted'] = $this->deleted;
-		}
-
-		if (is_bool($this->published)) {
-			$params['published'] = $this->published;
-		}
-
-		if (is_bool($this->hidden)) {
-			$params['hidden'] = $this->hidden;
-		}
-
-		return $params;
-	}
-
-	private function addWhere(string $clause): void
-	{
-		$clause = trim($clause);
-
-		if ($clause === '') {
+		if ($fragment->isEmpty()) {
 			return;
 		}
 
-		if ($this->whereFields === '') {
-			$this->whereFields = $clause;
-
-			return;
-		}
-
-		$this->whereFields = "({$this->whereFields}) AND ({$clause})";
+		$this->state = $this->state->withFilters($this->state->filters->and($fragment));
 	}
 
 	private function fieldExpression(string $field): string
@@ -324,7 +289,7 @@ final class Nodes implements Iterator
 		return $this->compileField($field, 'n.content');
 	}
 
-	private function typesCondition(array $types): string
+	private function typesCondition(array $types): SqlFragment
 	{
 		$result = [];
 
@@ -336,13 +301,13 @@ final class Nodes implements Iterator
 			$result[] = 't.handle = ' . $this->context->db->quote($type);
 		}
 
-		return match (count($result)) {
+		return new SqlFragment(match (count($result)) {
 			0 => '',
 			1 => '    ' . $result[0],
 			default => "    (\n        "
 				. implode("\n        OR ", $result)
 				. "\n    )",
-		};
+		});
 	}
 
 	private function typeFlagExpression(callable $flag): string
@@ -367,5 +332,10 @@ final class Nodes implements Iterator
 		}
 
 		return 't.handle IN (' . implode(', ', $handles) . ')';
+	}
+
+	protected function dialect(): Dialect
+	{
+		return $this->dialect;
 	}
 }

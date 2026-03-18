@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Tests\Integration;
 
+use Duon\Cms\Cms;
+use Duon\Cms\Context;
 use Duon\Cms\Node\Factory;
 use Duon\Cms\Node\Node;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Tests\IntegrationTestCase;
+use Duon\Core\Exception\HttpBadRequest;
+use Exception;
+use RuntimeException;
 
 final class FinderTest extends IntegrationTestCase
 {
@@ -187,7 +192,7 @@ final class FinderTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
-		$cms = $this->createCms();
+		$cms = $this->createCmsWithDebug(false);
 		$nodes = $cms->node(
 			"uid ~~ 'cms-node-shortcut-%'",
 			types: ['ordered-test-page'],
@@ -241,6 +246,85 @@ final class FinderTest extends IntegrationTestCase
 
 		$this->assertSame(4, $finder->count());
 		$this->assertCount(1, iterator_to_array($finder));
+	}
+
+	public function testFinderCountDoesNotConsumeIteration(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		for ($i = 1; $i <= 3; $i++) {
+			$this->createTestNode([
+				'uid' => "count-iteration-node-{$i}",
+				'type' => $typeId,
+			]);
+		}
+
+		$finder = $this->createCms()->nodes()
+			->types('ordered-test-page')
+			->order('uid ASC');
+		$nodes = iterator_to_array($finder);
+
+		$this->assertSame(3, $finder->count());
+		$this->assertSame('count-iteration-node-1', Factory::meta($nodes[0], 'uid'));
+	}
+
+	public function testFinderRewindFailsAfterGeneratorHasRun(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		for ($i = 1; $i <= 2; $i++) {
+			$this->createTestNode([
+				'uid' => "rewind-node-{$i}",
+				'type' => $typeId,
+			]);
+		}
+
+		$finder = $this->createCms()->nodes()
+			->types('ordered-test-page')
+			->order('uid ASC');
+
+		$finder->rewind();
+		$this->assertSame('rewind-node-1', Factory::meta($finder->current(), 'uid'));
+
+		$finder->next();
+		$this->assertSame('rewind-node-2', Factory::meta($finder->current(), 'uid'));
+
+		$this->expectException(
+			Exception::class,
+		);
+		$this->expectExceptionMessage('Cannot rewind a generator that was already run');
+		$finder->rewind();
+	}
+
+	public function testFinderMutationAfterIterationStartsDoesNotReplaceFetchedResult(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		$this->createTestNode([
+			'uid' => 'mutation-node-a',
+			'type' => $typeId,
+		]);
+		$this->createTestNode([
+			'uid' => 'mutation-node-b',
+			'type' => $typeId,
+		]);
+
+		$finder = $this->createCms()->nodes()
+			->types('ordered-test-page')
+			->order('uid ASC');
+
+		$finder->rewind();
+		$this->assertSame('mutation-node-a', Factory::meta($finder->current(), 'uid'));
+
+		$finder->limit(1);
+
+		$this->assertSame(
+			['mutation-node-a', 'mutation-node-b'],
+			array_map(
+				static fn(object $node): string => (string) Factory::meta($node, 'uid'),
+				iterator_to_array($finder),
+			),
+		);
 	}
 
 	public function testFinderSearchesAcrossFields(): void
@@ -387,6 +471,49 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertSame(['children-a', 'children-b'], $filteredUids);
 	}
 
+	public function testFinderChildrenOfAnyReturnsChildrenForMultipleParents(): void
+	{
+		$typeId = $this->createTestType('nested-test-page');
+
+		$parentA = $this->createTestNode([
+			'uid' => 'children-any-parent-a',
+			'type' => $typeId,
+		]);
+		$parentB = $this->createTestNode([
+			'uid' => 'children-any-parent-b',
+			'type' => $typeId,
+		]);
+
+		$this->createTestNode([
+			'uid' => 'children-any-a1',
+			'type' => $typeId,
+			'parent' => $parentA,
+		]);
+		$this->createTestNode([
+			'uid' => 'children-any-b1',
+			'type' => $typeId,
+			'parent' => $parentB,
+		]);
+		$this->createTestNode([
+			'uid' => 'children-any-unrelated',
+			'type' => $typeId,
+		]);
+
+		$nodes = iterator_to_array($this->createCms()->nodes()
+			->types('nested-test-page')
+			->published(null)
+			->childrenOfAny(['children-any-parent-a', 'children-any-parent-b'])
+			->order('uid ASC'));
+
+		$this->assertSame(
+			['children-any-a1', 'children-any-b1'],
+			array_map(
+				static fn(object $node): string => (string) Factory::meta($node, 'uid'),
+				$nodes,
+			),
+		);
+	}
+
 	public function testNodeChildrenReturnsDirectChildren(): void
 	{
 		$typeId = $this->createTestType('nested-test-page');
@@ -412,7 +539,7 @@ final class FinderTest extends IntegrationTestCase
 			'parent' => $childA,
 		]);
 
-		$cms = $this->createCms();
+		$cms = $this->createCmsWithDebug(false);
 		$parent = $cms->node->byUid('node-children-parent', published: null);
 
 		$this->assertNotNull($parent);
@@ -426,6 +553,105 @@ final class FinderTest extends IntegrationTestCase
 		}
 
 		$this->assertSame(['node-children-a', 'node-children-b'], $uids);
+	}
+
+	public function testCmsNodeFinderByUidRespectsVisibilityDefaults(): void
+	{
+		$typeId = $this->createTestType('unpublished-test-page');
+
+		$this->createTestNode([
+			'uid' => 'finder-by-uid-visible',
+			'type' => $typeId,
+			'published' => true,
+		]);
+		$this->createTestNode([
+			'uid' => 'finder-by-uid-hidden-draft',
+			'type' => $typeId,
+			'published' => false,
+		]);
+
+		$cms = $this->createCmsWithDebug(false);
+		$visibleNode = $cms->node->byUid('finder-by-uid-visible');
+		$draftNode = $cms->node->byUid('finder-by-uid-hidden-draft', published: null);
+
+		$this->assertNotNull($visibleNode);
+		$this->assertSame('finder-by-uid-visible', Factory::meta($visibleNode, 'uid'));
+		$this->assertNull($cms->node->byUid('finder-by-uid-hidden-draft'));
+		$this->assertNotNull($draftNode);
+		$this->assertSame('finder-by-uid-hidden-draft', Factory::meta($draftNode, 'uid'));
+	}
+
+	public function testCmsNodeFinderByPathResolvesStoredPath(): void
+	{
+		$typeId = $this->createTestType('routing-test-page');
+		$nodeId = $this->createTestNode([
+			'uid' => 'finder-by-path-node',
+			'type' => $typeId,
+		]);
+		$this->createTestPath($nodeId, '/finder-by-path-node');
+
+		$cms = $this->createCms();
+		$node = $cms->node->byPath('/finder-by-path-node');
+
+		$this->assertNotNull($node);
+		$this->assertSame('finder-by-path-node', Factory::meta($node, 'uid'));
+		$this->assertNull($cms->node->byPath('/missing-path'));
+	}
+
+	public function testCmsMagicGetReturnsFinderHelpers(): void
+	{
+		$cms = $this->createCms();
+
+		$this->assertInstanceOf(\Duon\Cms\Finder\Nodes::class, $cms->nodes);
+		$this->assertInstanceOf(\Duon\Cms\Finder\Node::class, $cms->node);
+	}
+
+	public function testCmsRenderReturnsRenderedNodeMarkup(): void
+	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$this->createTestNode([
+			'uid' => 'render-success-node',
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Rendered Title']],
+			],
+		]);
+
+		$cms = $this->createCmsWithDebug(false);
+
+		$this->assertSame(
+			'test-page:Rendered Title',
+			(string) $cms->render('render-success-node'),
+		);
+	}
+
+	public function testCmsRenderWrapsRendererFailureWhenDebugIsDisabled(): void
+	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$this->createTestNode([
+			'uid' => 'render-failure-node',
+			'type' => $typeId,
+		]);
+
+		$cms = $this->createCmsWithDebug(false);
+
+		$this->expectException(HttpBadRequest::class);
+		(string) $cms->render('render-failure-node', ['fail' => true]);
+	}
+
+	public function testCmsRenderRethrowsRendererFailureWhenDebugIsEnabled(): void
+	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$this->createTestNode([
+			'uid' => 'render-debug-node',
+			'type' => $typeId,
+		]);
+
+		$cms = $this->createCmsWithDebug(true);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('Forced renderer failure');
+		(string) $cms->render('render-debug-node', ['fail' => true]);
 	}
 
 	public function testNodeChildrenAppliesDslQuery(): void
@@ -501,5 +727,22 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertArrayHasKey('title', $content);
 		$this->assertEquals('Testhomepage', $content['title']['value']['de']);
 		$this->assertEquals('Test Homepage', $content['title']['value']['en']);
+	}
+
+	private function createCmsWithDebug(bool $debug): Cms
+	{
+		$request = $this->request();
+		$request->set('defaultLocale', $request->get('locales')->getDefault());
+
+		return new Cms(
+			new Context(
+				$this->db(),
+				$request,
+				$this->config(debug: $debug),
+				$this->container(),
+				$this->factory(),
+			),
+			new Types(),
+		);
 	}
 }

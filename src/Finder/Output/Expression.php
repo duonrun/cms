@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder\Output;
 
+use Duon\Cms\Db\Dialect;
+use Duon\Cms\Db\PostgresDialect;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Finder\CompilesField;
 use Duon\Cms\Finder\Input\Token;
@@ -13,6 +15,11 @@ use Duon\Quma\Database;
 abstract readonly class Expression
 {
 	use CompilesField;
+
+	protected function dialect(): Dialect
+	{
+		return new PostgresDialect();
+	}
 
 	protected function getOperator(TokenType $type): string
 	{
@@ -53,8 +60,6 @@ abstract readonly class Expression
 
 	protected function translateKeyword(string $keyword): string
 	{
-		return match ($keyword) {
-			'now' => 'NOW()',
-		};
+		return $this->dialect()->keyword($keyword);
 	}
 }

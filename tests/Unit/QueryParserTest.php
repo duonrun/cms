@@ -6,12 +6,9 @@ namespace Duon\Cms\Tests\Unit;
 
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\Output\Comparison;
-use Duon\Cms\Finder\Output\Exists;
-use Duon\Cms\Finder\Output\LeftParen;
-use Duon\Cms\Finder\Output\Operator;
-use Duon\Cms\Finder\Output\RightParen;
-use Duon\Cms\Finder\Output\UrlPath;
+use Duon\Cms\Finder\Condition\Comparison;
+use Duon\Cms\Finder\Condition\Exists;
+use Duon\Cms\Finder\Condition\TokenPart;
 use Duon\Cms\Finder\QueryParser;
 use Duon\Cms\Tests\TestCase;
 
@@ -37,17 +34,17 @@ final class QueryParserTest extends TestCase
 		);
 
 		$this->assertInstanceOf(Comparison::class, $output[0]);
-		$this->assertInstanceOf(Operator::class, $output[1]);
+		$this->assertInstanceOf(TokenPart::class, $output[1]);
 		$this->assertInstanceOf(Exists::class, $output[2]);
-		$this->assertInstanceOf(Operator::class, $output[3]);
-		$this->assertInstanceOf(LeftParen::class, $output[4]);
+		$this->assertInstanceOf(TokenPart::class, $output[3]);
+		$this->assertInstanceOf(TokenPart::class, $output[4]);
 		$this->assertInstanceOf(Comparison::class, $output[5]);
-		$this->assertInstanceOf(Operator::class, $output[6]);
-		$this->assertInstanceOf(UrlPath::class, $output[7]);
-		$this->assertInstanceOf(RightParen::class, $output[8]);
-		$this->assertInstanceOf(Operator::class, $output[9]);
+		$this->assertInstanceOf(TokenPart::class, $output[6]);
+		$this->assertInstanceOf(Comparison::class, $output[7]);
+		$this->assertInstanceOf(TokenPart::class, $output[8]);
+		$this->assertInstanceOf(TokenPart::class, $output[9]);
 		$this->assertInstanceOf(Exists::class, $output[10]);
-		$this->assertInstanceOf(Operator::class, $output[11]);
+		$this->assertInstanceOf(TokenPart::class, $output[11]);
 		$this->assertInstanceOf(Comparison::class, $output[12]);
 		$this->assertSame(false, isset($output[13]));
 	}

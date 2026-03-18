@@ -7,17 +7,13 @@ namespace Duon\Cms\Finder;
 use Duon\Cms\Context;
 use Duon\Cms\Exception\ParserException;
 use Duon\Cms\Exception\ParserOutputException;
+use Duon\Cms\Finder\Condition\Comparison;
+use Duon\Cms\Finder\Condition\Exists;
+use Duon\Cms\Finder\Condition\Part;
+use Duon\Cms\Finder\Condition\TokenPart;
 use Duon\Cms\Finder\Input\Token;
 use Duon\Cms\Finder\Input\TokenGroup;
 use Duon\Cms\Finder\Input\TokenType;
-use Duon\Cms\Finder\Output\Comparison;
-use Duon\Cms\Finder\Output\Exists;
-use Duon\Cms\Finder\Output\Expression;
-use Duon\Cms\Finder\Output\LeftParen;
-use Duon\Cms\Finder\Output\NullComparison;
-use Duon\Cms\Finder\Output\Operator;
-use Duon\Cms\Finder\Output\RightParen;
-use Duon\Cms\Finder\Output\UrlPath;
 
 final class QueryParser
 {
@@ -150,7 +146,7 @@ final class QueryParser
 	/**
 	 * @throws ParserException
 	 */
-	private function getExpression(Token $token): Expression
+	private function getExpression(Token $token): Part
 	{
 		if (!$this->readyForCondition) {
 			$this->error($token, 'Invalid position for a condition.');
@@ -185,7 +181,7 @@ final class QueryParser
 		$this->error($token, 'Invalid condition.');
 	}
 
-	private function getComparisonCondition(Token $left): Expression
+	private function getComparisonCondition(Token $left): Comparison
 	{
 		$operator = $this->tokens[$this->pos + 1];
 		$right = $this->tokens[$this->pos + 2];
@@ -199,15 +195,7 @@ final class QueryParser
 			$this->error($left, 'Invalid position for a null value.');
 		}
 
-		if ($right->type === TokenType::Null) {
-			return new NullComparison($left, $operator, $right, $this->context, $this->builtins);
-		}
-
-		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
-			return new UrlPath($left, $operator, $right, $this->context);
-		}
-
-		return new Comparison($left, $operator, $right, $this->context, $this->builtins);
+		return new Comparison($left, $operator, $right);
 	}
 
 	private function getExistsCondition(Token $token): Exists
@@ -223,13 +211,13 @@ final class QueryParser
 		$this->readyForCondition = false;
 		$this->pos++;
 
-		return new Exists($token, $this->context);
+		return new Exists($token);
 	}
 
 	/**
 	 * @throws ParserException
 	 */
-	private function getBooleanOperator(Token $token): Operator
+	private function getBooleanOperator(Token $token): TokenPart
 	{
 		if ($this->readyForCondition) {
 			$this->error(
@@ -246,13 +234,13 @@ final class QueryParser
 		$this->readyForCondition = true;
 		$this->pos++;
 
-		return new Operator($token);
+		return new TokenPart($token->type === TokenType::And ? ' AND ' : ' OR ');
 	}
 
 	/**
 	 * @throws ParserException
 	 */
-	private function getLeftParen(Token $token): LeftParen
+	private function getLeftParen(Token $token): TokenPart
 	{
 		if (!$this->readyForCondition) {
 			$this->error($token, 'Invalid position for parenthesis.');
@@ -261,13 +249,13 @@ final class QueryParser
 		$this->parensBalance++;
 		$this->pos++;
 
-		return new LeftParen($token);
+		return new TokenPart('(');
 	}
 
 	/**
 	 * @throws ParserException
 	 */
-	private function getRightParen(Token $token): RightParen
+	private function getRightParen(Token $token): TokenPart
 	{
 		if (
 			$this->pos > 0
@@ -283,7 +271,7 @@ final class QueryParser
 		$this->parensBalance--;
 		$this->pos++;
 
-		return new RightParen($token);
+		return new TokenPart(')');
 	}
 
 	/**

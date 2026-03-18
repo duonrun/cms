@@ -8,6 +8,7 @@ use Duon\Cms\Cms;
 use Duon\Cms\Context;
 use Duon\Cms\Node\Types;
 use Duon\Cms\Plugin;
+use Duon\Cms\Renderer;
 use Duon\Container\Container;
 use Duon\Quma\Connection;
 use Duon\Quma\Database;
@@ -43,11 +44,16 @@ class IntegrationTestCase extends TestCase
 
 	protected static function initializeTestDatabase(): void
 	{
-		// Create shared connection for migration check
+		if (self::testDriver() === 'sqlite') {
+			self::initializeSqliteDatabase();
+
+			return;
+		}
+
 		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
-			self::root() . '/db/migrations',
+			self::testDsn(),
+			self::testSqlDirs(),
+			self::testMigrationDirs(),
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
 		);
@@ -94,7 +100,7 @@ class IntegrationTestCase extends TestCase
 
 		// Begin transaction if this test uses them
 		if ($this->useTransactions) {
-			$this->testDb = new Database($this->conn());
+			$this->testDb = $this->createDatabase();
 			$this->testDb->begin();
 		}
 	}
@@ -112,13 +118,70 @@ class IntegrationTestCase extends TestCase
 
 	public function conn(): Connection
 	{
-		return new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
-			self::root() . '/db/sql',
-			self::root() . '/db/migrations',
+		$connection = new Connection(
+			self::testDsn(),
+			self::testSqlDirs(),
+			self::testMigrationDirs(),
 			fetchMode: PDO::FETCH_ASSOC,
 			print: false,
 		);
+
+		if (self::testDriver() === 'sqlite') {
+			$connection->setMigrationsTable('migrations');
+		}
+
+		return $connection;
+	}
+
+	protected static function initializeSqliteDatabase(): void
+	{
+		$path = substr(self::testDsn(), strlen('sqlite:'));
+
+		if ($path === false || $path === '') {
+			throw new RuntimeException('Invalid SQLite test DSN');
+		}
+
+		if (file_exists($path) && !unlink($path)) {
+			throw new RuntimeException('Could not reset SQLite test database: ' . $path);
+		}
+
+		$schemaPath = self::sqliteSchemaPath();
+
+		if (file_exists($schemaPath) && !unlink($schemaPath)) {
+			throw new RuntimeException('Could not reset SQLite CMS schema: ' . $schemaPath);
+		}
+
+		self::$sharedConnection = new Connection(
+			self::testDsn(),
+			self::testSqlDirs(),
+			self::testMigrationDirs(),
+			fetchMode: PDO::FETCH_ASSOC,
+			print: false,
+		);
+		self::$sharedConnection->setMigrationsTable('migrations');
+
+		$db = new Database(self::$sharedConnection);
+		self::attachSqliteSchema($db);
+
+		foreach (self::testMigrationDirs()['install'] as $dir) {
+			$files = glob($dir . '/*.sql');
+
+			if (!is_array($files)) {
+				continue;
+			}
+
+			sort($files);
+
+			foreach ($files as $file) {
+				$sql = file_get_contents($file);
+
+				if (!is_string($sql) || trim($sql) === '') {
+					continue;
+				}
+
+				$db->getConn()->exec($sql);
+			}
+		}
 	}
 
 	public function db(): Database
@@ -128,7 +191,18 @@ class IntegrationTestCase extends TestCase
 			return $this->testDb;
 		}
 
-		return new Database($this->conn());
+		return $this->createDatabase();
+	}
+
+	private function createDatabase(): Database
+	{
+		$db = new Database($this->conn());
+
+		if (self::testDriver() === 'sqlite') {
+			self::attachSqliteSchema($db);
+		}
+
+		return $db;
 	}
 
 	public function container(): Container
@@ -174,6 +248,8 @@ class IntegrationTestCase extends TestCase
 			->add('delete-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
 			->add('renderable-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+		$container->tag(Renderer::class)
+			->add('template', \Duon\Cms\Tests\Fixtures\TestRenderer::class);
 
 		return $container;
 	}
@@ -190,11 +266,26 @@ class IntegrationTestCase extends TestCase
 		foreach ($fixtures as $fixture) {
 			$path = self::root() . "/tests/Fixtures/data/{$fixture}.sql";
 
+			if (self::testDriver() === 'sqlite') {
+				$sqlitePath = self::root() . "/tests/Fixtures/data/sqlite/{$fixture}.sql";
+
+				if (file_exists($sqlitePath)) {
+					$path = $sqlitePath;
+				}
+			}
+
 			if (!file_exists($path)) {
 				throw new RuntimeException("Fixture file not found: {$path}");
 			}
 
 			$sql = file_get_contents($path);
+
+			if (self::testDriver() === 'sqlite') {
+				$db->getConn()->exec($sql);
+
+				continue;
+			}
+
 			$db->execute($sql)->run();
 		}
 	}
@@ -206,6 +297,14 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestType(string $handle): int
 	{
+		if (self::testDriver() === 'sqlite') {
+			$this->db()->execute('INSERT INTO cms.types (handle) VALUES (:handle)', [
+				'handle' => $handle,
+			])->run();
+
+			return (int) $this->db()->getConn()->lastInsertId();
+		}
+
 		$sql = "INSERT INTO cms.types (handle)
 				VALUES (:handle)
 				RETURNING type";
@@ -243,6 +342,14 @@ class IntegrationTestCase extends TestCase
 			$data['content'] = json_encode($data['content']);
 		}
 
+		if (self::testDriver() === 'sqlite') {
+			$sql = "INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
+					VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content)";
+			$this->db()->execute($sql, $data)->run();
+
+			return (int) $this->db()->getConn()->lastInsertId();
+		}
+
 		$sql = "INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
 				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
 				RETURNING node";
@@ -274,6 +381,14 @@ class IntegrationTestCase extends TestCase
 
 		if (isset($data['data']) && is_array($data['data'])) {
 			$data['data'] = json_encode($data['data']);
+		}
+
+		if (self::testDriver() === 'sqlite') {
+			$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
+					VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data, :creator, :editor)";
+			$this->db()->execute($sql, $data)->run();
+
+			return (int) $this->db()->getConn()->lastInsertId();
 		}
 
 		$sql = "INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)

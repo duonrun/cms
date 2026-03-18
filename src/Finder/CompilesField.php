@@ -4,33 +4,17 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Finder;
 
-use Duon\Cms\Exception\ParserException;
+use Duon\Cms\Db\Dialect;
 
 trait CompilesField
 {
+	abstract protected function dialect(): Dialect;
+
 	private function compileField(
 		string $fieldName,
 		string $tableField,
 		bool $asIs = false,
 	): string {
-		$parts = explode('.', $fieldName);
-
-		foreach ($parts as $part) {
-			if ($part === '') {
-				throw new ParserException('Invalid field name');
-			}
-		}
-
-		$count = count($parts);
-		$arrow = $asIs ? '->' : '->>';
-
-		if ($count === 1) {
-			return "{$tableField}->'{$parts[0]}'{$arrow}'value'";
-		}
-
-		$middle = implode("'->'", array_slice($parts, 0, $count - 1));
-		$end = array_slice($parts, -1)[0];
-
-		return "{$tableField}->'{$middle}'{$arrow}'{$end}'";
+		return $this->dialect()->compileField($fieldName, $tableField, $asIs);
 	}
 }

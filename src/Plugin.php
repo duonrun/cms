@@ -119,18 +119,23 @@ class Plugin implements CorePlugin
 		}
 
 		$root = dirname(__DIR__);
-		$sqlConfig = $this->config->get('db.sql', []);
+		$driver = explode(':', $this->config->get('db.dsn'), 2)[0];
 		$sql = array_merge(
 			[$root . '/db/sql'],
-			$sqlConfig ? (is_array($sqlConfig) ? $sqlConfig : [$sqlConfig]) : [],
+			$this->existingDirs($root . '/db/sql/' . $driver),
+			$this->configArray($this->config->get('db.sql', [])),
 		);
-		$migrations = $this->config->get('db.migrations', []);
-		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge(
-			$migrations ? (is_array($migrations) ? $migrations : [$migrations]) : [],
-			[$root . '/db/migrations/update'],
-		);
+		$namespacedMigrations = [
+			'install' => array_merge(
+				$this->existingDirs($root . '/db/migrations/' . $driver . '/install'),
+				$driver === 'pgsql' ? $this->existingDirs($root . '/db/migrations/install') : [],
+			),
+			'default' => array_merge(
+				$this->configArray($this->config->get('db.migrations', [])),
+				$this->existingDirs($root . '/db/migrations/' . $driver . '/update'),
+				$driver === 'pgsql' ? $this->existingDirs($root . '/db/migrations/update') : [],
+			),
+		];
 
 		$this->connection = new Connection(
 			$this->config->get('db.dsn'),
@@ -141,6 +146,45 @@ class Plugin implements CorePlugin
 			print: $this->config->get('db.print'),
 		);
 		$this->db = new Database($this->connection);
+
+		if ($driver === 'sqlite') {
+			$this->attachSqliteSchema($this->db, $this->sqliteSchemaPath($this->config->get('db.dsn')));
+		}
+	}
+
+	private function configArray(mixed $value): array
+	{
+		if ($value === [] || $value === null) {
+			return [];
+		}
+
+		return is_array($value) ? $value : [$value];
+	}
+
+	private function existingDirs(string ...$dirs): array
+	{
+		return array_values(array_filter($dirs, static fn(string $dir): bool => is_dir($dir)));
+	}
+
+	private function sqliteSchemaPath(string $dsn): string
+	{
+		$path = substr($dsn, strlen('sqlite:'));
+
+		if ($path === false || $path === '') {
+			throw new RuntimeException('SQLite DSN must point to a file path');
+		}
+
+		$info = pathinfo($path);
+		$dir = $info['dirname'] ?? '.';
+		$filename = $info['filename'] ?? 'database';
+		$extension = isset($info['extension']) ? '.' . $info['extension'] : '';
+
+		return $dir . '/' . $filename . '.cms' . $extension;
+	}
+
+	private function attachSqliteSchema(Database $db, string $path): void
+	{
+		$db->execute("ATTACH DATABASE '" . str_replace("'", "''", $path) . "' AS cms")->run();
 	}
 
 	/**
