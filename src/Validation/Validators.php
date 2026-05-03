@@ -4,39 +4,56 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Validation;
 
+use Duon\Sire\Contract\Validator;
 use Duon\Sire\Contract\Value;
-use Duon\Sire\Validator;
 use Duon\Sire\ValidatorRegistry;
+use Override;
 
 final class Validators
 {
 	public static function registry(): ValidatorRegistry
 	{
 		return ValidatorRegistry::withDefaults()->withMany([
-			'minitems' => new Validator(
-				'minitems',
-				'Has fewer than the minimum number of %4$s items',
-				static function (Value $value, string ...$args): bool {
-					if (!is_array($value->value)) {
-						return false;
-					}
-
-					return count($value->value) >= (int) ($args[0] ?? 0);
-				},
-				false,
-			),
-			'maxitems' => new Validator(
-				'maxitems',
-				'Has more than the maximum allowed number of %4$s items',
-				static function (Value $value, string ...$args): bool {
-					if (!is_array($value->value)) {
-						return false;
-					}
-
-					return count($value->value) <= (int) ($args[0] ?? 0);
-				},
-				true,
-			),
+			'minitems' => self::minItems(),
+			'maxitems' => self::maxItems(),
 		]);
+	}
+
+	private static function minItems(): Validator
+	{
+		return new class implements Validator {
+			public string $message = 'Has fewer than the minimum number of %4$s items';
+
+			public bool $skipEmpty = false;
+
+			#[Override]
+			public function validate(Value $value, string ...$args): bool
+			{
+				if (!is_array($value->value)) {
+					return false;
+				}
+
+				return count($value->value) >= (int) ($args[0] ?? 0);
+			}
+		};
+	}
+
+	private static function maxItems(): Validator
+	{
+		return new class implements Validator {
+			public string $message = 'Has more than the maximum allowed number of %4$s items';
+
+			public bool $skipEmpty = true;
+
+			#[Override]
+			public function validate(Value $value, string ...$args): bool
+			{
+				if (!is_array($value->value)) {
+					return false;
+				}
+
+				return count($value->value) <= (int) ($args[0] ?? 0);
+			}
+		};
 	}
 }
