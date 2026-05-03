@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duon\Cms\Validation;
 
+use Duon\Sire\Contract\ValidatesEmpty;
 use Duon\Sire\Contract\Validator;
 use Duon\Sire\Contract\Value;
 use Duon\Sire\ValidatorRegistry;
@@ -21,10 +22,8 @@ final class Validators
 
 	private static function minItems(): Validator
 	{
-		return new class implements Validator {
+		return new class implements ValidatesEmpty {
 			public string $message = 'Has fewer than the minimum number of %4$s items';
-
-			public bool $skipEmpty = false;
 
 			#[Override]
 			public function validate(Value $value, string ...$args): bool
@@ -42,8 +41,6 @@ final class Validators
 	{
 		return new class implements Validator {
 			public string $message = 'Has more than the maximum allowed number of %4$s items';
-
-			public bool $skipEmpty = true;
 
 			#[Override]
 			public function validate(Value $value, string ...$args): bool
