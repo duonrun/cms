@@ -1,12 +1,12 @@
-project: Duon Content Management Framework (duon/cms)
-repository: https://github.com/duoncode/cms
+project: Celemas Content Management Framework (celemas/cms)
+repository: https://github.com/celemas/cms
 canonical_branch: main
-license: MIT (https://github.com/duoncode/cms/blob/main/LICENSE.md)
+license: MIT (https://github.com/celemas/cms/blob/main/LICENSE.md)
 last_updated: 2026-04-29
-contact: https://github.com/duoncode/cms/issues
+contact: https://github.com/celemas/cms/issues
 
 summary:
-Duon CMS is a PHP CMS framework based on typed node classes, PHP attributes,
+Celemas CMS is a PHP CMS framework based on typed node classes, PHP attributes,
 autowired dependencies, and PostgreSQL-backed content storage.
 It supports explicit parent/child hierarchies via `#[Children(...)]`, lazy
 collection tree loading, and child creation with parent uid persistence.
@@ -18,14 +18,14 @@ Treat this as a practical integration guide during exploration.
 
 audience:
 - LLM assistants answering implementation or integration questions
-- Developers integrating duon/cms into downstream site projects
+- Developers integrating celemas/cms into downstream site projects
 
 preferred_sources_in_order:
-1) https://github.com/duoncode/cms/blob/main/README.md
-2) https://github.com/duoncode/cms/tree/main/src
-3) https://github.com/duoncode/cms/tree/main/tests
-4) https://github.com/duoncode/cms/blob/main/composer.json
-5) https://github.com/duoncode/cms/blob/main/AGENTS.md
+1) https://github.com/celemas/cms/blob/main/README.md
+2) https://github.com/celemas/cms/tree/main/src
+3) https://github.com/celemas/cms/tree/main/tests
+4) https://github.com/celemas/cms/blob/main/composer.json
+5) https://github.com/celemas/cms/blob/main/AGENTS.md
 
 usage_guidance:
 - Prefer `src/` and tests over assumptions.
@@ -58,7 +58,7 @@ HOW TO USE DUON/CMS (EXPLORATION REFERENCE)
 - PHP: `^8.5`
 - Required extensions: `pgsql`, `gd`, `intl`, `curl`, `dom`, `xml`
 - Database: PostgreSQL
-- Core dependencies: `duon/core`, `duon/quma`, `duon/session`, `duon/sire`
+- Core dependencies: `celemas/core`, `celemas/quma`, `celemas/session`, `celemas/sire`
 
 Repository-level development commands:
 
@@ -73,11 +73,11 @@ Local test database workflow used in this repo:
 
 2) Minimal integration pattern
 
-Use `Duon\Cms\App` for normal CMS applications. It wraps the core app and CMS plugin, so callers can configure CMS content and run the app through one object.
+Use `Celemas\Cms\App` for normal CMS applications. It wraps the core app and CMS plugin, so callers can configure CMS content and run the app through one object.
 
 Setup pattern (see tests for real working examples):
 
-1. Create `Duon\Cms\App` with `App::create($root, $settings)`.
+1. Create `Celemas\Cms\App` with `App::create($root, $settings)`.
 2. Pass the project root as the first argument.
 3. Create and load `Locales` if the app uses locales.
 4. Register node classes with `App::node(...)` and navigation with `App::section(...)` / `App::collection(...)`.
@@ -87,8 +87,8 @@ Setup pattern (see tests for real working examples):
 Example pattern:
 
 ```php
-use Duon\Cms\App;
-use Duon\Cms\Locales;
+use Celemas\Cms\App;
+use Celemas\Cms\Locales;
 
 $app = App::create(dirname(__DIR__), [
     'app.name' => 'mycms',
@@ -118,13 +118,13 @@ Important:
 - `Config` is immutable after construction. Prefer building the settings array upfront and passing it once to `App::create(...)` or `new Config(...)`; use native booleans and integers in PHP settings.
 - Use `Config::with(...)` sparingly for changed standalone config copies, tests, or small derived configs. Do not recommend long `with()` chains for full app config files.
 - Built-in settings are available by key (`$config->get('path.panel')`) and through typed lazy objects (`$config->panel->path`, `$config->session->options`). The lazy object properties own domain-specific conversion and broad type checks and may cache values safely because `Config` is immutable.
-- `Duon\Cms\App` installs default PSR-15 error middleware unless `error.enabled` is false.
+- `Celemas\Cms\App` installs default PSR-15 error middleware unless `error.enabled` is false.
 - Error pages use a dedicated Boiler renderer, independent from the CMS `view` renderer.
 - Project `http-error.php` and `http-server-error.php` templates in `{path.root}{path.views}` override built-in fallback templates.
 - `run()` calls `boot()` once, loads the internal CMS plugin, and adds the catchall route after routes and plugins registered through the facade.
 - Routes include panel endpoints and media endpoints automatically.
 - If `session.enabled` is true, selected frontend routes get session middleware. It defaults to `SITE_SESSION_ENABLED`.
-- The manual `Duon\Core\App` + `Duon\Cms\Plugin` API remains available for advanced integrations.
+- The manual `Celemas\Core\App` + `Celemas\Cms\Plugin` API remains available for advanced integrations.
 
 3) Defining node types
 
@@ -172,13 +172,13 @@ Field-level attributes (applied to field properties):
 Minimal node example:
 
 ```php
-use Duon\Cms\Field\Text;
-use Duon\Cms\Field\Textarea;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\FieldOrder;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Route;
-use Duon\Cms\Schema\Translate;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Field\Textarea;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\FieldOrder;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Route;
+use Celemas\Cms\Schema\Translate;
 
 #[Label('Article')]
 #[Route('/articles/{uid}')]
@@ -261,7 +261,7 @@ $latest = $cms->nodes()
     ->limit(10);
 
 foreach ($latest as $node) {
-    // $node is Duon\Cms\Node\Node wrapper
+    // $node is Celemas\Cms\Node\Node wrapper
     $title = $node->title();
     $path = $node->path();
 }
@@ -393,7 +393,7 @@ Image resizing query options:
 
 App and environment:
 
-- `app.name`: `env('APP_NAME', 'duoncms')` after `.env` has loaded; not validated or normalized, so keep it stable and safe for app-specific identifiers
+- `app.name`: `env('APP_NAME', 'celemascms')` after `.env` has loaded; not validated or normalized, so keep it stable and safe for app-specific identifiers
 - `app.debug`: `env('APP_DEBUG', false)` after `.env` has loaded
 - `app.env`: `env('APP_ENV', '')` after `.env` has loaded
 - `app.secret`: `env('APP_SECRET', null)` after `.env` has loaded
@@ -413,8 +413,8 @@ Paths and panel:
 
 Errors:
 
-- `error.enabled`: `true` (default error middleware in `Duon\Cms\App`)
-- `error.renderer`: `null` (optional `Duon\Error\Renderer` object or class-string)
+- `error.enabled`: `true` (default error middleware in `Celemas\Cms\App`)
+- `error.renderer`: `null` (optional `Celemas\Error\Renderer` object or class-string)
 - `error.trusted`: `[]` (extra trusted classes for Boiler error templates)
 - `error.views`: `null` (defaults to `{path.root}{path.views}` plus built-in fallback templates)
 - `error.whoops`: `true` (uses `filp/whoops` in debug mode when installed)
