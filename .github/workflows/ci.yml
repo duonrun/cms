@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     env:
       DUONCMS_DB_HOST: localhost
