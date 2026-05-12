@@ -24,7 +24,7 @@
 			<directory suffix=".php">src/Commands</directory>
 		</exclude>
 	</source>
-	<coverage includeUncoveredFiles="true" pathCoverage="true">
+	<coverage includeUncoveredFiles="true">
 		<report>
 			<html outputDirectory=".coverage/html"/>
 			<text outputFile="php://stdout"/>
