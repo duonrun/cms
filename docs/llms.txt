@@ -64,7 +64,7 @@ Repository-level development commands:
 
 - `composer test`
 - `composer coverage`
-- `composer mdlint`
+- `composer docs:lint`
 
 Local test database workflow used in this repo:
 

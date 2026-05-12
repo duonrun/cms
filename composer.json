@@ -32,7 +32,7 @@
 		"vlucas/phpdotenv": "^5.6"
 	},
 	"require-dev": {
-		"celemas/dev": "^3.0",
+		"celemas/dev": "^4.1",
 		"filp/whoops": "^2.15",
 		"laminas/laminas-diactoros": "^3"
 	},
@@ -54,7 +54,8 @@
 	},
 	"scripts": {
 		"test": "./vendor/bin/phpunit --testdox --no-coverage --colors=always",
-		"mdlint": "markdownlint-cli2 README.md CHANGELOG.md LICENSE.md",
+		"docs:format": "npx prettier@3.6.2 --write --config ./docs/.prettierrc README.md CHANGELOG.md LICENSE.md",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 --config ./vendor/celemas/dev/config/markdownlint.jsonc README.md CHANGELOG.md LICENSE.md",
 		"lint": [
 			"./vendor/bin/mago fmt --check",
 			"./vendor/bin/mago lint"
@@ -66,7 +67,7 @@
 		"ci": [
 			"composer lint",
 			"composer coverage",
-			"composer mdlint"
+			"composer docs:lint"
 		]
 	}
 }
