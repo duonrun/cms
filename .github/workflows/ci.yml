@@ -1,8 +1,15 @@
-name: CI
+name: ci
 
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -13,21 +20,26 @@ jobs:
       CELEMAS_CMS_DB_USER: celemas
       CELEMAS_CMS_DB_PASSWORD: celemas
     steps:
-      - name: Setup PHP extensions
-        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
         with:
           php-version: '8.5'
-          extensions: pcov, curl, xml, zip, mbstring, json, pgsql, gd, intl, dom
-          coverage: pcov
-
-      - name: Disable Xdebug
-        run: sudo phpdismod xdebug
+          extensions: curl, dom, gd, intl, json, mbstring, pgsql, xml, zip
+          coverage: xdebug
 
       - name: Checkout repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
       - name: Install packages with composer
         run: composer install
+
+      - name: Run PHP lint checks
+        run: composer lint
+
+      - name: Run Markdown lint checks
+        run: composer docs:lint
+        env:
+          npm_config_yes: 'true'
 
       - name: Start postgresql server and create test db
         run: |
@@ -38,10 +50,15 @@ jobs:
       - name: Initialize database schema
         run: php ./run db:migrations --apply
 
-      - name: Run tests, static type checker and linter
-        run: |
-          ./vendor/bin/mago fmt --check
-          ./vendor/bin/mago lint
-          php -d pcov.enabled=1 ./vendor/bin/phpunit --testdox --coverage-text --coverage-php=coverage/cover.php --colors=always
-          ./vendor/bin/coverlyzer coverage/cover.php
+      - name: Run tests with coverage
+        run: composer coverage:test
 
+      - name: Analyze coverage
+        run: composer coverage:analyze
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./.coverage/coverage.xml
+          fail_ci_if_error: true
