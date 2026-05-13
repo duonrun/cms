@@ -26,9 +26,10 @@
 	</source>
 	<coverage includeUncoveredFiles="true">
 		<report>
+			<clover outputFile=".coverage/coverage.xml"/>
 			<html outputDirectory=".coverage/html"/>
+			<php outputFile=".coverage/coverage.php"/>
 			<text outputFile="php://stdout"/>
-			<php outputFile=".coverage/cover.php"/>
 		</report>
 	</coverage>
 </phpunit>
