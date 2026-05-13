@@ -51,7 +51,7 @@ known_limits:
 
 ------------------------------------------------------------
 
-HOW TO USE DUON/CMS (EXPLORATION REFERENCE)
+HOW TO USE CELEMAS CMS (EXPLORATION REFERENCE)
 
 1) Runtime and dependencies
 
