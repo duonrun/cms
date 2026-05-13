@@ -10,14 +10,14 @@ use Celemas\Quma\Commands as QumaCommands;
 use Celemas\Quma\Connection;
 
 $connection = new Connection(
-	'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+	'pgsql:host=localhost;dbname=celemas;user=celemas;password=celemas',
 	__DIR__ . '/db/sql',
 )
 	->migrations(__DIR__ . '/db/migrations/install')
 	->fetch(PDO::FETCH_ASSOC);
 
 $commands = QumaCommands::get($connection);
-$commands->add(new RecreateDb('celemascms', 'celemascms', 'celemascms'));
+$commands->add(new RecreateDb('celemas', 'celemas', 'celemas'));
 
 $runner = new Runner($commands);
 

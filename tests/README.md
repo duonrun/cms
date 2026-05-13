@@ -38,7 +38,7 @@ Create a PostgreSQL user for testing:
 
 ```bash
 # Create user with CREATEDB privilege
-sudo -u postgres createuser -d -P celemascms 
+sudo -u postgres createuser -d -P celemas
 ```
 
 ### 3. Initialize Test Database
@@ -54,10 +54,11 @@ Create and initialize the test database:
 ```
 
 The `recreate-db` command:
+
 - Terminates existing connections to the database
 - Drops the database if it exists
 - Creates a fresh database
-- Sets the owner to `celemascms`
+- Sets the owner to `celemas`
 
 ## Running Tests
 
@@ -102,7 +103,7 @@ vendor/bin/phpunit --testsuite end2end
 vendor/bin/phpunit --group integration
 ```
 
-*Note: E2E tests are in the `end2end` test suite by configuration in phpunit.xml.dist*
+_Note: E2E tests are in the `end2end` test suite by configuration in phpunit.xml.dist_
 
 ### Generate Coverage Report
 
@@ -144,6 +145,7 @@ tests/
 #### `TestCase`
 
 Base class for all tests, provides:
+
 - **Database helpers**: `db()`, `config()`, `registry()`, `factory()`
 - **HTTP helpers**: `request()`, `psrRequest()`, `setMethod()`, `setRequestUri()`
 - **Utility helpers**: `fullTrim()`
@@ -151,6 +153,7 @@ Base class for all tests, provides:
 #### `IntegrationTestCase`
 
 Extends `TestCase` for integration tests, provides:
+
 - **Automatic transaction isolation**: Sets `$useTransactions = true` (each test runs in a transaction that rolls back)
 - **Database initialization**: Checks schema exists on first test class run
 - **Fixture loading**: `loadFixtures(...$fixtures)`
@@ -161,15 +164,16 @@ Extends `TestCase` for integration tests, provides:
 #### `End2EndTestCase`
 
 Extends `IntegrationTestCase` for end-to-end HTTP tests, provides:
+
 - **Application setup**: `createApp()` initializes the full CMS application
 - **Authentication helpers**:
-  - `createAuthenticatedUser(role)` - Creates a user with auth token
-  - `authenticateAs(role)` - Sets default auth token for subsequent requests
+    - `createAuthenticatedUser(role)` - Creates a user with auth token
+    - `authenticateAs(role)` - Sets default auth token for subsequent requests
 - **HTTP request helpers**: `makeRequest(method, uri, options)` - Simulates HTTP requests through the app
 - **Response assertions**:
-  - `assertResponseOk(response)` - Assert status code is 2xx
-  - `assertResponseStatus(expected, response)` - Assert specific status code
-  - `getJsonResponse(response)` - Decode response body as JSON
+    - `assertResponseOk(response)` - Assert status code is 2xx
+    - `assertResponseStatus(expected, response)` - Assert specific status code
+    - `getJsonResponse(response)` - Decode response body as JSON
 - **Disabled transactions**: Sets `$useTransactions = false` because the CMS creates separate DB connections
 - **Automatic cleanup**: Cleans up created test data including FK-referenced records
 
@@ -307,6 +311,7 @@ public function testWithFixtures(): void
 5. **Next test begins** → Clean database state (transaction starts)
 
 This ensures:
+
 - ✅ Each test has a clean database state
 - ✅ No test data persists between tests
 - ✅ Tests can run in any order
@@ -322,6 +327,7 @@ E2E tests **disable transactions** because the CMS creates separate database con
 4. **Next test begins** → Clean database state
 
 The cleanup process handles foreign key constraints by deleting in proper order:
+
 1. Delete FK-referenced records (audit records, fulltext index, etc.)
 2. Delete the main records
 3. Delete created types
@@ -331,6 +337,7 @@ This prevents FK constraint violations during cleanup.
 ### When to Recreate the Database
 
 Recreate the test database when:
+
 - Migrations have been added or modified
 - Database structure has changed
 - Tests are failing due to schema issues
@@ -345,11 +352,13 @@ Recreate the test database when:
 ### "Test database not initialized"
 
 **Error:**
+
 ```
 RuntimeException: Test database not initialized. Run: ./run recreate-db && ./run migrate --apply
 ```
 
 **Solution:**
+
 ```bash
 ./run recreate-db && ./run migrate --apply
 ```
@@ -357,11 +366,13 @@ RuntimeException: Test database not initialized. Run: ./run recreate-db && ./run
 ### "Migrations not applied"
 
 **Error:**
+
 ```
 RuntimeException: Migrations not applied to test database. Run: ./run migrate --apply
 ```
 
 **Solution:**
+
 ```bash
 ./run migrate --apply
 ```
@@ -369,30 +380,30 @@ RuntimeException: Migrations not applied to test database. Run: ./run migrate --
 ### "Authentication failed"
 
 **Error:**
+
 ```
-PDOException: SQLSTATE[28000] authentication failed for user "celemascms"
+PDOException: SQLSTATE[28000] authentication failed for user "celemas"
 ```
 
-**Solution:**
-Ensure the database user exists with the correct password:
+**Solution:** Ensure the database user exists with the correct password:
 
 ```bash
-sudo -u postgres createuser -d celemascms
-sudo -u postgres psql -c "ALTER USER celemascms WITH PASSWORD 'celemascms';"
+sudo -u postgres createuser -d celemas
+sudo -u postgres psql -c "ALTER USER celemas WITH PASSWORD 'celemas';"
 ```
 
 ### "Permission denied to create database"
 
 **Error:**
+
 ```
 PDOException: permission denied to create database
 ```
 
-**Solution:**
-Grant CREATEDB privilege to the user:
+**Solution:** Grant CREATEDB privilege to the user:
 
 ```bash
-sudo -u postgres psql -c "ALTER USER celemascms CREATEDB;"
+sudo -u postgres psql -c "ALTER USER celemas CREATEDB;"
 ```
 
 ### Database Connection Configuration
@@ -400,9 +411,9 @@ sudo -u postgres psql -c "ALTER USER celemascms CREATEDB;"
 Test database credentials are configured in `tests/TestCase.php`:
 
 ```php
-// Database: celemascms
-// User: celemascms
-// Password: celemascms
+// Database: celemas
+// User: celemas
+// Password: celemas
 // Host: localhost
 ```
 
@@ -418,48 +429,46 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+    test:
+        runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: celemascms
-          POSTGRES_USER: celemascms
-          POSTGRES_PASSWORD: celemascms
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_DB: celemas
+                    POSTGRES_USER: celemas
+                    POSTGRES_PASSWORD: celemas
+                options: >-
+                    --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-    steps:
-      - uses: actions/checkout@v4
+                ports:
+                    - 5432:5432
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: pdo, pdo_pgsql, pgsql
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: composer install
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.5'
+                  extensions: pdo, pdo_pgsql, pgsql
 
-      - name: Initialize test database
-        run: |
-          ./run recreate-db
-          ./run migrate --apply
+            - name: Install dependencies
+              run: composer install
 
-      - name: Run tests
-        run: composer test
+            - name: Initialize test database
+              run: |
+                  ./run recreate-db
+                  ./run migrate --apply
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
+            - name: Run tests
+              run: composer test
+
+            - name: Upload coverage
+              uses: codecov/codecov-action@v3
+              with:
+                  files: ./coverage.xml
 ```
 
 ## Best Practices
@@ -491,11 +500,13 @@ jobs:
 ## Performance
 
 Expected test execution times:
+
 - **Unit tests**: < 1 second
 - **Integration tests**: 5-15 seconds (depending on fixture data)
 - **Full test suite**: ~10-20 seconds
 
 To optimize:
+
 - Minimize fixture data (only load what's needed)
 - Use helper methods instead of loading large SQL files
 - Consider splitting large integration tests into smaller focused tests

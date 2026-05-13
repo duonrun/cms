@@ -16,7 +16,7 @@ This release removes the `Node` / `Page` / `Block` / `Document` inheritance hier
 - **Changed** finder facade class from `Celemas\Cms\Finder\Finder` to `Celemas\Cms\Cms`.
 - **Changed** plugin class from `Celemas\Cms\Cms` to `Celemas\Cms\Plugin`.
 - **Changed** CMS configuration ownership. Regular apps can use the new `Celemas\Cms\App` facade; advanced manual bootstraps pass `Celemas\Cms\Config` to `new Plugin($config)` instead of passing it to `Celemas\Core\App`. `Celemas\Cms\Config` no longer implements the removed core config interfaces.
-- **Changed** `Celemas\Cms\Config` construction to `new Config(string $root, array $settings = [])`. App name, debug mode, environment, app secret, public path, frontend sessions, and database DSN now live in `app.name`, `app.debug`, `app.env`, `app.secret`, `path.public`, `session.enabled`, and `db.dsn` settings instead of constructor arguments or public properties. `path.public` defaults to `$root . '/public'`. `app.name` reads `APP_NAME`, falling back to `celemascms`. `session.enabled` reads `SITE_SESSION_ENABLED`. `app.secret` reads `APP_SECRET`. `db.dsn` reads `DATABASE_URL`. `app.name` is not validated or normalized.
+- **Changed** `Celemas\Cms\Config` construction to `new Config(string $root, array $settings = [])`. App name, debug mode, environment, app secret, public path, frontend sessions, and database DSN now live in `app.name`, `app.debug`, `app.env`, `app.secret`, `path.public`, `session.enabled`, and `db.dsn` settings instead of constructor arguments or public properties. `path.public` defaults to `$root . '/public'`. `app.name` reads `APP_NAME`, falling back to `celemas`. `session.enabled` reads `SITE_SESSION_ENABLED`. `app.secret` reads `APP_SECRET`. `db.dsn` reads `DATABASE_URL`. `app.name` is not validated or normalized.
 - **Changed** `Celemas\Cms\Boiler\Error\Handler` to read debug/env/error settings from `Celemas\Cms\Config`; its constructor now accepts config, factory, and logger.
 - **Changed** frontend session middleware configuration from `sessionEnabled` constructor arguments on `Celemas\Cms\App` and `Celemas\Cms\Plugin` to the `session.enabled` setting.
 - **Changed** CMS session options to read `cookie_secure` from `SESSION_COOKIE_SECURE`, `cookie_lifetime` from `SESSION_COOKIE_LIFETIME`, and `gc_maxlifetime` from `SESSION_IDLE_TIMEOUT`.
@@ -45,7 +45,7 @@ This release removes the `Node` / `Page` / `Block` / `Document` inheritance hier
 - Default Boiler `view` renderer registration using the new `path.views` config key, which defaults to `/views` relative to `path.root`.
 - `Celemas\Cms\App` facade for regular CMS applications. It wraps the core app and CMS plugin, forwards the common app and CMS configuration APIs, installs the default error middleware, and adds the CMS catchall route during `run()`.
 - Built-in fallback templates for Boiler error pages plus `error.*` config keys for enabling/disabling the default handler, replacing the error renderer, configuring error views, and toggling Whoops debug pages.
-- Root-based `Config` initialization that loads `.env` with `vlucas/phpdotenv`, sets default `app.name` from `APP_NAME` with a `celemascms` fallback, and exposes `Config::requireEnv(...)` for required environment variables.
+- Root-based `Config` initialization that loads `.env` with `vlucas/phpdotenv`, sets default `app.name` from `APP_NAME` with a `celemas` fallback, and exposes `Config::requireEnv(...)` for required environment variables.
 
 ### Migration guide
 

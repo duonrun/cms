@@ -142,7 +142,7 @@ class TestCase extends BaseTestCase
 	{
 		return new \Celemas\Quma\Database(
 			new \Celemas\Quma\Connection(
-				'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+				'pgsql:host=localhost;dbname=celemas;user=celemas;password=celemas',
 				self::root() . '/db/sql',
 			)
 				->migrations(self::root() . '/db/migrations')

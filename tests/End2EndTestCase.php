@@ -224,7 +224,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$router = new Router();
 		$container = $this->container();
 		$config = $this->config([
-			'db.dsn' => 'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+			'db.dsn' => 'pgsql:host=localhost;dbname=celemas;user=celemas;password=celemas',
 			'path.root' => self::root(),
 			'path.public' => self::root() . '/public',
 			'path.views' => '/tests/Fixtures/templates',

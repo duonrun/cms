@@ -188,7 +188,7 @@ Common built-in settings:
 
 ```php
 [
-    'app.name' => env('APP_NAME', 'celemascms'),
+    'app.name' => env('APP_NAME', 'celemas'),
     'app.debug' => env('APP_DEBUG', false),
     'app.env' => env('APP_ENV', ''),
     'app.secret' => env('APP_SECRET', null),
@@ -244,8 +244,8 @@ return [
 Test database:
 
 ```bash
-echo "celemascms" | createuser --pwprompt --createdb celemascms
-createdb --owner celemascms celemascms
+echo "celemas" | createuser --pwprompt --createdb celemas
+createdb --owner celemas celemas
 ```
 
 System Requirements:

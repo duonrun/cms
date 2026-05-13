@@ -8,10 +8,10 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      DUONCMS_DB_HOST: localhost
-      DUONCMS_DB_NAME: celemascms
-      DUONCMS_DB_USER: celemascms
-      DUONCMS_DB_PASSWORD: celemascms
+      CELEMAS_CMS_DB_HOST: localhost
+      CELEMAS_CMS_DB_NAME: celemas
+      CELEMAS_CMS_DB_USER: celemas
+      CELEMAS_CMS_DB_PASSWORD: celemas
     steps:
       - name: Setup PHP extensions
         uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
@@ -32,8 +32,8 @@ jobs:
       - name: Start postgresql server and create test db
         run: |
           sudo systemctl start postgresql.service
-          sudo -u postgres psql -c "CREATE USER ${{ env.DUONCMS_DB_USER }} WITH PASSWORD '${{ env.DUONCMS_DB_PASSWORD }}' CREATEDB;"
-          sudo -u postgres createdb --owner ${{ env.DUONCMS_DB_USER }} ${{ env.DUONCMS_DB_NAME }}
+          sudo -u postgres psql -c "CREATE USER ${{ env.CELEMAS_CMS_DB_USER }} WITH PASSWORD '${{ env.CELEMAS_CMS_DB_PASSWORD }}' CREATEDB;"
+          sudo -u postgres createdb --owner ${{ env.CELEMAS_CMS_DB_USER }} ${{ env.CELEMAS_CMS_DB_NAME }}
 
       - name: Initialize database schema
         run: php ./run db:migrations --apply

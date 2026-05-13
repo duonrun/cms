@@ -393,7 +393,7 @@ Image resizing query options:
 
 App and environment:
 
-- `app.name`: `env('APP_NAME', 'celemascms')` after `.env` has loaded; not validated or normalized, so keep it stable and safe for app-specific identifiers
+- `app.name`: `env('APP_NAME', 'celemas')` after `.env` has loaded; not validated or normalized, so keep it stable and safe for app-specific identifiers
 - `app.debug`: `env('APP_DEBUG', false)` after `.env` has loaded
 - `app.env`: `env('APP_ENV', '')` after `.env` has loaded
 - `app.secret`: `env('APP_SECRET', null)` after `.env` has loaded

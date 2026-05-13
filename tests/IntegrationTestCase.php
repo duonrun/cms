@@ -45,7 +45,7 @@ class IntegrationTestCase extends TestCase
 	{
 		// Create shared connection for migration check
 		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+			'pgsql:host=localhost;dbname=celemas;user=celemas;password=celemas',
 			self::root() . '/db/sql',
 		)
 			->migrations(self::root() . '/db/migrations')
@@ -114,7 +114,7 @@ class IntegrationTestCase extends TestCase
 	public function conn(): Connection
 	{
 		return new Connection(
-			'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+			'pgsql:host=localhost;dbname=celemas;user=celemas;password=celemas',
 			self::root() . '/db/sql',
 		)
 			->migrations(self::root() . '/db/migrations')
