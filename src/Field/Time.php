@@ -23,8 +23,13 @@ class Time extends Field
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		Shapes::add($shape, 'type', 'text', 'required', 'in:time');
-		Shapes::add($shape, 'value', 'text', ...$this->validators);
+		$shape->add('type', 'string')->rules('required', 'in:time');
+
+		$value = $shape->add('value', 'string')->rules(...$this->validators);
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
+		}
 
 		return $shape;
 	}

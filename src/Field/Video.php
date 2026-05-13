@@ -40,28 +40,34 @@ class Video extends Field implements
 	{
 		$limitValidators = $this->limitValidators();
 		$shape = Shapes::create();
-		Shapes::add($shape, 'type', 'text', 'required', 'in:video');
+		$shape->add('type', 'string')->rules('required', 'in:video');
 
 		if ($this->translateFile) {
 			// File-translatable: separate file arrays per locale
 			$subShape = Shapes::list();
-			Shapes::add($subShape, 'file', 'text');
-			Shapes::add($subShape, 'title', 'text');
+			$subShape->add('file', 'string')->optional()->nullable();
+			$subShape->add('title', 'string')->optional()->nullable();
 
 			$i18nShape = Shapes::create();
 			$locales = $this->owner->locales();
 
 			foreach ($locales as $locale) {
-				Shapes::add($i18nShape, $locale->id, $subShape, ...$limitValidators)
+				$i18nShape
+					->add($locale->id, $subShape)
+					->rules(...$limitValidators)
+					->optional()
+					->nullable()
 					->prepare(Prepare::nullAsEmpty(...));
 			}
 
-			Shapes::add($shape, 'files', $i18nShape, ...$this->validators)
+			$files = $shape
+				->add('files', $i18nShape)
+				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		} elseif ($this->translate) {
 			// Text-translatable: shared files but translatable titles
 			$fileShape = Shapes::list();
-			Shapes::add($fileShape, 'file', 'text', 'required');
+			$fileShape->add('file', 'string')->rules('required');
 
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
@@ -74,19 +80,35 @@ class Video extends Field implements
 					$localeValidators[] = 'required';
 				}
 
-				Shapes::add($titleShape, $locale->id, 'text', ...$localeValidators);
+				$title = $titleShape->add($locale->id, 'string')->rules(...$localeValidators);
+
+				if (!in_array('required', $localeValidators, true)) {
+					$title->optional()->nullable();
+				}
 			}
 
-			Shapes::add($fileShape, 'title', $titleShape)->prepare(Prepare::nullAsEmpty(...));
-			Shapes::add($shape, 'files', $fileShape, ...$limitValidators, ...$this->validators)
+			$fileShape
+				->add('title', $titleShape)
+				->optional()
+				->nullable()
+				->prepare(Prepare::nullAsEmpty(...));
+			$files = $shape
+				->add('files', $fileShape)
+				->rules(...$limitValidators, ...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		} else {
 			// Non-translatable
 			$fileShape = Shapes::list();
-			Shapes::add($fileShape, 'file', 'text', 'required');
-			Shapes::add($fileShape, 'title', 'text');
-			Shapes::add($shape, 'files', $fileShape, ...$limitValidators, ...$this->validators)
+			$fileShape->add('file', 'string')->rules('required');
+			$fileShape->add('title', 'string')->optional()->nullable();
+			$files = $shape
+				->add('files', $fileShape)
+				->rules(...$limitValidators, ...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
+		}
+
+		if (!$this->isRequired()) {
+			$files->optional()->nullable();
 		}
 
 		return $shape;

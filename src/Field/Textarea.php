@@ -19,7 +19,7 @@ class Textarea extends Text implements Capability\Translatable
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		Shapes::add($shape, 'type', 'text', 'required', 'in:textarea');
+		$shape->add('type', 'string')->rules('required', 'in:textarea');
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();
@@ -33,12 +33,20 @@ class Textarea extends Text implements Capability\Translatable
 					$localeValidators[] = 'required';
 				}
 
-				Shapes::add($i18nShape, $locale->id, 'text', ...$localeValidators);
+				$localeField = $i18nShape->add($locale->id, 'string')->rules(...$localeValidators);
+
+				if (!in_array('required', $localeValidators, true)) {
+					$localeField->optional()->nullable();
+				}
 			}
 
-			Shapes::add($shape, 'value', $i18nShape, ...$this->validators);
+			$value = $shape->add('value', $i18nShape)->rules(...$this->validators);
 		} else {
-			Shapes::add($shape, 'value', 'text', ...$this->validators);
+			$value = $shape->add('value', 'string')->rules(...$this->validators);
+		}
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
 		}
 
 		return $shape;

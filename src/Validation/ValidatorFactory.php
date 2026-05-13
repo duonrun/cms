@@ -20,11 +20,11 @@ class ValidatorFactory
 		private readonly FieldHydrator $hydrator = new FieldHydrator(),
 	) {
 		$this->shape = Shapes::create();
-		Shapes::add($this->shape, 'uid', 'text', 'required', 'maxlen:64');
-		Shapes::add($this->shape, 'parent', 'text', 'maxlen:64');
-		Shapes::add($this->shape, 'published', 'bool', 'required');
-		Shapes::add($this->shape, 'locked', 'bool')->empty('missing', 'null')->default(false);
-		Shapes::add($this->shape, 'hidden', 'bool')->empty('missing', 'null')->default(false);
+		$this->shape->add('uid', 'string')->rules('required', 'maxlen:64');
+		$this->shape->add('parent', 'string')->rules('maxlen:64')->optional()->nullable();
+		$this->shape->add('published', 'bool')->rules('required');
+		$this->shape->add('locked', 'bool')->empty('missing', 'null')->default(false);
+		$this->shape->add('hidden', 'bool')->empty('missing', 'null')->default(false);
 	}
 
 	public function create(): Shape
@@ -35,13 +35,17 @@ class ValidatorFactory
 			$this->add($contentShape, $fieldName, $this->hydrator->getField($this->node, $fieldName));
 		}
 
-		Shapes::add($this->shape, 'content', $contentShape);
+		$this->shape->add('content', $contentShape)->optional()->nullable();
 
 		return $this->shape;
 	}
 
 	protected function add(Shape $shape, string $fieldName, Field $field): void
 	{
-		Shapes::add($shape, $fieldName, $field->shape())->label($field->getLabel());
+		$shape
+			->add($fieldName, $field->shape())
+			->label($field->getLabel())
+			->optional()
+			->nullable();
 	}
 }

@@ -26,16 +26,12 @@ final class GridItemValidator implements Validator
 			$this->shape->extra(Extra::Allow);
 		}
 
-		Shapes::add(
-			$this->shape,
-			'type',
-			'text',
-			'required',
-			'in:text,richtext,image,youtube,images,video,iframe',
-		);
-		Shapes::add($this->shape, 'rowspan', 'int', 'required');
-		Shapes::add($this->shape, 'colspan', 'int', 'required');
-		Shapes::add($this->shape, 'colstart', 'int');
+		$this->shape
+			->add('type', 'string')
+			->rules('required', 'in:text,richtext,image,youtube,images,video,iframe');
+		$this->shape->add('rowspan', 'int')->rules('required');
+		$this->shape->add('colspan', 'int')->rules('required');
+		$this->shape->add('colstart', 'int')->optional()->nullable();
 		$this->shape->review($this->reviewItems(...));
 	}
 
@@ -56,9 +52,9 @@ final class GridItemValidator implements Validator
 
 				if (is_array($files) && count($files) > 0) {
 					$fileShape = Shapes::list();
-					Shapes::add($fileShape, 'file', 'text', 'required');
-					Shapes::add($fileShape, 'title', 'text');
-					Shapes::add($fileShape, 'alt', 'text');
+					$fileShape->add('file', 'string')->rules('required');
+					$fileShape->add('title', 'string')->optional()->nullable();
+					$fileShape->add('alt', 'string')->optional()->nullable();
 
 					if ($fileShape->validate($files)->valid()) {
 						continue;

@@ -23,8 +23,13 @@ class Number extends Field
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		Shapes::add($shape, 'type', 'text', 'required', 'in:number');
-		Shapes::add($shape, 'value', 'float', ...$this->validators);
+		$shape->add('type', 'string')->rules('required', 'in:number');
+
+		$value = $shape->add('value', 'float')->rules(...$this->validators);
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
+		}
 
 		return $shape;
 	}

@@ -75,17 +75,26 @@ class Matrix extends Field implements Capability\Limitable
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		Shapes::add($shape, 'type', 'text', 'required', 'in:matrix');
+		$shape->add('type', 'string')->rules('required', 'in:matrix');
 
 		$itemShape = $this->allowsMultipleItems() ? Shapes::list() : Shapes::create();
 
 		foreach ($this->subfields as $name => $subfield) {
-			Shapes::add($itemShape, $name, $subfield->shape())
+			$itemShape
+				->add($name, $subfield->shape())
+				->optional()
+				->nullable()
 				->prepare(Prepare::nullAsEmpty(...));
 		}
 
-		Shapes::add($shape, 'value', $itemShape, ...$this->validators)
+		$value = $shape
+			->add('value', $itemShape)
+			->rules(...$this->validators)
 			->prepare(Prepare::nullAsEmpty(...));
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
+		}
 
 		return $shape;
 	}
