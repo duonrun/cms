@@ -6,9 +6,10 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/celemas/cms)](https://api.reuse.software/info/github.com/celemas/cms)
 [![License](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSES/MPL-2.0.txt)
 [![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](LICENSES/MIT.txt)
-<!-- prettier-ignore-end -->
 
-> [!WARNING] This project is under active development. Some features are experimental and may change. Documentation is still incomplete.
+> [!WARNING]
+> This project is under active development. Some features are experimental and may change. Documentation is still incomplete.
+<!-- prettier-ignore-end -->
 
 ## Bootstrapping
 
