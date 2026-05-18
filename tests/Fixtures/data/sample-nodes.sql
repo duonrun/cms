@@ -4,10 +4,10 @@
 -- Get the type IDs (these should exist after loading basic-types.sql)
 DO $$
 DECLARE
-    test_home_type INT;
-    test_page_type INT;
-    test_article_type INT;
-    test_block_type INT;
+    test_home_type BIGINT;
+    test_page_type BIGINT;
+    test_article_type BIGINT;
+    test_block_type BIGINT;
 BEGIN
     SELECT type INTO test_home_type FROM cms.types WHERE handle = 'test-home' LIMIT 1;
     SELECT type INTO test_page_type FROM cms.types WHERE handle = 'test-page' LIMIT 1;

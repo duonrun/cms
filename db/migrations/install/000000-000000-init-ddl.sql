@@ -21,7 +21,7 @@ CREATE TABLE cms.userroles (
 
 
 CREATE TABLE cms.users (
-	usr integer GENERATED ALWAYS AS IDENTITY,
+	usr bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
 	username text,
 	email text,
@@ -29,8 +29,8 @@ CREATE TABLE cms.users (
 	userrole text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
-	creator integer NOT NULL,
-	editor integer NOT NULL,
+	creator bigint NOT NULL,
+	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
@@ -79,11 +79,11 @@ CREATE TRIGGER users_trigger_02_audit AFTER UPDATE
 
 CREATE TABLE cms.authtokens (
 	token text NOT NULL,
-	usr integer NOT NULL,
+	usr bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
-	creator integer NOT NULL,
-	editor integer NOT NULL,
+	creator bigint NOT NULL,
+	editor bigint NOT NULL,
 	CONSTRAINT pk_authtokens PRIMARY KEY (token),
 	CONSTRAINT fk_authtokens_users FOREIGN KEY (usr)
 		REFERENCES cms.users (usr),
@@ -100,7 +100,7 @@ CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.authtokens
 
 CREATE TABLE cms.onetimetokens (
 	token text NOT NULL,
-	usr integer NOT NULL,
+	usr bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	CONSTRAINT pk_onetimetokens PRIMARY KEY (token),
 	CONSTRAINT fk_onetimetokens_users FOREIGN KEY (usr)
@@ -111,7 +111,7 @@ CREATE TABLE cms.onetimetokens (
 
 CREATE TABLE cms.loginsessions (
 	hash text NOT NULL,
-	usr integer NOT NULL,
+	usr bigint NOT NULL,
 	expires timestamp with time zone NOT NULL,
 	CONSTRAINT pk_loginsessions PRIMARY KEY (hash),
 	CONSTRAINT uc_loginsessions_usr UNIQUE (usr),
@@ -121,7 +121,7 @@ CREATE TABLE cms.loginsessions (
 
 
 CREATE TABLE cms.types (
-	type integer GENERATED ALWAYS AS IDENTITY,
+	type bigint GENERATED ALWAYS AS IDENTITY,
 	handle text NOT NULL,
 	CONSTRAINT pk_types PRIMARY KEY (type),
 	CONSTRAINT uc_types_handle UNIQUE (handle),
@@ -130,15 +130,15 @@ CREATE TABLE cms.types (
 
 
 CREATE TABLE cms.nodes (
-	node integer GENERATED ALWAYS AS IDENTITY,
+	node bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
-	parent integer,
+	parent bigint,
 	published boolean DEFAULT false NOT NULL,
 	hidden boolean DEFAULT false NOT NULL,
 	locked boolean DEFAULT false NOT NULL,
-	type integer NOT NULL,
-	creator integer NOT NULL,
-	editor integer NOT NULL,
+	type bigint NOT NULL,
+	creator bigint NOT NULL,
+	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
@@ -203,7 +203,7 @@ CREATE TRIGGER nodes_trigger_03_audit AFTER UPDATE
 
 
 CREATE TABLE cms.fulltext (
-	node integer NOT NULL,
+	node bigint NOT NULL,
 	locale text NOT NULL,
 	document tsvector NOT NULL,
 	CONSTRAINT pk_fulltext PRIMARY KEY (node, locale),
@@ -215,11 +215,11 @@ CREATE INDEX ix_nodes_tsv ON cms.fulltext USING GIN(document);
 
 
 CREATE TABLE cms.urlpaths (
-	node integer NOT NULL,
+	node bigint NOT NULL,
 	path text NOT NULL,
 	locale text NOT NULL,
-	creator integer NOT NULL,
-	editor integer NOT NULL,
+	creator bigint NOT NULL,
+	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	inactive timestamp with time zone,
 	CONSTRAINT pk_urlpaths PRIMARY KEY (node, locale, path),
@@ -239,9 +239,9 @@ CREATE UNIQUE INDEX ux_urlpaths_locale ON cms.urlpaths
 
 
 CREATE TABLE cms.drafts (
-	node integer NOT NULL,
+	node bigint NOT NULL,
 	changed timestamp with time zone NOT NULL,
-	editor integer NOT NULL,
+	editor bigint NOT NULL,
 	content jsonb NOT NULL,
 	CONSTRAINT pk_drafts PRIMARY KEY (node),
 	CONSTRAINT fk_drafts_nodes FOREIGN KEY (node) REFERENCES cms.nodes (node)
@@ -279,7 +279,7 @@ CREATE TABLE cms.menuitems (
 	item text NOT NULL,
 	parent text,
 	menu text NOT NULL,
-	displayorder smallint NOT NULL,
+	displayorder integer NOT NULL,
 	data jsonb NOT NULL,
 	CONSTRAINT pk_menuitems PRIMARY KEY (item),
 	CONSTRAINT fk_menuitems_menus FOREIGN KEY (menu)
@@ -292,7 +292,7 @@ CREATE TABLE cms.menuitems (
 
 
 CREATE TABLE cms.topics (
-	topic integer GENERATED ALWAYS AS IDENTITY,
+	topic bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
 	name jsonb NOT NULL,
 	color text NOT NULL,
@@ -304,10 +304,10 @@ CREATE TABLE cms.topics (
 
 
 CREATE TABLE cms.tags (
-	tag integer GENERATED ALWAYS AS IDENTITY,
+	tag bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
 	name jsonb NOT NULL,
-	topic integer NOT NULL,
+	topic bigint NOT NULL,
 	CONSTRAINT pk_tags PRIMARY KEY (tag),
 	CONSTRAINT uc_tags_uid UNIQUE (uid),
 	CONSTRAINT fk_tags_topics FOREIGN KEY (topic)
@@ -317,9 +317,9 @@ CREATE TABLE cms.tags (
 
 
 CREATE TABLE cms.nodetags (
-	node integer NOT NULL,
-	tag integer NOT NULL,
-	sort smallint NOT NULL DEFAULT 0,
+	node bigint NOT NULL,
+	tag bigint NOT NULL,
+	sort integer NOT NULL DEFAULT 0,
 	CONSTRAINT pk_nodetags PRIMARY KEY (node, tag),
 	CONSTRAINT fk_nodetags_nodes FOREIGN KEY (node)
 		REFERENCES cms.nodes (node),
@@ -329,14 +329,14 @@ CREATE TABLE cms.nodetags (
 
 
 CREATE TABLE audit.nodes (
-	node integer NOT NULL,
-	parent integer,
+	node bigint NOT NULL,
+	parent bigint,
 	changed timestamp with time zone NOT NULL,
 	published boolean NOT NULL,
 	hidden boolean NOT NULL,
 	locked boolean NOT NULL,
-	type text NOT NULL,
-	editor integer NOT NULL,
+	type bigint NOT NULL,
+	editor bigint NOT NULL,
 	deleted timestamp with time zone,
 	content jsonb NOT NULL,
 	CONSTRAINT pk_nodes PRIMARY KEY (node, changed),
@@ -346,9 +346,9 @@ CREATE TABLE audit.nodes (
 
 
 CREATE TABLE audit.drafts (
-	node integer NOT NULL,
+	node bigint NOT NULL,
 	changed timestamp with time zone NOT NULL,
-	editor integer NOT NULL,
+	editor bigint NOT NULL,
 	content jsonb NOT NULL,
 	CONSTRAINT pk_drafts PRIMARY KEY (node, changed),
 	CONSTRAINT fk_audit_drafts FOREIGN KEY (node)
@@ -357,14 +357,14 @@ CREATE TABLE audit.drafts (
 
 
 CREATE TABLE audit.users (
-	usr integer NOT NULL,
+	usr bigint NOT NULL,
 	username text,
 	email text,
 	pwhash text NOT NULL,
 	userrole text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
-	editor integer NOT NULL,
+	editor bigint NOT NULL,
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
 	CONSTRAINT pk_users PRIMARY KEY (usr, changed),
